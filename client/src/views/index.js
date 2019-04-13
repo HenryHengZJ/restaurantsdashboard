@@ -25,7 +25,7 @@ import { Pickup, Delivery, OpeningHours, OrderLater } from './Services';
 import { ReceiveOrder, MenuSetup } from './OrdersMenu';
 import { Order, Sales, Customer, Review, Dishes } from './Order';
 import { OnlinePayment } from './Payment';
-
+import { Publish } from './Publish';
 
 export {
   Page404,
@@ -52,5 +52,6 @@ export {
   Customer,
   Review,
   Dishes,
+  Publish,
 };
 

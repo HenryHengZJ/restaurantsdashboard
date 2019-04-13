@@ -21,6 +21,8 @@ const MenuSetup = React.lazy(() => import('./views/OrdersMenu/MenuSetup'));
 
 const OnlinePayment = React.lazy(() => import('./views/Payment/OnlinePayment'));
 
+const Publish = React.lazy(() => import('./views/Publish/Publish'));
+
 const Order = React.lazy(() => import('./views/Reports/Order'));
 const Sales = React.lazy(() => import('./views/Reports/Sales'));
 const Customer = React.lazy(() => import('./views/Reports/Customer'));
@@ -92,6 +94,9 @@ const routes = [
   { path: '/caterer/reports/customer', name: 'Customer', component: Customer },
   { path: '/caterer/reports/review', name: 'Review', component: Review },
   { path: '/caterer/reports/dishes', name: 'Dishes', component: Dishes },
+  { path: '/caterer/publish', exact: true, name: 'Publish', component: Publish },
+  { path: '/caterer/publish/publish', name: 'Publish Store', component: Publish },
+  
  /* { path: '/caterer/theme', exact: true, name: 'Theme', component: Colors },
   { path: '/caterer/theme/colors', name: 'Colors', component: Colors },
   { path: '/caterer/theme/typography', name: 'Typography', component: Typography },
