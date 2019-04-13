@@ -29,7 +29,7 @@ class DefaultLayout extends Component {
 
   signOut(e) {
     e.preventDefault()
-    this.props.history.push('/')
+    window.location.assign('https://foodiebee.herokuapp.com');
   }
 
   onProfileClicked(e) {
