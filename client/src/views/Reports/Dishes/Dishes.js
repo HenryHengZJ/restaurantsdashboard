@@ -16,12 +16,13 @@ import {
   DropdownItem,
   DropdownMenu,
   DropdownToggle,
-  UncontrolledDropdown
+  UncontrolledDropdown,
+  Progress,
 } from "reactstrap";
 import { Bar, Doughnut, Line, Pie, Polar, Radar } from "react-chartjs-2";
 import { CustomTooltips } from "@coreui/coreui-plugin-chartjs-custom-tooltips";
 import moment from "moment";
-import "./Review.css";
+import "./Dishes.css";
 import 'react-date-range/dist/styles.css'; // main style file
 import 'react-date-range/dist/theme/default.css'; // theme css file
 import { DateRangePicker, DateRange } from 'react-date-range';
@@ -44,7 +45,7 @@ const options = {
   maintainAspectRatio: false
 };
 
-class Review extends Component {
+class Dishes extends Component {
   constructor(props) {
     super(props);
 
@@ -65,41 +66,30 @@ class Review extends Component {
         },
       },
       dateRange: '',
-      review: [
+      topsellingitems: [
         {
-          name: "Kieran",
-          location: 'Limerick, Ireland',
-          comment: "Everyone was very happy. Hearty sandwiches. Very nice dessert sandwiches",
-          time: "5 days ago",
-          rating: 5,
+          itemtitle: 'Sandwich Combo',
+          orderquantity: 108,
         },
         {
-          name: "Qiana",
-          location: 'Dublin, Ireland',
-          comment: "The food smelled pretty good and staff seemed excited because they eat there on their own time. The only downside is they delivered 45 mins. early, which is better than being late. I guess it didn't matter much since we did sandwiches and not something that would be bad if it got cold (i.e., pasta or other hot entree).",
-          time: "7 days ago",
-          rating: 4,
+          itemtitle: 'Bagel Tray',
+          orderquantity: 87,
         },
         {
-          name: "Aldo",
-          location: 'Limerick, Ireland',
-          comment: "Food is on time, great experience, food is delicious",
-          time: "8 days ago",
-          rating: 5,
+          itemtitle: 'Traditional Irish Breakfast',
+          orderquantity: 76,
         },
         {
-          name: "Connie",
-          location: 'Limerick, Ireland',
-          comment: "The food was delicious and the presentation looked great. Perfect portions. We will order again!",
-          time: "15 days ago",
-          rating: 4,
+          itemtitle: 'Chicken Parmigiano',
+          orderquantity: 65,
         },
         {
-          name: "Chandra",
-          location: 'Limerick, Ireland',
-          comment: "First time ordering from Italian Gourmet for this group. Everything was a big hit--even though they were a bit early.",
-          time: "1 month ago",
-          rating: 5,
+          itemtitle: 'Lasagna',
+          orderquantity: 54,
+        },
+        {
+          itemtitle: 'Meatball & Cheese Sub',
+          orderquantity: 27,
         },
       ],
     };
@@ -191,10 +181,48 @@ class Review extends Component {
     );
   }
 
+  renderMenuBarChart() {
+
+    var topsellingitems = this.state.topsellingitems
+    var itemarray = [];
+    var barColor;
+
+    for(let i = 0; i < topsellingitems.length; i++){
+      if (topsellingitems[i].orderquantity > 70) {
+        barColor = "success"
+      }
+      else if (topsellingitems[i].orderquantity <= 70 && topsellingitems[i].orderquantity > 30) {
+        barColor = "warning"
+      }
+      else if (topsellingitems[i].orderquantity <= 30 && topsellingitems[i].orderquantity > 0) {
+        barColor = "danger"
+      }
+      itemarray.push(
+        <div className="progress-group mb-4">
+          <div className="progress-group-header">
+            <p >
+              {topsellingitems[i].itemtitle}
+            </p>
+            <p className="ml-auto font-weight-bold">{topsellingitems[i].orderquantity}</p>
+          </div>
+          <div className="progress-group-bars">
+            <Progress className="progress-xs" color={barColor} value={topsellingitems[i].orderquantity} />
+          </div>
+        </div>
+      )
+    } 
+
+    return(
+      <div>
+        {itemarray}
+      </div>
+    )
+  }
+
   renderTableItems() {
     var itemarray = [];
 
-    var tableitems = this.state.review;
+    var tableitems = this.state.Dishes;
 
     for (let i = 0; i < tableitems.length; i++) {
       itemarray.push(
@@ -248,14 +276,14 @@ class Review extends Component {
                 <Row >
                   <Col>
                     <Label style={{ marginTop: 10 }} className="h6">
-                      Review
+                      Dishes
                     </Label>
                   </Col>
                 </Row>
               </CardHeader>
               <CardBody>
                 <div class="table-wrapper-scroll-y my-custom-scrollbar">
-                  {this.renderReviewTable()}
+                  {this.renderMenuBarChart()}
                 </div>
                 <UncontrolledDropdown style={{marginTop: 10}} isOpen={this.state.dropDownDate}  toggle={() => this.toggleDropDown()}>
                   <DropdownToggle
@@ -295,4 +323,4 @@ class Review extends Component {
   }
 }
 
-export default Review;
+export default Dishes;

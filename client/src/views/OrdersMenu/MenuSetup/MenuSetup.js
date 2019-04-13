@@ -77,6 +77,7 @@ class MenuSetup extends Component {
     this.myRef = React.createRef()   // Create a ref object 
 
     this.state = {
+      isMobile: false,
       activeTab: "Appetizer",
       menutitle: [
         "Appetizer",
@@ -468,6 +469,22 @@ class MenuSetup extends Component {
 
   componentDidMount() {
     this.restructureMenu();
+
+    if (window.innerWidth < 450) {
+      this.setState({
+        isMobile: true
+      });
+    }
+
+    window.addEventListener(
+      "resize",
+      () => {
+        this.setState({
+          isMobile: window.innerWidth < 450
+        });
+      },
+      false
+    );
   }
 
   restructureMenu = () => {
@@ -1128,17 +1145,8 @@ class MenuSetup extends Component {
           <Row>
             <Col style={{ marginTop: 0, marginBottom: 30 }} xs="12">
               <Button
-                style={{ fontSize: 17, fontWeight: "600" }}
-                onClick={this.toggleNewCategoryModal}
-                color="primary"
-                className="btn-pill"
-              >
-                {" "}
-                <i className="fa fa-plus fa-1x" aria-hidden="true" />
-                &nbsp; Add New Category
-              </Button>
-              <Button
-                style={{ fontSize: 17, fontWeight: "600" }}
+                block = {this.state.isMobile? true :false}
+                style={{ fontSize: 17, fontWeight: "600", marginBottom:20, }}
                 onClick={this.togglePreviewModal}
                 color="success"
                 className="float-right"
@@ -1147,6 +1155,19 @@ class MenuSetup extends Component {
                 <i className="fa fa-play fa-1x" aria-hidden="true" />
                 &nbsp; Preview
               </Button>
+
+              <Button
+                block = {this.state.isMobile? true :false}
+                style={{ fontSize: 17, fontWeight: "600" }}
+                onClick={this.toggleNewCategoryModal}
+                color="primary"
+                
+              >
+                {" "}
+                <i className="fa fa-plus fa-1x" aria-hidden="true" />
+                &nbsp; Add New Category
+              </Button>
+              
             </Col>
             <Col xs="12">{this.renderMenu(menutitle[i])}</Col>
           </Row>

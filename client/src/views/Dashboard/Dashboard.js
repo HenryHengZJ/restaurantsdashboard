@@ -475,7 +475,7 @@ class Dashboard extends Component {
                   <a
                     style={{marginLeft: 10, cursor: 'pointer', opacity: 0.6}} 
                     className="card-header-action float-right"
-                    onClick={() => alert('Go to')}
+                    onClick={() => this.goToPage('/caterer/reports/dishes')}
                   >
                     <i className="fa fa-external-link" />
                   </a> : null}

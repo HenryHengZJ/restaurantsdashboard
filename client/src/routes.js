@@ -4,6 +4,7 @@ import DefaultLayout from './containers/DefaultLayout';
 const Dashboard = React.lazy(() => import('./views/Dashboard'));
 
 const NameAddress = React.lazy(() => import('./views/Basics/NameAddress'));
+const Description = React.lazy(() => import('./views/Basics/Description'));
 const Website = React.lazy(() => import('./views/Basics/Website'));
 const Cuisine = React.lazy(() => import('./views/Basics/Cuisine'));
 const Occasion = React.lazy(() => import('./views/Basics/Occasion'));
@@ -24,6 +25,7 @@ const Order = React.lazy(() => import('./views/Reports/Order'));
 const Sales = React.lazy(() => import('./views/Reports/Sales'));
 const Customer = React.lazy(() => import('./views/Reports/Customer'));
 const Review = React.lazy(() => import('./views/Reports/Review'));
+const Dishes = React.lazy(() => import('./views/Reports/Dishes'));
 
 const Profile = React.lazy(() => import('./views/Account/Profile'));
 
@@ -68,6 +70,7 @@ const routes = [
   { path: '/caterer/dashboard', name: 'Dashboard', component: Dashboard },
   { path: '/caterer/basics', exact: true, name: 'Basics', component: NameAddress },
   { path: '/caterer/basics/nameaddress', name: 'Name & Address', component: NameAddress },
+  { path: '/caterer/basics/description', name: 'Description', component: Description },
   { path: '/caterer/basics/website', name: 'Website', component: Website },
   { path: '/caterer/basics/cuisine', name: 'Cuisine', component: Cuisine },
   { path: '/caterer/basics/occasion', name: 'Occasion', component: Occasion },
@@ -88,6 +91,7 @@ const routes = [
   { path: '/caterer/reports/sales', name: 'Sales', component: Sales },
   { path: '/caterer/reports/customer', name: 'Customer', component: Customer },
   { path: '/caterer/reports/review', name: 'Review', component: Review },
+  { path: '/caterer/reports/dishes', name: 'Dishes', component: Dishes },
  /* { path: '/caterer/theme', exact: true, name: 'Theme', component: Colors },
   { path: '/caterer/theme/colors', name: 'Colors', component: Colors },
   { path: '/caterer/theme/typography', name: 'Typography', component: Typography },

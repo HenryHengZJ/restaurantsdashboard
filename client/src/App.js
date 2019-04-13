@@ -12,16 +12,6 @@ const DefaultLayout = Loadable({
   loading
 });
 
-const LandingPage = Loadable({
-  loader: () => import('./containers/LandingPage'),
-  loading
-});
-
-const CatererSignUp = Loadable({
-  loader: () => import('./containers/CatererSignUp'),
-  loading
-});
-
 // Pages
 
 const DeliveryConfirmation = Loadable({
@@ -79,15 +69,13 @@ class App extends Component {
       <HashRouter>
           <Switch>
             <Route exact path="/deliveryconfirmation" name="Delivery Confirmation" component={DeliveryConfirmation} />
-            <Route exact path="/caterersignup" name="Caterer SignUp" component={CatererSignUp} />
             <Route exact path="/catererdetail" name="Caterer Detail" component={CatererDetail} />
             <Route exact path="/searchcaterer" name="Search Caterer" component={SearchCaterer} />
             <Route exact path="/login" name="Login Page" component={Login} />
             <Route exact path="/register" name="Register Page" component={Register} />
             <Route exact path="/404" name="Page 404" component={Page404} />
             <Route exact path="/500" name="Page 500" component={Page500} />
-            <Route path="/caterer" name="Caterer Dashboard" component={DefaultLayout} />
-            <Route path="/" name="Home" component={LandingPage} />
+            <Route path="/" name="Caterer Dashboard" component={DefaultLayout} />
           </Switch>
       </HashRouter>
     );

@@ -553,7 +553,7 @@ class Sales extends Component {
                          showSelectionPreview={true}
                          moveRangeOnFirstSelection={false}
                          className={'PreviewArea'}
-                         months={2}
+                         months={1}
                          ranges={[this.state.dateRangePicker.selection]}
                          direction="horizontal"
                          maxDate={this.state.maxDate}

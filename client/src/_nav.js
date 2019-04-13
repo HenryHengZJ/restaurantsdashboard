@@ -16,8 +16,8 @@ export default {
           icon: '',
         },
         {
-          name: 'Website',
-          url: '/caterer/basics/website',
+          name: 'Description',
+          url: '/caterer/basics/description',
           icon: '',
         },
         {
@@ -122,6 +122,11 @@ export default {
         {
           name: 'Review',
           url: '/caterer/reports/review',
+          icon: '',
+        },
+        {
+          name: 'Dishes',
+          url: '/caterer/reports/dishes',
           icon: '',
         },
       ]
