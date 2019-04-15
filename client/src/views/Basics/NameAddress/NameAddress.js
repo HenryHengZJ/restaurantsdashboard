@@ -25,6 +25,10 @@ import {
   Row,
 } from 'reactstrap';
 import './NameAddress.css'; 
+import axios from 'axios';
+import apis from "../../../apis";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 class NameAddress extends Component {
 
@@ -38,37 +42,61 @@ class NameAddress extends Component {
     this.handleRestaurantCity = this.handleRestaurantCity.bind(this);
     this.handleRestaurantPostalCode = this.handleRestaurantPostalCode.bind(this);
     this.handleRestaurantCountry = this.handleRestaurantCountry.bind(this);
-    this.handleNext = this.handleNext.bind(this);
+    this.handleSave = this.handleSave.bind(this);
     this.state = {
-      restaurantName: "",
+      _id: "",
+      catererName: "",
       isNameEmpty: false,
-      restaurantPhoneNumber: "",
+      catererPhoneNumber: "",
       isPhoneNumberEmpty: false,
-      restaurantStreet: "",
+      catererStreet: "",
       isStreetEmpty: false,
-      restaurantCity: "",
+      catererCity: "",
       isCityEmpty: false,
-      restaurantPostalCode: "",
-      restaurantCounty: "",
+      catererPostalCode: "",
+      catererCounty: "",
       isCountyEmpty: false,
-      restaurantCountry: "",
+      catererCountry: "",
       isCountryEmpty: false,
       isNextButtonActive: false,
+      isProceedButtonVisible: false,
+      isSaving: false,
     };
 
     this.CountyData  = [
-      {
-        "key": "Dublin",
-        "value": "Dublin"
-      },
-      {
-        "key": "Limerick",
-        "value": "Limerick"
-      },
-      {
-        "key": "Cork",
-        "value": "Cork"
-      },
+      "Dublin",
+      "Cork",
+      "Limerick",      
+      "Galway",
+      "Waterford",
+      "Antrim",
+      "Armagh",
+      "Carlow",
+      "Cavan",
+      "Clare",
+      "Cork",
+      "Donegal",
+      "Down",
+      "Fermanagh",
+      "Kerry",
+      "Kildare",
+      "Kilkenny",
+      "Laois",
+      "Leitrim",
+      "Londonderry",
+      "Longford",
+      "Louth",
+      "Mayo",
+      "Meath",
+      "Monaghan",
+      "Offaly",
+      "Roscommon",
+      "Sligo",
+      "Tipperary",
+      "Tyrone",
+      "Westmeath",
+      "Wexford",
+      "Wicklow",
     ];
 
     this.CountryData  = [
@@ -1022,7 +1050,7 @@ class NameAddress extends Component {
 
   handleRestaurantNameChange(e) {
     this.setState({ 
-      restaurantName: e.target.value,
+      catererName: e.target.value,
       isNameEmpty: e.target.value == "" ? true : false
     },() => {
       this.checkAllInput()
@@ -1032,10 +1060,14 @@ class NameAddress extends Component {
   handleRestaurantPhoneNumber(e) {
     if(isNaN(e.target.value)){
       //Letters
-    }else {
+    }
+    else if (e.target.value.includes("+") || e.target.value.includes("-") || e.target.value.includes(".")) {
+      //Letters
+    }
+    else {
       //Valid Number
       this.setState({ 
-        restaurantPhoneNumber: e.target.value,
+        catererPhoneNumber: e.target.value,
         isPhoneNumberEmpty: e.target.value == "" ? true : false
       },() => {
         this.checkAllInput()
@@ -1045,7 +1077,7 @@ class NameAddress extends Component {
   
   handleRestaurantStreet(e) {
     this.setState({ 
-      restaurantStreet: e.target.value,
+      catererStreet: e.target.value,
       isStreetEmpty: e.target.value == "" ? true : false
     },() => {
       this.checkAllInput()
@@ -1054,7 +1086,7 @@ class NameAddress extends Component {
 
   handleRestaurantCounty(e) {
     this.setState({ 
-      restaurantCounty: e.target.value,
+      catererCounty: e.target.value,
       isCountyEmpty: e.target.value == "" ? true : false
     },() => {
       this.checkAllInput()
@@ -1063,7 +1095,7 @@ class NameAddress extends Component {
 
   handleRestaurantCity(e) {
     this.setState({ 
-      restaurantCity: e.target.value,
+      catererCity: e.target.value,
       isCityEmpty: e.target.value == "" ? true : false
     },() => {
       this.checkAllInput()
@@ -1071,12 +1103,12 @@ class NameAddress extends Component {
   }
 
   handleRestaurantPostalCode(e) {
-    this.setState({ restaurantPostalCode: e.target.value });
+    this.setState({ catererPostalCode: e.target.value });
   }
 
   handleRestaurantCountry(e) {
     this.setState({ 
-      restaurantCountry: e.target.value, 
+      catererCountry: e.target.value, 
       isCountryEmpty: e.target.value == "" ? true : false,
     },() => {
       this.checkAllInput()
@@ -1084,8 +1116,8 @@ class NameAddress extends Component {
   }
 
   checkAllInput = () => {
-    const {restaurantName, restaurantPhoneNumber, restaurantStreet, restaurantCity, restaurantCounty, restaurantCountry} = this.state
-    if (restaurantName != "" && restaurantPhoneNumber != "" && restaurantStreet != "" && restaurantCity != "" && restaurantCounty != "" && restaurantCountry != "") {
+    const {catererName, catererPhoneNumber, catererStreet, catererCity, catererCounty, catererCountry} = this.state
+    if (catererName != "" && catererPhoneNumber != "" && catererStreet != "" && catererCity != "" && catererCounty != "" && catererCountry != "") {
       //Activate Next Button
       this.setState({ 
         isNextButtonActive: true, 
@@ -1098,14 +1130,82 @@ class NameAddress extends Component {
     }
   }
 
-  handleNext() {
-    const {restaurantName, restaurantPhoneNumber, restaurantStreet, restaurantCity, restaurantCounty, restaurantCountry} = this.state
-    var finalArray = [restaurantName, restaurantPhoneNumber, restaurantStreet, restaurantCity, restaurantCounty, restaurantCountry]
-    alert(finalArray)
+  handleSave() {
+
+    this.setState({
+      isSaving: true,
+    })
+
+    const {catererName, catererPhoneNumber, catererStreet, catererCity, catererCounty, catererCountry, catererPostalCode, _id} = this.state
+
+    var phoneNumber;
+    var fulladdress;
+
+    //Phone number format
+    var countrycode = catererCountry.split("+")[1];
+    var firstchar = catererPhoneNumber.charAt(0);
+    if (firstchar === '0') {
+      phoneNumber = catererPhoneNumber.slice( 1 );
+    }
+    else {
+      phoneNumber = catererPhoneNumber.slice();
+    }
+    phoneNumber = '+' + countrycode + phoneNumber
+
+    //Full address format
+    fulladdress = catererStreet + ', ' + catererCity + ', ' + catererCounty + ', ' + catererPostalCode + ', ' + catererCountry.split("+")[0];
+    
+    //Data to be saved
+    var data = {
+      catererName: catererName,
+      catererPhoneNumber: phoneNumber,
+      catererAddress: fulladdress,
+      catererCity: catererCity,
+      catererCounty: catererCounty,
+      catererCountry: catererCountry.split("+")[0]
+    }
+   // alert(JSON.stringify(data))
+
+    var headers = {
+      'Content-Type': 'application/json',
+      //'Authorization': jwtToken,
+    }
+
+    var url = apis.UPDATEcaterer;
+
+    if (_id !== "") {
+      url = url + +"?_id=" + _id;
+    }
+
+    axios.put(url, data, {headers: headers})
+      .then((response) => {
+        if (response.status === 201) {
+          toast(<SuccessInfo/>, {
+            position: toast.POSITION.BOTTOM_RIGHT
+          });
+          this.setState({
+            isProceedButtonVisible: true,
+            isSaving: false,
+          })
+        }
+      })
+      .catch((error) => {
+        //alert("error updating! " + error)
+        toast(<ErrorInfo/>, {
+          position: toast.POSITION.BOTTOM_RIGHT
+        });
+        this.setState({
+          isSaving: false,
+        })
+      });
+  }
+
+  handleProceed = () => {
+    this.props.history.push('/caterer/basics/description')
   }
 
   render() {
-    const {isNameEmpty, isPhoneNumberEmpty, isStreetEmpty, isCityEmpty, isCountyEmpty, isCountryEmpty, isNextButtonActive} = this.state
+    const {isNameEmpty, isPhoneNumberEmpty, isStreetEmpty, isCityEmpty, isCountyEmpty, isCountryEmpty, isNextButtonActive, isProceedButtonVisible, isSaving} = this.state
 
     return (
       <div className="animated fadeIn">
@@ -1118,25 +1218,25 @@ class NameAddress extends Component {
               <CardBody>
                 <FormGroup>
                   <Label htmlFor="company">Restaurant *</Label>
-                  <Input style={{color: 'black'}} value={this.state.restaurantName} onChange={(e) => this.handleRestaurantNameChange(e)} type="text" id="company" placeholder="Enter your restaurant name" invalid={isNameEmpty ? true : false} />
+                  <Input style={{color: 'black'}} value={this.state.catererName} onChange={(e) => this.handleRestaurantNameChange(e)} type="text" id="company" placeholder="Enter your restaurant name" invalid={isNameEmpty ? true : false} />
                   <FormFeedback>Please enter your restaurant name</FormFeedback>
                 </FormGroup>
                 <FormGroup>
                   <Label htmlFor="telephone">Phone Number *</Label>
-                  <Input style={{color: 'black'}} value={this.state.restaurantPhoneNumber} onChange={(e) => this.handleRestaurantPhoneNumber(e)} type="text" id="telephone" placeholder="Enter your restaurant phone number" invalid={isPhoneNumberEmpty ? true : false}/>
+                  <Input style={{color: 'black'}} value={this.state.catererPhoneNumber} onChange={(e) => this.handleRestaurantPhoneNumber(e)} type="text" id="telephone" placeholder="Enter your restaurant phone number (e.g: 0831456789)" invalid={isPhoneNumberEmpty ? true : false}/>
                   <FormFeedback>Please enter your phone number</FormFeedback>
                 </FormGroup>
                 <FormGroup>
                   <Label htmlFor="street">Street *</Label>
-                  <Input style={{color: 'black'}} value={this.state.restaurantStreet} onChange={(e) => this.handleRestaurantStreet(e)} type="text" id="street" placeholder="Enter street name" invalid={isStreetEmpty ? true : false}/>
+                  <Input style={{color: 'black'}} value={this.state.catererStreet} onChange={(e) => this.handleRestaurantStreet(e)} type="text" id="street" placeholder="Enter street name" invalid={isStreetEmpty ? true : false}/>
                   <FormFeedback>Please enter restaurant street name</FormFeedback>
                 </FormGroup>
                 <FormGroup>
                   <Label htmlFor="county">County *</Label>
-                  <Input value={this.state.restaurantCounty} onChange={(e) => this.handleRestaurantCounty(e)} style={{color: this.state.restaurantCounty == "" ? 'grey': 'black'}} type="select" name="select" id="select" invalid={isCountyEmpty ? true : false}>
+                  <Input value={this.state.catererCounty} onChange={(e) => this.handleRestaurantCounty(e)} style={{color: this.state.catererCounty == "" ? 'grey': 'black'}} type="select" name="select" id="select" invalid={isCountyEmpty ? true : false}>
                   <option value='' disabled>Select County</option>
                   {this.CountyData.map(county =>
-                    <option style={{color:'black'}} key={county.key} value={county.key}>{county.value}</option>
+                    <option style={{color:'black'}} key={county} value={county}>{county}</option>
                   )}
                   </Input>
                 </FormGroup>
@@ -1144,20 +1244,20 @@ class NameAddress extends Component {
                   <Col xs="8">
                     <FormGroup>
                       <Label htmlFor="city">City *</Label>
-                      <Input style={{color: 'black'}} value={this.state.restaurantCity} onChange={(e) => this.handleRestaurantCity(e)} type="text" id="city" placeholder="Enter your city" invalid={isCityEmpty ? true : false}/>
+                      <Input style={{color: 'black'}} value={this.state.catererCity} onChange={(e) => this.handleRestaurantCity(e)} type="text" id="city" placeholder="Enter your city" invalid={isCityEmpty ? true : false}/>
                       <FormFeedback>Please enter your restaurant based city</FormFeedback>
                     </FormGroup>
                   </Col>
                   <Col xs="4">
                     <FormGroup>
                       <Label htmlFor="postal-code">Postal Code</Label>
-                      <Input style={{color: 'black'}} value={this.state.restaurantPostalCode} onChange={(e) => this.handleRestaurantPostalCode(e)} type="text" id="postal-code" placeholder="Postal Code"/>
+                      <Input style={{color: 'black'}} value={this.state.catererPostalCode} onChange={(e) => this.handleRestaurantPostalCode(e)} type="text" id="postal-code" placeholder="Postal Code"/>
                     </FormGroup>
                   </Col>
                 </FormGroup>
                 <FormGroup>
                   <Label htmlFor="country">Country *</Label>
-                  <Input value={this.state.restaurantCountry} onChange={(e) => this.handleRestaurantCountry(e)} style={{color: this.state.restaurantCountry == "" ? 'grey': 'black'}} type="select" name="select" id="select" invalid={isCountryEmpty ? true : false}>
+                  <Input value={this.state.catererCountry} onChange={(e) => this.handleRestaurantCountry(e)} style={{color: this.state.catererCountry == "" ? 'grey': 'black'}} type="select" name="select" id="select" invalid={isCountryEmpty ? true : false}>
                   <option value='' disabled>Select Country</option>
                   {this.CountryData.map(country =>
                     <option style={{color:'black'}} key={country.value} value={country.value+""+country.code}>{country.value} {country.code}</option>
@@ -1165,15 +1265,37 @@ class NameAddress extends Component {
                   </Input>
                 </FormGroup>
                 <div className="form-actions">
-                  <Button disabled={isNextButtonActive? false : true} onClick={this.handleNext} className="float-right" type="submit" color="primary">Next</Button>
+                  {isProceedButtonVisible ? 
+                  <Button style={{marginLeft:10}} onClick={() => this.handleProceed()} className="float-right" color="success">Proceed</Button>
+                  : null}
+                  <Button disabled={isNextButtonActive? false : true} onClick={this.handleSave} className="float-right" type="submit" color="primary">{isSaving ? "Saving..." : "Save" }</Button>
                 </div>
               </CardBody>
             </Card>
           </Col>
         </Row>
+        <ToastContainer hideProgressBar/>
       </div>
     );
   }
 }
+
+const SuccessInfo = ({ closeToast }) => (
+  <div>
+    <img style={ { marginLeft:10, objectFit:'cover', width: 25, height: 25 }} src={require("../../../assets/img/checked.png")} />
+
+     <b style={{marginLeft:10, marginTop:5, color: 'green'}}>Successfully Saved</b>
+   
+  </div>
+)
+
+const ErrorInfo = ({ closeToast }) => (
+  <div>
+    <img style={ { marginLeft:10, objectFit:'cover', width: 25, height: 25 }} src={require("../../../assets/img/cancel.png")} />
+
+     <b style={{marginLeft:10, marginTop:5, color: 'red'}}>Error saving data. Please try again</b>
+   
+  </div>
+)
 
 export default NameAddress;

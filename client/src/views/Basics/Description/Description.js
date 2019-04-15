@@ -24,6 +24,10 @@ import {
   Label,
   Row,
 } from 'reactstrap';
+import axios from 'axios';
+import apis from "../../../apis";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 class Description extends Component {
 
@@ -31,10 +35,17 @@ class Description extends Component {
     super(props);
 
     this.handleDescriptionChange = this.handleDescriptionChange.bind(this);
-    this.handleNext = this.handleNext.bind(this);
+  
     this.state = {
+      _id: "",
       description: "",
+      isProceedButtonVisible: false,
+      isSaving: false,
     };
+  }
+
+  componentDidMount() {
+    
   }
 
   handleDescriptionChange(e) {
@@ -43,14 +54,57 @@ class Description extends Component {
     })
   }
 
-  handleNext() {
-    const {description} = this.state
-    alert(description)
+  handleProceed = () => {
+    this.props.history.push('/caterer/basics/cuisine')
+  }
+
+  handleNext = () => {
+    this.setState({
+      isSaving: true,
+    })
+
+    const {description, _id} = this.state
+
+    var data = {
+      catererDescrip: description,
+    }
+
+    var headers = {
+      'Content-Type': 'application/json',
+      //'Authorization': jwtToken,
+    }
+
+    var url = apis.UPDATEcaterer;
+
+    if (_id !== "") {
+      url = url + +"?_id=" + _id;
+    }
+
+    axios.put(url, data, {headers: headers})
+      .then((response) => {
+        if (response.status === 201) {
+          toast(<SuccessInfo/>, {
+            position: toast.POSITION.BOTTOM_RIGHT
+          });
+          this.setState({
+            isProceedButtonVisible: true,
+            isSaving: false,
+          })
+        }
+      })
+      .catch((error) => {
+        //alert("error updating! " + error)
+        toast(<ErrorInfo/>, {
+          position: toast.POSITION.BOTTOM_RIGHT
+        });
+        this.setState({
+          isSaving: false,
+        })
+      });
   }
 
   render() {
-    const {isDescriptionEmpty} = this.state
-
+  
     return (
       <div className="animated fadeIn">
         <Row className="justify-content-center">
@@ -65,15 +119,37 @@ class Description extends Component {
                   <Input type="textarea" rows="5" style={{color: 'black'}} value={this.state.description} onChange={(e) => this.handleDescriptionChange(e)} placeholder="Description (eg: history, theme, main selling dishes)" />
                 </FormGroup>
                 <div className="form-actions">
-                  <Button onClick={this.handleNext} className="float-right" type="submit" color="primary">Next</Button>
+                  {this.state.isProceedButtonVisible ? 
+                    <Button style={{marginLeft:10}} onClick={() => this.handleProceed()} className="float-right" color="success">Proceed</Button>
+                  : null}
+                  <Button onClick={() => this.handleNext()} className="float-right" type="submit" color="primary">{this.state.isSaving ? "Saving..." : "Save" }</Button>
                 </div>
               </CardBody>
             </Card>
           </Col>
         </Row>
+        <ToastContainer hideProgressBar/>
       </div>
     );
   }
 }
+
+const SuccessInfo = ({ closeToast }) => (
+  <div>
+    <img style={ { marginLeft:10, objectFit:'cover', width: 25, height: 25 }} src={require("../../../assets/img/checked.png")} />
+
+     <b style={{marginLeft:10, marginTop:5, color: 'green'}}>Successfully Saved</b>
+   
+  </div>
+)
+
+const ErrorInfo = ({ closeToast }) => (
+  <div>
+    <img style={ { marginLeft:10, objectFit:'cover', width: 25, height: 25 }} src={require("../../../assets/img/cancel.png")} />
+
+     <b style={{marginLeft:10, marginTop:5, color: 'red'}}>Error saving data. Please try again</b>
+   
+  </div>
+)
 
 export default Description;

@@ -28,6 +28,10 @@ import {
   PaginationLink,
 } from 'reactstrap';
 import { AppSwitch } from '@coreui/react'
+import axios from 'axios';
+import apis from "../../../apis";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 let prev  = 0;
 let next  = 0;
@@ -41,74 +45,71 @@ class Occasion extends Component {
     super(props);
 
     this.handleClick = this.handleClick.bind(this);
-    this.onEntering = this.onEntering.bind(this);
-    this.onEntered = this.onEntered.bind(this);
-    this.onExiting = this.onExiting.bind(this);
-    this.onExited = this.onExited.bind(this);
     this.handleNext = this.handleNext.bind(this);
     
     this.state = {
+      _id: "",
       selectedoccasion: [],
       occasionmenu: [
         {
-          src: 'https://www.dublinskylonhotel.com/cmsGallery/imagerow/11256/resized/1200x798/breakfast_hot_buffet_1.jpg',
+          src: require('../../../assets/img/breakfast.jpg'),          
           checked: false,
           caption: 'Breakfast',
         },
         {
-          src: 'https://bordeaux.intercontinental.com/wp-content/uploads/2016/07/InterContinentalBordeauxLeGrandHotel_3b-488x430.jpg',
+          src: require('../../../assets/img/brunch.jpg'),          
           checked: false,
           caption: 'Brunch',
         },
         {
-          src: 'https://i2.wp.com/twinoakscaterers.com/wp-content/uploads/2016/04/catering-buffet.jpg?w=1220&ssl=1',
+          src: require('../../../assets/img/buffet.jpg'),          
           checked: false,
           caption: 'Buffet',
         },
         {
-          src: 'https://www.sunsetranchbc.com/image/w700-h400-c7:4/files/5a8f2f70-ac6c-488c-929f-3f64d8b0b5a5.jpg',
+          src: require('../../../assets/img/christmasparty.jpg'),          
           checked: false,
           caption: 'Christmas Party',
         },
         {
-          src: 'https://static.businessinsider.com/image/53f5f48b6bb3f79f491577d0-750.jpg',
+          src: require('../../../assets/img/dinner.jpg'),          
           checked: false,
           caption: 'Dinner',
         },
         {
-          src: 'https://www.hartsfoodandevents.co.uk/site/wp-content/uploads/2017/01/london_060-3.jpg',
+          src: require('../../../assets/img/event.jpg'),          
           checked: false,
           caption: 'Event',
         },
         ///////////////////////////////
         {
-          src: 'https://devouritcatering.com.au/wp-content/uploads/2017/07/party-event-catering-image.jpg',
+          src: require('../../../assets/img/fingerfood.jpg'),          
           checked: false,
           caption: 'Finger Food',
         },
         {
-          src: 'https://dynl.mktgcdn.com/p/Yf9K-dzedOu5VP4TKzmJOpF9XXJjDXj7JL2R2qEAQEQ/423x250.jpg',
+          src: require('../../../assets/img/lunch.jpg'),          
           checked: false,
           caption: 'Lunch',
         },
 
         {
-          src: 'https://images.click.in/classifieds/images/151/23_04_2018_11_44_55_c9346130f848964f21705e336d297ee6_45mukjqz2d.jpg',
+          src: require('../../../assets/img/meeting.jpg'),          
           checked: false,
           caption: 'Meeting',
         },
         {
-          src: 'https://restaurantclicks.com/wp-content/uploads/2015/04/restaurant-catering-event.jpg',
+          src: require('../../../assets/img/officedaily.jpg'),          
           checked: false,
           caption: 'Office Daily',
         },
         {
-          src: 'https://www.lazygourmet.ca/wp-content/uploads/Image-9.jpg',
+          src: require('../../../assets/img/wedding.jpg'),          
           checked: false,
           caption: 'Wedding',
         },
         {
-          src: 'https://images.medicaldaily.com/sites/medicaldaily.com/files/styles/headline/public/2015/05/21/processed-foods-and-snacks.jpg',
+          src: require('../../../assets/img/snacks.jpg'),          
           checked: false,
           caption: 'Snacks',
         },
@@ -116,9 +117,14 @@ class Occasion extends Component {
       currentPage: 1,
       menuPerPage: 6,
       isOpen: false,
+      isSaving: false,
     };
-
   }
+
+  componentDidMount() {
+    
+  }
+
 
   handleClick(event) {
     event.preventDefault();
@@ -127,25 +133,58 @@ class Occasion extends Component {
     });
   }
 
+    
+  handleProceed = () => {
+    this.props.history.push('/caterer/basics/validateemail')
+  }
+
   handleNext() {
-    const {selectedoccasion} = this.state
-    alert(selectedoccasion)
-  }
+    this.setState({
+      isSaving: true,
+    })
 
-  onEntering() {
-    this.setState({ status: 'Opening...' });
-  }
+    const {selectedoccasion, _id} = this.state
+    var occasions = [];
+    for (let i = 0; i < selectedoccasion.length; i++) {
+      occasions.push(selectedoccasion[i].caption);
+    }
+    //alert(JSON.stringify(occasions))
+    var data = {
+      catererOccasion: occasions,
+    }
 
-  onEntered() {
-    this.setState({ status: 'Opened' });
-  }
+    var headers = {
+      'Content-Type': 'application/json',
+      //'Authorization': jwtToken,
+    }
 
-  onExiting() {
-    this.setState({ status: 'Closing...' });
-  }
+    var url = apis.UPDATEcaterer;
 
-  onExited() {
-    this.setState({ status: 'Closed' });
+    if (_id !== "") {
+      url = url + +"?_id=" + _id;
+    }
+
+    axios.put(url, data, {headers: headers})
+      .then((response) => {
+        if (response.status === 201) {
+          toast(<SuccessInfo/>, {
+            position: toast.POSITION.BOTTOM_RIGHT
+          });
+          this.setState({
+            isProceedButtonVisible: true,
+            isSaving: false,
+          })
+        }
+      })
+      .catch((error) => {
+        //alert("error updating! " + error)
+        toast(<ErrorInfo/>, {
+          position: toast.POSITION.BOTTOM_RIGHT
+        });
+        this.setState({
+          isSaving: false,
+        })
+      });
   }
 
   handleCardClick(occasionmenu) {
@@ -231,7 +270,7 @@ class Occasion extends Component {
                 <strong>Restaurant Occasion</strong>
               </CardHeader>
               <CardBody>
-                <Collapse isOpen={isOpen} onEntering={this.onEntering} onEntered={this.onEntered} onExiting={this.onExiting} onExited={this.onExited}>
+                <Collapse isOpen={isOpen}>
                   <Label style={{paddingTop: 10, paddingBottom: 10}} className="h6">Your Occasion</Label>
                   <Row>
                     {
@@ -315,16 +354,38 @@ class Occasion extends Component {
                       
 
                 <div className="form-actions">
-                  <Button style={{marginTop: 20}} onClick={this.handleNext} className="float-right" type="submit" color="primary">Next</Button>
+                  {this.state.isProceedButtonVisible ? 
+                    <Button style={{marginTop: 20, marginLeft:10}} onClick={() => this.handleProceed()} className="float-right" color="success">Proceed</Button>
+                  : null}
+                  <Button style={{marginTop: 20}} onClick={this.handleNext} className="float-right" type="submit" color="primary">{this.state.isSaving ? "Saving..." : "Save" }</Button>
                 </div>
                
               </CardBody>
             </Card>
           </Col>
         </Row>
+        <ToastContainer hideProgressBar/>
       </div>
     );
   }
 }
+
+const SuccessInfo = ({ closeToast }) => (
+  <div>
+    <img style={ { marginLeft:10, objectFit:'cover', width: 25, height: 25 }} src={require("../../../assets/img/checked.png")} />
+
+     <b style={{marginLeft:10, marginTop:5, color: 'green'}}>Successfully Saved</b>
+   
+  </div>
+)
+
+const ErrorInfo = ({ closeToast }) => (
+  <div>
+    <img style={ { marginLeft:10, objectFit:'cover', width: 25, height: 25 }} src={require("../../../assets/img/cancel.png")} />
+
+     <b style={{marginLeft:10, marginTop:5, color: 'red'}}>Error saving data. Please try again</b>
+   
+  </div>
+)
 
 export default Occasion;

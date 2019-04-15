@@ -29,6 +29,10 @@ import {
 } from 'reactstrap';
 import { AppSwitch } from '@coreui/react'
 import './Cuisine.css'; 
+import axios from 'axios';
+import apis from "../../../apis";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 let prev  = 0;
 let next  = 0;
@@ -43,121 +47,118 @@ class Cuisine extends Component {
 
     this.handleClick = this.handleClick.bind(this);
     this.handleNext = this.handleNext.bind(this);
-    this.onEntering = this.onEntering.bind(this);
-    this.onEntered = this.onEntered.bind(this);
-    this.onExiting = this.onExiting.bind(this);
-    this.onExited = this.onExited.bind(this);
-    
+   
     this.state = {
+      _id: "",
       selectedmenu: [],
       cuisinemenu: [
         {
-          src: 'https://www.cityworksrestaurant.com/minneapolis/wp-content/uploads/sites/2/2015/11/Smokehouse-Burger_600x400.jpg',
+          src: require('../../../assets/img/american.jpg'),          
           checked: false,
           caption: 'American',
         },
         {
-          src: 'https://media.apnarm.net.au/media/images/2017/01/24/twb240117asian-7aj2fxtt8c9k5lphmn2_ct677x380.jpg',
+          src: require('../../../assets/img/asian.jpg'),               
           checked: false,
           caption: 'Asian',
         },
         {
-          src: 'https://du7ybees82p4m.cloudfront.net/578f9fac892d52.19976571.jpg?width=910&height=512',
+          src: require('../../../assets/img/burger.jpg'),          
           checked: false,
           caption: 'Burger',
         },
         {
-          src: 'https://img.grouponcdn.com/deal/2TSVo66dbSJZNdYzcNFeP4/163747171-1000x600/v1/c700x420.jpg',
+          src: require('../../../assets/img/carribean.jpg'),          
           checked: false,
           caption: 'Carribean',
         },
         {
-          src: 'https://static.independent.co.uk/s3fs-public/thumbnails/image/2017/02/07/15/chinese.jpg?w968h681',
+          src: require('../../../assets/img/chinese.jpg'),          
           checked: false,
           caption: 'Chinese',
         },
         {
-          src: 'https://images-gmi-pmc.edge-generalmills.com/817d708a-33e6-46f7-b985-0360b6c55cf4.jpg',
+          src: require('../../../assets/img/dessert.jpg'),          
           checked: false,
           caption: 'Dessert',
         },
         {
-          src: 'https://www.royalcaribbean.com/content/royal/US/en_US/experience/beverage-packages/_jcr_content/parsys/responsivegrid_copy__85624416/tiles2_copy.img.jpg/1516721606073.jpg',
+          src: require('../../../assets/img/drinks.jpg'),
           checked: false,
           caption: 'Drinks',
         },
         {
-          src: 'https://cmkt-image-prd.global.ssl.fastly.net/0.1.0/ps/3668084/910/607/m1/fpnw/wm1/gy704j30kvcnm4iaozt0bvok5vx1ksdr1opgicgd0olzgpwgqlneh8ugpdjm6m0z-.jpg?1512113419&s=833260b3e67c5b8ac86da63caf309538',
+          src: require('../../../assets/img/english.jpg'),          
           checked: false,
           caption: 'English',
         },
         {
-          src: 'https://media-cdn.tripadvisor.com/media/photo-s/09/45/2e/76/l-escargot-montorgueil.jpg',
+          src: require('../../../assets/img/french.jpg'),          
           checked: false,
           caption: 'French',
         },
         {
-          src: 'https://images.dailyhive.com/20160628100420/spanakopita.jpg',
+          src: require('../../../assets/img/greek.jpg'),          
           checked: false,
           caption: 'Greek',
         },
         {
-          src: 'https://superfood-asia.com/wp-content/uploads/2018/01/halal-food-asia.jpg',
+          src: require('../../../assets/img/halal.jpg'),          
           checked: false,
           caption: 'Halal',
         },
         {
-          src: 'https://main-cdn.grabone.co.nz/goimage/fullsize/d1985b69cf2c1783940e8f3fc36b5c24744915a5.jpg',
+          src: require('../../../assets/img/indian.jpg'),          
           checked: false,
           caption: 'Indian',
         },
         {
-          src: 'https://www.tasteofhome.com/wp-content/uploads/2017/10/St-Paddy-s-Irish-Beef-Dinner_exps82271_CW1996972D10_18_2bC_RMS.jpg',
+          src: require('../../../assets/img/irish.jpg'),          
           checked: false,
           caption: 'Irish',
         },
         {
-          src: 'https://www.bbcgoodfoodme.com/assets/var/app/current/features/624/original/Pan-tasty-alfredo-pasta-forks__800X500.png',
+          src: require('../../../assets/img/italian.jpg'),          
           checked: false,
           caption: 'Italian',
         },
         {
-          src: 'https://img.grouponcdn.com/iam/iF513Z3oSKacycWGpEjS/xu-2048x1229/v1/c700x420.jpg',
+          src: require('../../../assets/img/japanese.jpg'),          
           checked: false,
           caption: 'Japanese',
         },
         {
-          src: 'https://www.seriouseats.com/recipes/images/2017/11/20171031-sweet-potato-quesadilla-4-625x469.jpg',
+          src: require('../../../assets/img/mexican.jpg'),          
           checked: false,
           caption: 'Mexican',
         },
         {
-          src: 'https://foodtime.asia/blog/wp-content/uploads/2018/01/image3-760x490.jpg',
+          src: require('../../../assets/img/middleeastern.jpg'),          
           checked: false,
           caption: 'Middle Eastern',
         },
         {
-          src: 'https://i.dailymail.co.uk/i/pix/2013/10/10/article-0-1A9F1DAA000005DC-669_634x447.jpg',
+          src: require('../../../assets/img/pizza.jpg'),          
           checked: false,
           caption: 'Pizza',
         },
         {
-          src: 'https://www.ndtv.com/cooks/images/mixed.vegetables.salad.jpg',
+          src: require('../../../assets/img/salad.jpg'),          
           checked: false,
           caption: 'Salad',
         },
         {
-          src: 'https://www.bbcgoodfood.com/sites/default/files/recipe-collections/collection-image/2018/08/egg-cress-club-sandwich.jpg',
+          src: require('../../../assets/img/sandwich.jpg'),          
           checked: false,
           caption: 'Sandwich',
         },
         {
-          src: 'https://secure.i.telegraph.co.uk/multimedia/archive/03055/tom-yum_3055855b.jpg',
+          src: require('../../../assets/img/thai.jpg'),          
           checked: false,
           caption: 'Thai',
         },
         {
-          src: 'https://img.theculturetrip.com/840x440/smart//wp-content/uploads/2018/05/shutterstock_551299417.jpg',
+          src: require('../../../assets/img/vegetarian.jpg'),          
           checked: false,
           caption: 'Vegetarian Friendly',
         },
@@ -165,8 +166,13 @@ class Cuisine extends Component {
       currentPage: 1,
       menuPerPage: 6,
       isOpen: false,
+      isProceedButtonVisible: false,
+      isSaving: false,
     };
+  }
 
+  componentDidMount() {
+    
   }
 
   handleClick(event) {
@@ -176,25 +182,59 @@ class Cuisine extends Component {
     });
   }
 
+  
+  handleProceed = () => {
+    this.props.history.push('/caterer/basics/occasion')
+  }
+
   handleNext() {
-    const {selectedmenu} = this.state
-    alert(selectedmenu)
-  }
+    this.setState({
+      isSaving: true,
+    })
 
-  onEntering() {
-    this.setState({ status: 'Opening...' });
-  }
+    const {selectedmenu, _id} = this.state
+    var cuisines = [];
+    for (let i = 0; i < selectedmenu.length; i++) {
+      cuisines.push(selectedmenu[i].caption);
+    }
+   // alert(JSON.stringify(cuisines))
 
-  onEntered() {
-    this.setState({ status: 'Opened' });
-  }
+    var data = {
+      catererCuisine: cuisines,
+    }
 
-  onExiting() {
-    this.setState({ status: 'Closing...' });
-  }
+    var headers = {
+      'Content-Type': 'application/json',
+      //'Authorization': jwtToken,
+    }
 
-  onExited() {
-    this.setState({ status: 'Closed' });
+    var url = apis.UPDATEcaterer;
+
+    if (_id !== "") {
+      url = url + +"?_id=" + _id;
+    }
+
+    axios.put(url, data, {headers: headers})
+      .then((response) => {
+        if (response.status === 201) {
+          toast(<SuccessInfo/>, {
+            position: toast.POSITION.BOTTOM_RIGHT
+          });
+          this.setState({
+            isProceedButtonVisible: true,
+            isSaving: false,
+          })
+        }
+      })
+      .catch((error) => {
+        //alert("error updating! " + error)
+        toast(<ErrorInfo/>, {
+          position: toast.POSITION.BOTTOM_RIGHT
+        });
+        this.setState({
+          isSaving: false,
+        })
+      });
   }
 
   handleCardClick(cuisinemenu) {
@@ -228,7 +268,7 @@ class Cuisine extends Component {
       selectedmenu: newselectedmenu,
       cuisinemenu: newcuisinemenu,
       isOpen: newselectedmenu.length > 0 ? true : false
-    },() => { alert(JSON.stringify(this.state.cuisinemenu))})
+    })
 
   }
 
@@ -281,7 +321,7 @@ class Cuisine extends Component {
                 <strong>Restaurant Cuisine</strong>
               </CardHeader>
               <CardBody>
-                <Collapse isOpen={isOpen} onEntering={this.onEntering} onEntered={this.onEntered} onExiting={this.onExiting} onExited={this.onExited}>
+                <Collapse isOpen={isOpen}>
                   <Label style={{paddingTop: 10, paddingBottom: 10}} className="h6">Your Cuisine</Label>
                   <Row>
                     {
@@ -365,16 +405,38 @@ class Cuisine extends Component {
                       
 
                 <div className="form-actions">
-                  <Button style={{marginTop: 20}} onClick={this.handleNext} className="float-right" type="submit" color="primary">Next</Button>
+                  {this.state.isProceedButtonVisible ? 
+                    <Button style={{marginTop: 20, marginLeft:10}} onClick={() => this.handleProceed()} className="float-right" color="success">Proceed</Button>
+                  : null}
+                  <Button style={{marginTop: 20}} onClick={this.handleNext} className="float-right" type="submit" color="primary">{this.state.isSaving ? "Saving..." : "Save" }</Button>
                 </div>
                
               </CardBody>
             </Card>
           </Col>
         </Row>
+        <ToastContainer hideProgressBar/>
       </div>
     );
   }
 }
+
+const SuccessInfo = ({ closeToast }) => (
+  <div>
+    <img style={ { marginLeft:10, objectFit:'cover', width: 25, height: 25 }} src={require("../../../assets/img/checked.png")} />
+
+     <b style={{marginLeft:10, marginTop:5, color: 'green'}}>Successfully Saved</b>
+   
+  </div>
+)
+
+const ErrorInfo = ({ closeToast }) => (
+  <div>
+    <img style={ { marginLeft:10, objectFit:'cover', width: 25, height: 25 }} src={require("../../../assets/img/cancel.png")} />
+
+     <b style={{marginLeft:10, marginTop:5, color: 'red'}}>Error saving data. Please try again</b>
+   
+  </div>
+)
 
 export default Cuisine;

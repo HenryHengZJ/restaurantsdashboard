@@ -46,6 +46,7 @@
     "react-star-rating-component": "^1.4.1",
     "react-star-ratings": "^2.3.0",
     "react-test-renderer": "^16.8.2",
+    "react-toastify": "^5.0.1",
     "reactstrap": "^7.1.0",
     "simple-line-icons": "^2.4.1"
   },

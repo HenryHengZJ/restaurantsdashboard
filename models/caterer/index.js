@@ -3,14 +3,27 @@ var mongoose = require('mongoose');
 
 // define the schema for our Photographer model
 var catererSchema = mongoose.Schema({
-	name: String,
-    descrip: String,
-    rating: String,
-    numofreview: String,
+	catererName: String,
+    catererDescrip: String,
+    catererPhoneNumber: String,
+    catererAddress: String,
+    catererCity: String,
+    catererCounty: String,
+    catererCountry: String,
+    catererCuisine: Array,
+    catererOccasion: Array,
+    catererPickup: Boolean,
+    rating: Number,
+    numofreview: Number,
     src: String,
-    minimumspend: String,
-    deliveryfee: String,
+    minimumspend: Number,
+    deliveryfee: Number,
+    verified: {
+        type: Boolean,
+        default: false
+    }
 });
+
 
 //Connect to specific database
 const db = mongoose.connection.useDb('foodiebee');

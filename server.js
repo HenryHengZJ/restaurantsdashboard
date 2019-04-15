@@ -30,12 +30,16 @@ app.use(logger("dev"));
 
 // router files ===============================================================
 var testRoutes   = require('./routes/test');
+var catererRoutes   = require('./routes/caterer');
 
 // routes ======================================================================
 app.use('/test', testRoutes);
+app.use('/caterer', catererRoutes);
 
 //Static file declaration
 app.use(express.static(path.join(__dirname, 'client/build')));
+
+console.log(process.env.NODE_ENV)
 
 //production mode
 if(process.env.NODE_ENV === 'production') {
