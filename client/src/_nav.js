@@ -21,6 +21,11 @@ export default {
           icon: '',
         },
         {
+          name: 'Location',
+          url: '/caterer/basics/location',
+          icon: '',
+        },
+        {
           name: 'Cuisine',
           url: '/caterer/basics/cuisine',
           icon: '',

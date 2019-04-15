@@ -5,6 +5,7 @@ const Dashboard = React.lazy(() => import('./views/Dashboard'));
 
 const NameAddress = React.lazy(() => import('./views/Basics/NameAddress'));
 const Description = React.lazy(() => import('./views/Basics/Description'));
+const Location = React.lazy(() => import('./views/Basics/Location'));
 const Website = React.lazy(() => import('./views/Basics/Website'));
 const Cuisine = React.lazy(() => import('./views/Basics/Cuisine'));
 const Occasion = React.lazy(() => import('./views/Basics/Occasion'));
@@ -73,6 +74,7 @@ const routes = [
   { path: '/caterer/basics', exact: true, name: 'Basics', component: NameAddress },
   { path: '/caterer/basics/nameaddress', name: 'Name & Address', component: NameAddress },
   { path: '/caterer/basics/description', name: 'Description', component: Description },
+  { path: '/caterer/basics/location', name: 'Location', component: Location },
   { path: '/caterer/basics/website', name: 'Website', component: Website },
   { path: '/caterer/basics/cuisine', name: 'Cuisine', component: Cuisine },
   { path: '/caterer/basics/occasion', name: 'Occasion', component: Occasion },
