@@ -1265,16 +1265,6 @@ class NameAddress extends Component {
                   </Input>
                 </FormGroup>
 
-                <FormGroup>
-                  <Label htmlFor="country">Pin Point your location</Label>
-                  <Input value={this.state.catererCountry} onChange={(e) => this.handleRestaurantCountry(e)} style={{color: this.state.catererCountry == "" ? 'grey': 'black'}} type="select" name="select" id="select" invalid={isCountryEmpty ? true : false}>
-                  <option value='' disabled>Select Country</option>
-                  {this.CountryData.map(country =>
-                    <option style={{color:'black'}} key={country.value} value={country.value+""+country.code}>{country.value} {country.code}</option>
-                  )}
-                  </Input>
-                </FormGroup>
-                
                 <div className="form-actions">
                   {isProceedButtonVisible ? 
                   <Button style={{marginLeft:10}} onClick={() => this.handleProceed()} className="float-right" color="success">Proceed</Button>

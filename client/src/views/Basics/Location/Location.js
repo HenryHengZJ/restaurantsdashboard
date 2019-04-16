@@ -30,26 +30,6 @@ import GoogleMapReact from 'google-map-react';
 
 const GOOGLE_API_KEY = process.env.GOOGLE_API_KEY;
 
-
-class GMapReact extends React.Component {
-  render() {
-    const { center, zoom } = this.props;
-    return (
-      <div style={{ width: "100%", height: "100%" }}>
-         <GoogleMapReact
-            bootstrapURLKeys={{ key: [GOOGLE_API_KEY] }}
-            center={center}
-            zoom={zoom}
-            yesIWantToUseGoogleMapApiInternals={true}
-            onGoogleApiLoaded={({ map, maps }) => this.renderMarkers(map, maps)}
-          >
-            
-          </GoogleMapReact>
-      </div>
-    );
-  }
-}
-
 class Location extends Component {
 
   constructor(props) {
@@ -69,6 +49,8 @@ class Location extends Component {
         lng: -6.266155
       }
     };
+
+    this.marker = null;
   }
 
 
@@ -79,7 +61,7 @@ class Location extends Component {
   }
 
   searchAddress = (e) => {
-   // e.preventDefault()
+    e.preventDefault()
     const {form} = this.state
   
     this.setState({
@@ -87,6 +69,9 @@ class Location extends Component {
       longitude: form.lng,
       center: this.state.form
     })
+    if (this.marker !== null) {
+      this.marker.setPosition(this.state.form);
+    }
   }
 
   showPlaceDetails(address) {
@@ -99,24 +84,26 @@ class Location extends Component {
   }
 
   renderMarkers(map, maps, center) {
-    let marker = new maps.Marker({
+    this.marker = new maps.Marker({
       position: center,
       draggable: true,
       map
     });
-    marker.setMap(map);
-    var newLatLng = new maps.LatLng(center.lat, center.lng);
-    marker.setPosition(newLatLng);
+    this.marker.setMap(map);
     // Add an event listener on the rectangle.
-    marker.addListener("dragend", () => {
-      const lat = marker.getPosition().lat();
-      const lng = marker.getPosition().lng();
+    this.marker.addListener("dragend", () => {
+      const lat = this.marker.getPosition().lat();
+      const lng = this.marker.getPosition().lng();
       this.setState({
         latitude: lat,
         longitude: lng,
+        form: {
+          lat: Number(lat),
+          lng: Number(lng)
+        },
         center: {
-          lat: lat,
-          lng: lng
+          lat: Number(lat),
+          lng: Number(lng)
         },
       });
     });
@@ -155,7 +142,7 @@ class Location extends Component {
                         placeholder = "Enter business address"
                         onPlaceChanged={this.showPlaceDetails.bind(this)} />    
                       <InputGroupAddon addonType="prepend">
-                        <Button onClick={(e) => this.searchAddress(e)} block style={{height: '100%', borderTopRightRadius: 5, borderBottomRightRadius: 5,}} className="bg-primary" color="primary">SEARCH</Button>
+                        <Button onClick={(e) => this.searchAddress(e)} block style={{height: '100%', fontWeight: '600', borderTopRightRadius: 5, borderBottomRightRadius: 5,}} className="bg-primary" color="primary">SEARCH</Button>
                       </InputGroupAddon>
                     </InputGroup>
                   </Col>
@@ -170,7 +157,7 @@ class Location extends Component {
             center={this.state.center}
             zoom={14}
             yesIWantToUseGoogleMapApiInternals={true}
-            onGoogleApiLoaded={({ map, maps, center }) => this.renderMarkers(map, maps, this.state.center)}
+            onGoogleApiLoaded={({ map, maps }) => this.renderMarkers(map, maps, this.state.center)}
           >
             
           </GoogleMapReact>

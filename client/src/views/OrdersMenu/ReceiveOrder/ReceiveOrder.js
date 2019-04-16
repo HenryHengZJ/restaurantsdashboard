@@ -86,7 +86,7 @@ class ReceiveOrder extends Component {
                     <AppSwitch size="lg" onChange={this.togglePhoneOrder} className={'float-left'} variant={'3d'} color={'success'} checked={phoneOrder} label dataOn={'On'} dataOff={'Off'}/>   
                   </Col>
                   <Col xs="6">
-                    <img style={ { objectFit:'cover', width: '100%', height: '100%' }} src={"https://img.freepik.com/free-vector/mobile-phone-with-incoming-call_1347-136.jpg?size=338&ext=jpg"}  />
+                    <img style={ { objectFit:'cover', width: '100%', height: '100%' }} src={require("../../../assets/img/receiveorderphone.jpg")}  />
                   </Col>
                 </FormGroup>
               </CardBody>
@@ -105,7 +105,7 @@ class ReceiveOrder extends Component {
                     <AppSwitch size="lg" onChange={this.toggleEmailOrder} className={'float-left'} variant={'3d'} color={'success'} checked={emailOrder} label dataOn={'On'} dataOff={'Off'}/>   
                   </Col>
                   <Col xs="6">
-                    <img style={ { objectFit:'cover', width: '100%', height: '100%' }} src={"https://media.istockphoto.com/vectors/hand-holds-the-smartphone-with-new-email-notification-on-smartphone-vector-id926559146?k=6&m=926559146&s=612x612&w=0&h=-44iODQ0ZuGPheFHQkfSGiXiSCsR2gGgpENtDq5UJIQ="}  />
+                    <img style={ { objectFit:'cover', width: '100%', height: '100%' }} src={require("../../../assets/img/receiveorderemail.jpg")}  />
                   </Col>
                 </FormGroup>
               </CardBody>

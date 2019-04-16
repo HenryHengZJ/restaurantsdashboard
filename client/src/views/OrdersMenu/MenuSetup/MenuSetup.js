@@ -1891,7 +1891,7 @@ class MenuSetup extends Component {
                   <div class="container">
                     <img
                       style={{ height: 80, width: 80, objectFit: "cover" }}
-                      src="https://www.goodmealhunting.com/assets/healthy-icon-40124fd3f588b7024ccfff8f60f0288132a9ccbda70f77e6a2619d83a0313114.png"
+                      src={require("../../../assets/img/singledish.png")}
                       alt=""
                     />
                   </div>
@@ -1918,7 +1918,7 @@ class MenuSetup extends Component {
                   <div class="container">
                     <img
                       style={{ height: 80, width: 90, objectFit: "cover" }}
-                      src="https://mealprepkingz.com/wp-content/uploads/2016/12/icon-wecook.png"
+                      src={require("../../../assets/img/bulkdish.png")}
                       alt=""
                     />
                   </div>

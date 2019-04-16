@@ -101,7 +101,7 @@ class OnlinePayment extends Component {
       <Modal isOpen={this.state.pgprovidermodal} toggle={this.toggleModal}>
         <ModalHeader toggle={this.toggleModal}>Payment Gateway Provider</ModalHeader>
         <ModalBody>
-          <img style={{objectFit:'cover', width: 80, height: 45 }} src={'https://icons-for-free.com/free-icons/png/512/701548.png'}  />
+          <img style={{objectFit:'cover', width: 80, height: 45 }} src={require("../../../assets/img/stripe.png")}  />
           <div style={{ marginTop: 20 }}>
             <span><a className="h6" href="https://stripe.com/ie/payments">Stripe</a> is a technology company that allows individuals and businesses to receive payments over the Internet. Stripe provides the technical, fraud prevention, and banking infrastructure required to operate on-line payment systems.</span>
           </div>
@@ -184,9 +184,9 @@ class OnlinePayment extends Component {
 
                 <Collapse style={{paddingTop: 20}} isOpen={this.state.collapse} onEntering={this.onEntering} onEntered={this.onEntered} onExiting={this.onExiting} onExited={this.onExited}>
                   <Row>
-                    {this.renderCard('isVisaCardChecked', this.state.isVisaCardChecked, 'https://cdn1.iconfinder.com/data/icons/credit-card-icons/512/visa.png')}
-                    {this.renderCard('isMasterCardChecked', this.state.isMasterCardChecked, 'https://cdn1.iconfinder.com/data/icons/credit-card-icons/512/master.png')}
-                    {this.renderCard('isAmericanExpressChecked', this.state.isAmericanExpressChecked, 'https://cdn4.iconfinder.com/data/icons/simple-peyment-methods/512/amex_american_express-512.png')}
+                    {this.renderCard('isVisaCardChecked', this.state.isVisaCardChecked, require("../../../assets/img/visa.png"))}
+                    {this.renderCard('isMasterCardChecked', this.state.isMasterCardChecked, require("../../../assets/img/mastercard.png"))}
+                    {this.renderCard('isAmericanExpressChecked', this.state.isAmericanExpressChecked, require("../../../assets/img/americanexpress.png"))}
                   </Row>
                   <div>
                     <Label style={{marginTop: 10, marginBottom: 20}}>Payment Gateway Provider</Label>
@@ -194,7 +194,7 @@ class OnlinePayment extends Component {
                       <Card style={{marginLeft: 15, borderColor: '#20a8d8'}}>
                         <CardBody>
                           <Col>
-                            <img style={{ objectFit:'cover', width: 60, height: 30 }} src={'https://icons-for-free.com/free-icons/png/512/701548.png'}  />
+                            <img style={{ objectFit:'cover', width: 60, height: 30 }} src={require("../../../assets/img/stripe.png")}  />
                           </Col>
                         </CardBody>
                       </Card>

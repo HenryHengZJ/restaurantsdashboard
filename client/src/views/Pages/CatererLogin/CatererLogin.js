@@ -51,6 +51,14 @@ class CatererLogin extends Component {
     this.props.history.push('/caterer')
   };
 
+  openEmail = () => {
+    window.location.href = `mailto:support@foodiebee.com`;
+  }
+
+  signUp = () => {
+    window.open('https://foodiebee.herokuapp.com/caterersignup', '_blank');
+  }
+
   render() {
 
     const { isMobile } = this.state;
@@ -107,9 +115,9 @@ class CatererLogin extends Component {
                         className="text-muted text-center"
                       >
                         Don't have an account?&nbsp;
-                        <a style={{ fontWeight: '500', color: "#20a8d8" }} href="">
-                          Sign Up
-                        </a>
+                        <Button color="link" onClick={() => this.signUp()} style={{ fontWeight: '500',color: "#20a8d8" }} >
+                          <p style={{padding: 0, marginTop: 10}}>Sign Up</p>
+                        </Button>
                       </p>
                       <InputGroup className="mb-3">
                         <InputGroupAddon addonType="prepend">
@@ -175,9 +183,9 @@ class CatererLogin extends Component {
                       className="text-muted text-center"
                     >
                       Have a question?&nbsp;
-                      <a style={{ fontWeight: '500',color: "#20a8d8" }} href="">
-                        support@foodiebee.com
-                      </a>
+                      <Button color="link" onClick={() => this.openEmail()} style={{ fontWeight: '500',color: "#20a8d8" }} >
+                        <p style={{padding: 0, marginTop: 10}}>support@foodiebee.com</p>
+                      </Button>
                     </p>
                   </CardBody>
                 </Card>
