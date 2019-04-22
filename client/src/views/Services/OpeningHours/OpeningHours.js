@@ -26,6 +26,10 @@ import {
 } from 'reactstrap';
 import { AppSwitch } from '@coreui/react'
 import TimeField from 'react-simple-timefield';
+import axios from 'axios';
+import apis from "../../../apis";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 class OpeningHours extends Component {
 
@@ -50,39 +54,201 @@ class OpeningHours extends Component {
     this.onSundayClosingTimeChange = this.onSundayClosingTimeChange.bind(this);
 
     this.state = {
-      mondaystartingtime: '08:00',
-      mondayclosingtime: '22:00',
-      tuesdaystartingtime: '08:00',
-      tuesdayclosingtime: '22:00',
-      wednesdaystartingtime: '08:00',
-      wednesdayclosingtime: '22:00',
-      thursdaystartingtime: '08:00',
-      thursdayclosingtime: '22:00',
-      fridaystartingtime: '08:00',
-      fridayclosingtime: '22:00',
-      saturdaystartingtime: '08:00',
-      saturdayclosingtime: '22:00',
-      sundaystartingtime: '08:00',
-      sundayclosingtime: '22:00',
+      _id: "",
+      mondaystartingtime: '',
+      mondayclosingtime: '',
+      tuesdaystartingtime: '',
+      tuesdayclosingtime: '',
+      wednesdaystartingtime: '',
+      wednesdayclosingtime: '',
+      thursdaystartingtime: '',
+      thursdayclosingtime: '',
+      fridaystartingtime: '',
+      fridayclosingtime: '',
+      saturdaystartingtime: '',
+      saturdayclosingtime: '',
+      sundaystartingtime: '',
+      sundayclosingtime: '',
+      isProceedButtonVisible: false,
+      isSaving: false,
     };
-
   }
+
+  componentDidMount() {
   
-  handleNext() {
-    const {mondaystartingtime, mondayclosingtime, tuesdaystartingtime, tuesdayclosingtime, wednesdaystartingtime, wednesdayclosingtime,
-      thursdaystartingtime, thursdayclosingtime, fridaystartingtime, fridayclosingtime, saturdaystartingtime, saturdayclosingtime, sundaystartingtime, sundayclosingtime} = this.state
-  
-    var openinghours = {
-      "Monday": {"startingtime": mondaystartingtime, "closingtime": mondayclosingtime},
-      "Tuesday": {"startingtime": tuesdaystartingtime, "closingtime": tuesdayclosingtime},
-      "Wednesday": {"startingtime": wednesdaystartingtime, "closingtime": wednesdayclosingtime},
-      "Thursday": {"startingtime": thursdaystartingtime, "closingtime": thursdayclosingtime},
-      "Friday": {"startingtime": fridaystartingtime, "closingtime": fridayclosingtime},
-      "Saturday": {"startingtime": saturdaystartingtime, "closingtime": saturdayclosingtime},
-      "Sunday": {"startingtime": sundaystartingtime, "closingtime": sundayclosingtime}
+    var headers = {
+      'Content-Type': 'application/json',
     }
 
-    alert(JSON.stringify(openinghours))
+    var url = apis.GETcaterer;
+
+    axios.get(url, {withCredentials: true}, {headers: headers})
+      .then((response) => {
+        if (response.status === 200) {
+
+          if (response.data[0].openinghours.length > 0) {
+            var openinghours = response.data[0].openinghours
+            for (let i = 0; i < openinghours.length; i++) {
+              if (openinghours[i].day === 'Monday') {
+                this.setState({
+                  mondaystartingtime: this.reformatInput(openinghours[i].starttime.toString()),
+                  mondayclosingtime:  this.reformatInput(openinghours[i].closetime.toString())
+                })
+              }
+              else if (openinghours[i].day === 'Tuesday') {
+                this.setState({
+                  tuesdaystartingtime: this.reformatInput(openinghours[i].starttime.toString()),
+                  tuesdayclosingtime:  this.reformatInput(openinghours[i].closetime.toString())
+                })
+              }
+              else if (openinghours[i].day === 'Wednesday') {
+                this.setState({
+                  wednesdaystartingtime: this.reformatInput(openinghours[i].starttime.toString()),
+                  wednesdayclosingtime:  this.reformatInput(openinghours[i].closetime.toString())
+                })
+              }
+              else if (openinghours[i].day === 'Thursday') {
+                this.setState({
+                  thursdaystartingtime: this.reformatInput(openinghours[i].starttime.toString()),
+                  thursdayclosingtime:  this.reformatInput(openinghours[i].closetime.toString())
+                })
+              }
+              else if (openinghours[i].day === 'Friday') {
+                this.setState({
+                  fridaystartingtime: this.reformatInput(openinghours[i].starttime.toString()),
+                  fridayclosingtime:  this.reformatInput(openinghours[i].closetime.toString())
+                })
+              }
+              else if (openinghours[i].day === 'Saturday') {
+                this.setState({
+                  saturdaystartingtime: this.reformatInput(openinghours[i].starttime.toString()),
+                  saturdayclosingtime: this.reformatInput(openinghours[i].closetime.toString())
+                })
+              }
+              else if (openinghours[i].day === 'Sunday') {
+                this.setState({
+                  sundaystartingtime: this.reformatInput(openinghours[i].starttime.toString()),
+                  sundayclosingtime:  this.reformatInput(openinghours[i].closetime.toString())
+                })
+              }
+            }
+          }
+          else {
+            this.setState({
+              mondaystartingtime: '08:00',
+              mondayclosingtime: '22:00',
+              tuesdaystartingtime: '08:00',
+              tuesdayclosingtime: '22:00',
+              wednesdaystartingtime: '08:00',
+              wednesdayclosingtime: '22:00',
+              thursdaystartingtime: '08:00',
+              thursdayclosingtime: '22:00',
+              fridaystartingtime: '08:00',
+              fridayclosingtime: '22:00',
+              saturdaystartingtime: '08:00',
+              saturdayclosingtime: '22:00',
+              sundaystartingtime: '08:00',
+              sundayclosingtime: '22:00',
+            })
+          }
+        } 
+      })
+      .catch((error) => {
+      });
+  }
+
+  reformatInput = (time) => {
+    if (time.length > 3 ) {
+      time = time.slice(0, 2) + ":" + time.slice(2, 4)
+      
+    }
+    else {
+      time = "0" + time.slice(0, 1) + ":" + time.slice(1, 3)
+    }
+    return time
+  }
+
+  handleProceed = () => {
+    this.props.history.push('/caterer/services/orderlater')
+  }
+
+  
+  handleNext() {
+    this.setState({
+      isSaving: true,
+    })
+
+    const {_id, mondaystartingtime, mondayclosingtime, tuesdaystartingtime, tuesdayclosingtime, wednesdaystartingtime, wednesdayclosingtime,
+      thursdaystartingtime, thursdayclosingtime, fridaystartingtime, fridayclosingtime, saturdaystartingtime, saturdayclosingtime, sundaystartingtime, sundayclosingtime} = this.state
+
+    var data = {
+      openinghours:  [
+        {
+          day: "Monday",
+          starttime: this.state.mondaystartingtime.includes(":") ? Number(this.state.mondaystartingtime.replace(":", "")) : this.state.mondaystartingtime,
+          closetime: this.state.mondayclosingtime.includes(":") ? Number(this.state.mondayclosingtime.replace(":", "")) : this.state.mondayclosingtime,
+        },
+        {
+          day: "Tuesday",
+          starttime: this.state.tuesdaystartingtime.includes(":") ? Number(this.state.tuesdaystartingtime.replace(":", "")) : this.state.tuesdaystartingtime,
+          closetime: this.state.tuesdayclosingtime.includes(":") ? Number(this.state.tuesdayclosingtime.replace(":", "")) : this.state.tuesdayclosingtime,
+        },
+        {
+          day: "Wednesday",
+          starttime: this.state.wednesdaystartingtime.includes(":") ? Number(this.state.wednesdaystartingtime.replace(":", "")) : this.state.wednesdaystartingtime,
+          closetime: this.state.wednesdayclosingtime.includes(":") ? Number(this.state.wednesdayclosingtime.replace(":", "")) : this.state.wednesdayclosingtime,
+        },
+        {
+          day: "Thursday",
+          starttime: this.state.thursdaystartingtime.includes(":") ? Number(this.state.thursdaystartingtime.replace(":", "")) : this.state.thursdaystartingtime,
+          closetime: this.state.thursdayclosingtime.includes(":") ? Number(this.state.thursdayclosingtime.replace(":", "")) : this.state.thursdayclosingtime,
+        },
+        {
+          day: "Friday",
+          starttime: this.state.fridaystartingtime.includes(":") ? Number(this.state.fridaystartingtime.replace(":", "")) : this.state.fridaystartingtime,
+          closetime: this.state.fridayclosingtime.includes(":") ? Number(this.state.fridayclosingtime.replace(":", "")) : this.state.fridayclosingtime,
+        },
+        {
+          day: "Saturday",
+          starttime: this.state.saturdaystartingtime.includes(":") ? Number(this.state.saturdaystartingtime.replace(":", "")) : this.state.saturdaystartingtime,
+          closetime: this.state.saturdayclosingtime.includes(":") ? Number(this.state.saturdayclosingtime.replace(":", "")) : this.state.saturdayclosingtime,
+        },
+        {
+          day: "Sunday",
+          starttime: this.state.sundaystartingtime.includes(":") ? Number(this.state.sundaystartingtime.replace(":", "")) : this.state.sundaystartingtime,
+          closetime: this.state.sundayclosingtime.includes(":") ? Number(this.state.sundayclosingtime.replace(":", "")) : this.state.sundayclosingtime,
+        },
+      ]
+    }
+
+    var headers = {
+      'Content-Type': 'application/json',
+      //'Authorization': jwtToken,
+    }
+
+    var url = apis.UPDATEcaterer;
+
+    axios.put(url, data, {withCredentials: true}, {headers: headers})
+      .then((response) => {
+        if (response.status === 201) {
+          toast(<SuccessInfo/>, {
+            position: toast.POSITION.BOTTOM_RIGHT
+          });
+          this.setState({
+            isProceedButtonVisible: true,
+            isSaving: false,
+          })
+        }
+      })
+      .catch((error) => {
+        //alert("error updating! " + error)
+        toast(<ErrorInfo/>, {
+          position: toast.POSITION.BOTTOM_RIGHT
+        });
+        this.setState({
+          isSaving: false,
+        })
+      });
   }
 
   onMondayStartingTimeChange(mondaystartingtime) {
@@ -281,16 +447,38 @@ class OpeningHours extends Component {
                 </table>
                 
                 <div className="form-actions">
-                  <Button style={{marginTop: 20}} onClick={this.handleNext} className="float-right" type="submit" color="primary">Next</Button>
+                  {this.state.isProceedButtonVisible ? 
+                    <Button style={{marginTop: 20, marginLeft:10}} onClick={() => this.handleProceed()} className="float-right" color="success">Proceed</Button>
+                  : null}
+                  <Button style={{marginTop: 20}} onClick={this.handleNext} className="float-right" type="submit" color="primary">{this.state.isSaving ? "Saving..." : "Save" }</Button>
                 </div>
                
               </CardBody>
             </Card>
           </Col>
         </Row>
+        <ToastContainer hideProgressBar/>
       </div>
     );
   }
 }
+
+const SuccessInfo = ({ closeToast }) => (
+  <div>
+    <img style={ { marginLeft:10, objectFit:'cover', width: 25, height: 25 }} src={require("../../../assets/img/checked.png")} />
+
+     <b style={{marginLeft:10, marginTop:5, color: 'green'}}>Successfully Saved</b>
+   
+  </div>
+)
+
+const ErrorInfo = ({ closeToast }) => (
+  <div>
+    <img style={ { marginLeft:10, objectFit:'cover', width: 25, height: 25 }} src={require("../../../assets/img/cancel.png")} />
+
+     <b style={{marginLeft:10, marginTop:5, color: 'red'}}>Error saving data. Please try again</b>
+   
+  </div>
+)
 
 export default OpeningHours;

@@ -1048,6 +1048,31 @@ class NameAddress extends Component {
 
   }
 
+  componentDidMount() {
+  
+    var headers = {
+      'Content-Type': 'application/json',
+    }
+
+    var url = apis.GETcaterer;
+
+    axios.get(url, {withCredentials: true}, {headers: headers})
+      .then((response) => {
+        if (response.status === 200) {
+          this.setState({
+            catererName: typeof response.data[0].catererName !== 'undefined' ? response.data[0].catererName : "",
+            catererPhoneNumber: typeof response.data[0].catererPhoneNumber !== 'undefined' ? response.data[0].catererPhoneNumber : "",
+            catererStreet: typeof response.data[0].catererAddress !== 'undefined' ? response.data[0].catererAddress : "",
+            catererPostalCode: typeof response.data[0].catererPostalCode !== 'undefined' ? response.data[0].catererPostalCode : "",
+            catererCity: typeof response.data[0].catererCity !== 'undefined' ? response.data[0].catererCity : "",
+            catererCountry: typeof response.data[0].catererCountry !== 'undefined' ? response.data[0].catererCountry : ""
+          })
+        } 
+      })
+      .catch((error) => {
+      });
+  }
+
   handleRestaurantNameChange(e) {
     this.setState({ 
       catererName: e.target.value,
@@ -1168,16 +1193,11 @@ class NameAddress extends Component {
 
     var headers = {
       'Content-Type': 'application/json',
-      //'Authorization': jwtToken,
     }
 
     var url = apis.UPDATEcaterer;
 
-    if (_id !== "") {
-      url = url + +"?_id=" + _id;
-    }
-
-    axios.put(url, data, {headers: headers})
+    axios.put(url, data, {withCredentials: true}, {headers: headers})
       .then((response) => {
         if (response.status === 201) {
           toast(<SuccessInfo/>, {

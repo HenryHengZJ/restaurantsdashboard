@@ -7,7 +7,10 @@ const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const logger = require('morgan');
 var cors = require('cors');
-require('dotenv').config()
+const passport = require('passport');
+const cookieParser = require('cookie-parser');
+require('dotenv').config();
+require('./middleware/passport')(passport);
 
 // DB configuration ===============================================================
 const dbRoute = process.env.DB_URI;
@@ -24,17 +27,30 @@ db.on("error", console.error.bind(console, "MongoDB connection error:"));
 // (optional) only made for logging and
 // bodyParser, parses the request body to be a readable json format
 app.use(cors());
+app.use(logger("dev"));
+app.use(cookieParser());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
-app.use(logger("dev"));
+app.use(passport.initialize());
+
 
 // router files ===============================================================
 var testRoutes   = require('./routes/test');
 var catererRoutes   = require('./routes/caterer');
+var customerRoutes   = require('./routes/customer');
+var menuRoutes   = require('./routes/menu');
+var orderRoutes   = require('./routes/order');
+var reviewRoutes   = require('./routes/review');
+var authRoutes   = require('./routes/auth');
 
 // routes ======================================================================
 app.use('/test', testRoutes);
 app.use('/caterer', catererRoutes);
+app.use('/customer', customerRoutes);
+app.use('/menu', menuRoutes);
+app.use('/order', orderRoutes);
+app.use('/review', reviewRoutes);
+app.use('/auth', authRoutes);
 
 //Static file declaration
 app.use(express.static(path.join(__dirname, 'client/build')));

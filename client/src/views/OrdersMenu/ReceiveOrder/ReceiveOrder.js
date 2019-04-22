@@ -25,6 +25,10 @@ import {
   Row,
 } from 'reactstrap';
 import { AppSwitch } from '@coreui/react'
+import axios from 'axios';
+import apis from "../../../apis";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 class ReceiveOrder extends Component {
 
@@ -35,6 +39,7 @@ class ReceiveOrder extends Component {
     this.toggleEmailOrder = this.toggleEmailOrder.bind(this);
 
     this.state = {
+      _id: "",
       phoneOrder: true,
       emailOrder: true,
     };
@@ -58,12 +63,45 @@ class ReceiveOrder extends Component {
   }
 
   handleNext = () => {
-    const {phoneOrder, emailOrder} = this.state
-    var sendOrder = {
-      "phoneOrder": phoneOrder,
-      "emailOrder": emailOrder
+    const {phoneOrder, emailOrder, _id} = this.state
+    
+    var data = {
+      phoneReceivable: phoneOrder,
+      emailReceivable: emailOrder,
     }
-    alert(JSON.stringify(sendOrder))
+
+    var headers = {
+      'Content-Type': 'application/json',
+      //'Authorization': jwtToken,
+    }
+
+    var url = apis.UPDATEcaterer;
+
+    if (_id !== "") {
+      url = url + +"?_id=" + _id;
+    }
+
+    axios.put(url, data, {headers: headers})
+      .then((response) => {
+        if (response.status === 201) {
+          toast(<SuccessInfo/>, {
+            position: toast.POSITION.BOTTOM_RIGHT
+          });
+          this.setState({
+            isProceedButtonVisible: true,
+            isSaving: false,
+          })
+        }
+      })
+      .catch((error) => {
+        //alert("error updating! " + error)
+        toast(<ErrorInfo/>, {
+          position: toast.POSITION.BOTTOM_RIGHT
+        });
+        this.setState({
+          isSaving: false,
+        })
+      });
   }
 
   render() {
@@ -112,9 +150,28 @@ class ReceiveOrder extends Component {
             </Card>
           </Col>
         </Row>
+        <ToastContainer hideProgressBar/>
       </div>
     );
   }
 }
+
+const SuccessInfo = ({ closeToast }) => (
+  <div>
+    <img style={ { marginLeft:10, objectFit:'cover', width: 25, height: 25 }} src={require("../../../assets/img/checked.png")} />
+
+     <b style={{marginLeft:10, marginTop:5, color: 'green'}}>Successfully Saved</b>
+   
+  </div>
+)
+
+const ErrorInfo = ({ closeToast }) => (
+  <div>
+    <img style={ { marginLeft:10, objectFit:'cover', width: 25, height: 25 }} src={require("../../../assets/img/cancel.png")} />
+
+     <b style={{marginLeft:10, marginTop:5, color: 'red'}}>Error saving data. Please try again</b>
+   
+  </div>
+)
 
 export default ReceiveOrder;

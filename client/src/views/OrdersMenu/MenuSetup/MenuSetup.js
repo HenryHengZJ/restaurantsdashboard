@@ -27,6 +27,10 @@ import {
   InputGroupAddon,
   InputGroupText
 } from "reactstrap";
+import axios from 'axios';
+import apis from "../../../apis";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import classnames from "classnames";
 import "./MenuSetup.css";
 import Dotdotdot from "react-dotdotdot";
@@ -597,7 +601,95 @@ class MenuSetup extends Component {
     });
   };
 
-  menuItemClicked = _id => {
+  menuItemClicked = id => {
+
+    var _id = ""
+
+    /*var data = {
+      title: "Hot Dog",
+      catererID: "5cb7b4591cdace30742d56f7",
+      categoryname: "Appetizer",
+      categorytag: "Appetizer",
+      descrip:
+        "Tomato sauce, oregano, mozzarella and fresh basil. Home made hot dog with extra cheese plus toppings such as garlic dips",
+      dishtype: "single",
+      serveperunit: 1,
+      minimumquantity: 1,
+      markitem: ["Hot", "Spicy"],
+      priceperunit: 4.5,
+      selection: [
+        {
+          selectioncategory: "Starter",
+          selectionmaxnum: 2,
+          selectionitem: [
+            {
+              selectionitemtitle: "Pork Rib",
+              selectionitemprice: 2.0
+            },
+            {
+              selectionitemtitle: "Sring Roll",
+              selectionitemprice: 1.0
+            },
+            {
+              selectionitemtitle: "Fried Ball",
+              selectionitemprice: 1.0
+            },
+            {
+              selectionitemtitle: "Hot n Sour Soup",
+              selectionitemprice: 1.5
+            }
+          ]
+        },
+        {
+          selectioncategory: "Bread",
+          selectionmaxnum: 1,
+          selectionitem: [
+            {
+              selectionitemtitle: "Pita Bread",
+              selectionitemprice: 0.0
+            },
+            {
+              selectionitemtitle: "Tortilla Bread",
+              selectionitemprice: 0.0
+            }
+          ]
+        }
+      ]
+    }
+
+    var headers = {
+      'Content-Type': 'application/json',
+      //'Authorization': jwtToken,
+    }
+
+    var url = apis.UPDATEmenu;
+
+    if (_id !== "") {
+      url = url + +"?_id=" + _id;
+    }
+
+    axios.put(url, data, {headers: headers})
+      .then((response) => {
+        if (response.status === 201) {
+          toast(<SuccessInfo/>, {
+            position: toast.POSITION.BOTTOM_RIGHT
+          });
+          this.setState({
+            isProceedButtonVisible: true,
+            isSaving: false,
+          })
+        }
+      })
+      .catch((error) => {
+        //alert("error updating! " + error)
+        toast(<ErrorInfo/>, {
+          position: toast.POSITION.BOTTOM_RIGHT
+        });
+        this.setState({
+          isSaving: false,
+        })
+      });*/
+
     var itemindex = this.state.fetchedmenu.findIndex(x => x._id == _id);
 
     if (itemindex >= 0) {
@@ -1820,7 +1912,7 @@ class MenuSetup extends Component {
         </ModalHeader>
         <ModalBody>
           <div >
-            <CatererDetail/>
+            <CatererDetail preview={true}/>
           </div>
         </ModalBody>
       </Modal>
@@ -2020,9 +2112,29 @@ class MenuSetup extends Component {
         {this.renderDeleteItemModal()}
 
         {this.renderPreviewModal()}
+
+        <ToastContainer hideProgressBar/>
       </div>
     );
   }
 }
+
+const SuccessInfo = ({ closeToast }) => (
+  <div>
+    <img style={ { marginLeft:10, objectFit:'cover', width: 25, height: 25 }} src={require("../../../assets/img/checked.png")} />
+
+     <b style={{marginLeft:10, marginTop:5, color: 'green'}}>Successfully Saved</b>
+   
+  </div>
+)
+
+const ErrorInfo = ({ closeToast }) => (
+  <div>
+    <img style={ { marginLeft:10, objectFit:'cover', width: 25, height: 25 }} src={require("../../../assets/img/cancel.png")} />
+
+     <b style={{marginLeft:10, marginTop:5, color: 'red'}}>Error saving data. Please try again</b>
+   
+  </div>
+)
 
 export default MenuSetup;

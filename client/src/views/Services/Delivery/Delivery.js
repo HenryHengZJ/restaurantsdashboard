@@ -63,13 +63,10 @@ class Delivery extends Component {
     this.state = {
       _id: "",
       delivery: true,
-      latitude: 53.349244,
-      longitude: -6.2693076,
-      radius: 1000,
-      center: {
-        lat: 53.349244,
-        lng: -6.2693076
-      },
+      latitude: null,
+      longitude: null,
+      radius: null,
+      center: null,
       deliveryfee: 0,
       isProceedButtonVisible: false,
       isSaving: false,
@@ -77,8 +74,52 @@ class Delivery extends Component {
   }
 
   componentDidMount() {
-    
+  
+    var headers = {
+      'Content-Type': 'application/json',
+    }
+
+    var url = apis.GETcaterer;
+
+    axios.get(url, {withCredentials: true}, {headers: headers})
+      .then((response) => {
+        if (response.status === 200) {
+
+          var latitude;
+          var longitude;
+          var center;
+      
+          if (response.data[0].location.coordinates.length > 0) {
+            latitude = response.data[0].location.coordinates[0];
+            longitude = response.data[0].location.coordinates[1];
+            center =  {
+              lat: response.data[0].location.coordinates[0],
+              lng: response.data[0].location.coordinates[1]
+            };
+          }
+          else {
+            latitude = 53.350140;
+            longitude = -6.266155;
+            center =  {
+              lat: 53.350140,
+              lng: -6.266155
+            };
+          }
+
+          this.setState({
+            delivery: typeof response.data[0].catererDelivery !== 'undefined' ? response.data[0].catererDelivery : true,
+            latitude: latitude,
+            longitude: longitude,
+            center: center,
+            radius: typeof response.data[0].deliveryradius !== 'undefined' ? response.data[0].deliveryradius : 1000,
+            deliveryfee: typeof response.data[0].deliveryfee !== 'undefined' ? response.data[0].deliveryfee : 0,
+          })
+        } 
+      })
+      .catch((error) => {
+      });
   }
+
 
   toggle() {
     this.setState({ delivery: !this.state.delivery });
@@ -94,24 +135,20 @@ class Delivery extends Component {
     })
 
     const {delivery, _id, latitude, longitude, radius, deliveryfee} = this.state
-    alert(delivery)
-
-    /*var data = {
-      catererPickup: pickup,
+  
+    var data = {
+      deliveryradius: radius,
+      deliveryfee: deliveryfee,
+      catererDelivery: delivery,
     }
 
     var headers = {
       'Content-Type': 'application/json',
-      //'Authorization': jwtToken,
     }
 
     var url = apis.UPDATEcaterer;
 
-    if (_id !== "") {
-      url = url + +"?_id=" + _id;
-    }
-
-    axios.put(url, data, {headers: headers})
+    axios.put(url, data, {withCredentials: true}, {headers: headers})
       .then((response) => {
         if (response.status === 201) {
           toast(<SuccessInfo/>, {
@@ -131,7 +168,7 @@ class Delivery extends Component {
         this.setState({
           isSaving: false,
         })
-      });*/
+      });
   }
 
   addCircle = (map, maps) => {

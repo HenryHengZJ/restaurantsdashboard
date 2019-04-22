@@ -4,6 +4,8 @@ import { Button, Card, CardBody, CardGroup, Col, Container, Form, Input, InputGr
 import NavBar from '../../../components/NavBar/NavBar';
 import Footer from '../../../components/Footer/Footer';
 import caterer_login_wallpaper from "../../../assets/img/caterer_login_wallpaper.jpg";
+import axios from 'axios';
+import apis from "../../../apis";
 
 class CatererLogin extends Component {
 
@@ -48,7 +50,29 @@ class CatererLogin extends Component {
 
   login = e => {
     e.preventDefault();
-    this.props.history.push('/caterer')
+
+    var data = {
+      email: "lala@gg.com",
+      password: "1234567"
+    }
+
+    var headers = {
+      'Content-Type': 'application/json',
+      //'Authorization': jwtToken,
+    }
+
+    var url = apis.POSTcatererlogin;
+
+    axios.post(url, data, {withCredentials: true}, {headers: headers})
+      .then((response) => {
+        if (response.status === 200) {
+          this.props.history.push('/caterer')
+        }
+      })
+      .catch((error) => {
+        alert("error login! " + error)
+      });
+    
   };
 
   openEmail = () => {

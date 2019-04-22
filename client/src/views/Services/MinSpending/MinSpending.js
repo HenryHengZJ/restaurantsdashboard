@@ -37,13 +37,11 @@ class MinSpending extends Component {
   constructor(props) {
     super(props);
 
-    this.toggle = this.toggle.bind(this);
     this.handleNext = this.handleNext.bind(this);
     this.handlePriceChange = this.handlePriceChange.bind(this);
   
     this.state = {
       _id: "",
-      minspending: true,
       minspendingfee: 0,
       isProceedButtonVisible: false,
       isSaving: false,
@@ -51,11 +49,23 @@ class MinSpending extends Component {
   }
 
   componentDidMount() {
-    
-  }
+  
+    var headers = {
+      'Content-Type': 'application/json',
+    }
 
-  toggle() {
-    this.setState({ minspending: !this.state.minspending });
+    var url = apis.GETcaterer;
+
+    axios.get(url, {withCredentials: true}, {headers: headers})
+      .then((response) => {
+        if (response.status === 200) {
+          this.setState({
+            minspendingfee: typeof response.data[0].minimumspend !== 'undefined' ? response.data[0].minimumspend : 0,
+          })
+        } 
+      })
+      .catch((error) => {
+      });
   }
 
   handleProceed = () => {
@@ -67,24 +77,18 @@ class MinSpending extends Component {
       isSaving: true,
     })
     const {minspendingfee,  _id} = this.state
-    alert(minspendingfee)
-
+    
     var data = {
       minimumspend: minspendingfee,
     }
 
     var headers = {
       'Content-Type': 'application/json',
-      //'Authorization': jwtToken,
     }
 
     var url = apis.UPDATEcaterer;
-
-    if (_id !== "") {
-      url = url + +"?_id=" + _id;
-    }
-
-    axios.put(url, data, {headers: headers})
+  
+    axios.put(url, data, {withCredentials: true}, {headers: headers})
       .then((response) => {
         if (response.status === 201) {
           toast(<SuccessInfo/>, {
@@ -97,7 +101,6 @@ class MinSpending extends Component {
         }
       })
       .catch((error) => {
-        //alert("error updating! " + error)
         toast(<ErrorInfo/>, {
           position: toast.POSITION.BOTTOM_RIGHT
         });
@@ -131,9 +134,7 @@ class MinSpending extends Component {
                   </Col>
                 </FormGroup>
 
-                <Collapse style={{paddingTop: 20}} isOpen={this.state.minspending} >
-
-                <FormGroup row>
+                <FormGroup style={{paddingTop: 20}} row>
                   <Col xs="4" md="3">
                     <h6>Minimum Spending:</h6>
                   </Col>
@@ -158,9 +159,7 @@ class MinSpending extends Component {
                     </InputGroup>
                   </Col>
                 </FormGroup>
-              
-                </Collapse>
-
+           
                 <div className="form-actions">
                   {this.state.isProceedButtonVisible ? 
                     <Button style={{marginTop: 20, marginLeft:10}} onClick={() => this.handleProceed()} className="float-right" color="success">Proceed</Button>

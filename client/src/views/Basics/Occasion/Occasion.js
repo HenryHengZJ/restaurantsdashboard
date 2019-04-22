@@ -122,9 +122,50 @@ class Occasion extends Component {
   }
 
   componentDidMount() {
-    
+  
+    var headers = {
+      'Content-Type': 'application/json',
+    }
+
+    var url = apis.GETcaterer;
+
+    axios.get(url, {withCredentials: true}, {headers: headers})
+      .then((response) => {
+        if (response.status === 200) {
+          if (response.data[0].catererOccasion.length > 0) {
+            this.setInitialInput(response.data[0].catererOccasion)
+          }
+        } 
+      })
+      .catch((error) => {
+      });
   }
 
+  setInitialInput = (catererOccasion) => {
+    var selectedoccasion = [];
+    var occasionmenu = this.state.occasionmenu.slice()
+ 
+    for (let x = 0; x < catererOccasion.length; x++) {
+      for (let i = 0; i < occasionmenu.length; i++) {
+        if (occasionmenu[i].caption === catererOccasion[x]) {
+          occasionmenu[i].checked = true
+          var selectedoccasionItem = {
+            src: occasionmenu[i].src,     
+            checked: true,
+            caption: occasionmenu[i].caption
+          }
+          selectedoccasion.push(selectedoccasionItem)
+        }
+      }
+    }
+
+    this.setState({
+      occasionmenu: occasionmenu,
+      selectedoccasion: selectedoccasion,
+      isOpen: selectedoccasion.length > 0 ? true : false
+    })
+   
+  }
 
   handleClick(event) {
     event.preventDefault();
@@ -160,11 +201,7 @@ class Occasion extends Component {
 
     var url = apis.UPDATEcaterer;
 
-    if (_id !== "") {
-      url = url + +"?_id=" + _id;
-    }
-
-    axios.put(url, data, {headers: headers})
+    axios.put(url, data, {withCredentials: true}, {headers: headers})
       .then((response) => {
         if (response.status === 201) {
           toast(<SuccessInfo/>, {

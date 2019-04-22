@@ -545,8 +545,13 @@ class CatererDetail extends Component {
     });
   };
 
-  checkOutClicked = () => {
-    this.props.history.push('deliveryconfirmation')
+  checkOutClicked = (previewVal) => {
+    if (previewVal) {
+      alert("Items Checked Out!")
+    }
+    else {
+      this.props.history.push('deliveryconfirmation')
+    }
   }
 
   toggleCuisineDropDown = () => {
@@ -1160,7 +1165,7 @@ class CatererDetail extends Component {
     return <tbody>{itemarray}</tbody>;
   }
 
-  renderNotEmptyCart() {
+  renderNotEmptyCart(previewVal) {
     return (
       <CardBody style={{ textAlign: "center" }}>
         <Table borderless>{this.renderTableItems()}</Table>
@@ -1198,7 +1203,7 @@ class CatererDetail extends Component {
             fontWeight: "600",
             fontSize: 16
           }}
-          onClick={() => this.checkOutClicked()}
+          onClick={() => this.checkOutClicked(previewVal)}
           block
         >
           Checkout
@@ -1290,7 +1295,7 @@ class CatererDetail extends Component {
     );
   }
 
-  renderCart() {
+  renderCart(previewVal) {
     return (
       <Card
         style={{
@@ -1311,7 +1316,7 @@ class CatererDetail extends Component {
 
         {this.state.cartitem.length === 0
           ? this.renderEmptyCart()
-          : this.renderNotEmptyCart()}
+          : this.renderNotEmptyCart(previewVal)}
       </Card>
     );
   }
@@ -1676,11 +1681,16 @@ class CatererDetail extends Component {
   }
 
   render() {
+    const {
+      preview,
+    } = this.props;
+
     const menutitlelength = this.state.menutitle.length;
+    const previewVal = preview || false;
 
     return (
       <div style={{backgroundColor: 'white'}}>
-         <NavBar signIn={e=>this.signIn(e)}/>
+         {previewVal ? null : <NavBar signIn={e=>this.signIn(e)}/> }
       <div className="app align-items-center">
 
           <Container>
@@ -1795,13 +1805,13 @@ class CatererDetail extends Component {
               </Col>
 
               <Col style={{ marginTop: 20 }} xs="0" sm="0" md="5" lg="5">
-                {this.renderCart()}
+                {this.renderCart(previewVal)}
               </Col>
 
-              <div style={{marginTop:30, marginBottom:20, height:1, backgroundColor: 'gray', opacity: 0.3, width: '100%'}}/>
+              {previewVal ? null : <div style={{marginTop:30, marginBottom:20, height:1, backgroundColor: 'gray', opacity: 0.3, width: '100%'}}/>}
 
               <Col style={{ marginTop: 20 }} xs="12" sm="12" md="7" lg="7">
-                {this.renderReview()}
+                {previewVal ? null : this.renderReview()}
               </Col>
 
               <Col style={{ marginTop: 20 }} xs="0" sm="0" md="5" lg="5"></Col>
@@ -1819,7 +1829,7 @@ class CatererDetail extends Component {
             {this.state.menuModalOpen ? this.renderMenuModal() : null}
           </Container>
         </div>
-        <Footer />
+        {previewVal ? null : <Footer />}
       </div>
     );
   }

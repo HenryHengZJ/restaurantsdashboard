@@ -18,6 +18,10 @@ import {
 import navigation from '../../_nav';
 // routes config
 import routes from '../../routes';
+import axios from 'axios';
+import apis from "../../apis";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const DefaultAside = React.lazy(() => import('./DefaultAside'));
 const DefaultFooter = React.lazy(() => import('./DefaultFooter'));
@@ -29,7 +33,26 @@ class DefaultLayout extends Component {
 
   signOut(e) {
     e.preventDefault()
-    window.location.assign('https://foodiebee.herokuapp.com');
+
+    var headers = {
+      'Content-Type': 'application/json',
+    }
+
+    var url = apis.GETcatererlogout;
+   
+    axios.get(url, {withCredentials: true}, {headers: headers})
+      .then((response) => {
+        if (response.status === 200) {
+          //window.location.assign('https://foodiebeecaterer.herokuapp.com');
+          this.props.history.push('/')
+        }
+      })
+      .catch((error) => {
+        toast(<ErrorInfo/>, {
+          position: toast.POSITION.BOTTOM_RIGHT
+        });
+      });
+    
   }
 
   onProfileClicked(e) {
@@ -83,10 +106,19 @@ class DefaultLayout extends Component {
             </Suspense>
           </AppAside>
         </div>
-       
+        <ToastContainer hideProgressBar/>
       </div>
     );
   }
 }
+
+const ErrorInfo = ({ closeToast }) => (
+  <div>
+    <img style={ { marginLeft:10, objectFit:'cover', width: 25, height: 25 }} src={require("../../assets/img/cancel.png")} />
+
+     <b style={{marginLeft:10, marginTop:5, color: 'red'}}>Error saving data. Please try again</b>
+   
+  </div>
+)
 
 export default DefaultLayout;

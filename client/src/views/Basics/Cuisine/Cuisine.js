@@ -172,7 +172,49 @@ class Cuisine extends Component {
   }
 
   componentDidMount() {
-    
+  
+    var headers = {
+      'Content-Type': 'application/json',
+    }
+
+    var url = apis.GETcaterer;
+
+    axios.get(url, {withCredentials: true}, {headers: headers})
+      .then((response) => {
+        if (response.status === 200) {
+          if (response.data[0].catererCuisine.length > 0) {
+            this.setInitialInput(response.data[0].catererCuisine)
+          }
+        } 
+      })
+      .catch((error) => {
+      });
+  }
+
+  setInitialInput = (catererCuisine) => {
+    var selectedmenu = [];
+    var cuisinemenu = this.state.cuisinemenu.slice()
+ 
+    for (let x = 0; x < catererCuisine.length; x++) {
+      for (let i = 0; i < cuisinemenu.length; i++) {
+        if (cuisinemenu[i].caption === catererCuisine[x]) {
+          cuisinemenu[i].checked = true
+          var selectedMenuItem = {
+            src: cuisinemenu[i].src,     
+            checked: true,
+            caption: cuisinemenu[i].caption
+          }
+          selectedmenu.push(selectedMenuItem)
+        }
+      }
+    }
+
+    this.setState({
+      cuisinemenu: cuisinemenu,
+      selectedmenu: selectedmenu,
+      isOpen: selectedmenu.length > 0 ? true : false
+    })
+   
   }
 
   handleClick(event) {
@@ -209,12 +251,8 @@ class Cuisine extends Component {
     }
 
     var url = apis.UPDATEcaterer;
-
-    if (_id !== "") {
-      url = url + +"?_id=" + _id;
-    }
-
-    axios.put(url, data, {headers: headers})
+   
+    axios.put(url, data, {withCredentials: true}, {headers: headers})
       .then((response) => {
         if (response.status === 201) {
           toast(<SuccessInfo/>, {

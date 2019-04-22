@@ -40,14 +40,30 @@ class Pickup extends Component {
 
     this.state = {
       _id: "",
-      pickup: true,
+      pickup: null,
       isProceedButtonVisible: false,
       isSaving: false,
     };
   }
 
   componentDidMount() {
-    
+  
+    var headers = {
+      'Content-Type': 'application/json',
+    }
+
+    var url = apis.GETcaterer;
+
+    axios.get(url, {withCredentials: true}, {headers: headers})
+      .then((response) => {
+        if (response.status === 200) {
+          this.setState({
+            pickup: typeof response.data[0].catererPickup !== 'undefined' ? response.data[0].catererPickup : true,
+          })
+        } 
+      })
+      .catch((error) => {
+      });
   }
 
   toggle() {
@@ -76,11 +92,7 @@ class Pickup extends Component {
 
     var url = apis.UPDATEcaterer;
 
-    if (_id !== "") {
-      url = url + +"?_id=" + _id;
-    }
-
-    axios.put(url, data, {headers: headers})
+    axios.put(url, data, {withCredentials: true}, {headers: headers})
       .then((response) => {
         if (response.status === 201) {
           toast(<SuccessInfo/>, {
