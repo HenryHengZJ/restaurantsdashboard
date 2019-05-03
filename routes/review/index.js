@@ -2,28 +2,19 @@ var express = require('express');
 var router = express.Router();
 var Review = require('../../models/review');
 var ObjectId = require('mongodb').ObjectID;
+var passport = require('passport');
 
-router.get('/getreview', (req, res) => {
-    Review.find( (err,doc) => {
+router.get('/getreview', passport.authenticate('jwt', {session: false}), (req, res) => {
+
+    const { user } = req;
+    var userID = user.catererID
+
+    var matchquery;
+    matchquery = {catererID: new ObjectId(userID)}
+
+    Review.find(matchquery, (err,doc) => {
         if (err) return res.status(500).send({ error: err });
         return res.status(200).json(doc);
-    });
-});
-
-router.put('/updatreview', (req, res) => {
-    var matchquery;
-    if (typeof req.query._id === 'undefined') {
-        matchquery= {_id: new ObjectId()}
-    }
-    else {
-        matchquery = {_id: new ObjectId(req.query._id)}
-    }
-   
-    var updateData = req.body
-
-    Review.findOneAndUpdate(matchquery, {$set: updateData}, {upsert:true, new: true, runValidators: true, setDefaultsOnInsert: true}, (err, doc) => {
-        if (err) return res.status(500).send({ error: err });
-        return res.status(201).json(doc);
     });
 });
 

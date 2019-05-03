@@ -7,6 +7,7 @@ export default {
 
     /*Menu API*/
     UPDATEmenu: "/menu/updatemenu",
+    GETmenu: "/menu/getmenu",
 
     /*Auth API*/
     POSTcatererlogin: "/auth/catererlogin",

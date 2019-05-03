@@ -23,6 +23,7 @@ var catererSchema = mongoose.Schema({
     catererCountry: String,
     catererCuisine: [String],
     catererOccasion: [String],
+    catererDietaryConcern: [String],
     catererPickup: Boolean,
 	catererDelivery: Boolean,
 	location: { type: {type:String}, coordinates: [Number]},
@@ -43,11 +44,14 @@ var catererSchema = mongoose.Schema({
     },
     rating: Number,
     numofreview: Number,
-    src: String,
+    coversrc: String,
+    profilesrc: String,
     verified: {
         type: Boolean,
         default: false
     }
+}, {
+    timestamps: true
 });
 
 // generating a hash
@@ -81,6 +85,7 @@ catererSchema.methods.toAuthJSON = function() {
     catererCountry		: this.catererCountry,
     catererCuisine		: this.catererCuisine,
     catererOccasion		: this.catererOccasion,
+    catererDietaryConcern : this.catererDietaryConcern,
     catererPickup		: this.catererPickup,
 	catererDelivery		: this.catererDelivery,
 	deliveryradius		: this.deliveryradius,
@@ -94,7 +99,8 @@ catererSchema.methods.toAuthJSON = function() {
     emailReceivable     : this.emailReceivable,
     rating				: this.rating,
     numofreview			: this.numofreview,
-    src					: this.src,
+    coversrc			: this.coversrc,
+    profilesrc          : this.profilesrc,
     verified			: this.verified,
 	token		 		: this.generateJWT(),
   };

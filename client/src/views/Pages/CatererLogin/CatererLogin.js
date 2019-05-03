@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
-import { Button, Card, CardBody, CardGroup, Col, Container, Form, Input, InputGroup, InputGroupAddon, InputGroupText, Row } from 'reactstrap';
+import { Label, Button, Card, CardBody, CardGroup, Col, Container, Form, FormText, Input, InputGroup, InputGroupAddon, InputGroupText, Row } from 'reactstrap';
 import NavBar from '../../../components/NavBar/NavBar';
 import Footer from '../../../components/Footer/Footer';
 import caterer_login_wallpaper from "../../../assets/img/caterer_login_wallpaper.jpg";
@@ -18,7 +18,8 @@ class CatererLogin extends Component {
     this.state = {
       useremail: "",
       userpassword: "",
-      isMobile: false
+      isMobile: false,
+      invalidUser: false,
     };
   }
 
@@ -41,24 +42,25 @@ class CatererLogin extends Component {
   }
 
   handleEmailChange(e) {
-    this.setState({ useremail: e.target.value });
+    this.setState({ useremail: e.target.value, invalidUser: false });
   }
 
   handlePasswordChange(e) {
-    this.setState({ userpassword: e.target.value });
+    this.setState({ userpassword: e.target.value, invalidUser: false });
   }
 
   login = e => {
     e.preventDefault();
 
+    const {useremail, userpassword} = this.state;
+
     var data = {
-      email: "lala@gg.com",
-      password: "1234567"
+      email: useremail,
+      password: userpassword
     }
 
     var headers = {
       'Content-Type': 'application/json',
-      //'Authorization': jwtToken,
     }
 
     var url = apis.POSTcatererlogin;
@@ -68,9 +70,16 @@ class CatererLogin extends Component {
         if (response.status === 200) {
           this.props.history.push('/caterer')
         }
+        else {
+          this.setState({
+            invalidUser: true
+          })
+        }
       })
       .catch((error) => {
-        alert("error login! " + error)
+        this.setState({
+          invalidUser: true
+        })
       });
     
   };
@@ -85,7 +94,7 @@ class CatererLogin extends Component {
 
   render() {
 
-    const { isMobile } = this.state;
+    const { isMobile, invalidUser } = this.state;
   
     return (
       <div
@@ -176,6 +185,7 @@ class CatererLogin extends Component {
                           autoComplete="current-password"
                         />
                       </InputGroup>
+                      {invalidUser ? <Label style={{color: 'red', marginBottom: 20, fontSize: 13}}>Invalid email / password</Label> : null }
                       <Row>
                         <Col xs="6" md="6">
                           <Button

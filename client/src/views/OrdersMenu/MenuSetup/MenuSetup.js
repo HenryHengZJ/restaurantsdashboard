@@ -79,18 +79,20 @@ class MenuSetup extends Component {
     );
 
     this.myRef = React.createRef()   // Create a ref object 
+    this.inputOpenFileRef = React.createRef()
 
     this.state = {
       isMobile: false,
+      file: '',
+      imagePreviewUrl: '',
       activeTab: "Appetizer",
       menutitle: [
         "Appetizer",
         "Breakfast",
         "Sandwiches",
         "Salads",
-        "Catering",
         "Entrees",
-        "Lunches",
+        "Main",
         "Pizza",
         "Sides",
         "Desserts",
@@ -472,7 +474,8 @@ class MenuSetup extends Component {
   }
 
   componentDidMount() {
-    this.restructureMenu();
+    //this.restructureMenu();
+    this.getCatererMenu();
 
     if (window.innerWidth < 450) {
       this.setState({
@@ -489,6 +492,27 @@ class MenuSetup extends Component {
       },
       false
     );
+  }
+
+  getCatererMenu= () => {
+    var headers = {
+      'Content-Type': 'application/json',
+    }
+
+    var url = apis.GETmenu;
+
+    axios.get(url, {withCredentials: true}, {headers: headers})
+      .then((response) => {
+        if (response.status === 200) {
+          this.setState({
+            fetchedmenu: response.data,
+          },() => {
+            this.restructureMenu();
+          })
+        } 
+      })
+      .catch((error) => {
+      });
   }
 
   restructureMenu = () => {
@@ -575,7 +599,9 @@ class MenuSetup extends Component {
   toggleNewItemModal() {
     this.setState({
       menuModalOpen: !this.state.menuModalOpen,
-      updateItem: false
+      updateItem: false,
+      file: "",
+      imagePreviewUrl: ""
     });
   }
 
@@ -601,9 +627,9 @@ class MenuSetup extends Component {
     });
   };
 
-  menuItemClicked = id => {
+  menuItemClicked = _id => {
 
-    var _id = ""
+    //var _id = ""
 
     /*var data = {
       title: "Hot Dog",
@@ -713,7 +739,11 @@ class MenuSetup extends Component {
           selectedMarkItemAs:
             typeof this.state.fetchedmenu[itemindex].markitem == "undefined"
               ? []
-              : this.state.fetchedmenu[itemindex].markitem
+              : this.state.fetchedmenu[itemindex].markitem,
+          imagePreviewUrl: 
+            typeof this.state.fetchedmenu[itemindex].src == "undefined"
+              ? ""
+              : this.state.fetchedmenu[itemindex].src,
         },
         () => {this.clearFormFeedback()}
       );
@@ -735,7 +765,7 @@ class MenuSetup extends Component {
         selectedCategoryName: categoryname,
         selectedCategoryTag: menutitle,
         selectedItemSelection: [],
-        selectedMarkItemAs:[]
+        selectedMarkItemAs:[],
       }, () => {this.clearFormFeedback()}
     )
   }
@@ -1038,6 +1068,30 @@ class MenuSetup extends Component {
   };
 
   //Handle Input Change//////////////////////////////////////////////////////////////////////
+
+  
+  handleImageChange(e) {
+    e.preventDefault();
+
+    let reader = new FileReader();
+    let file = e.target.files[0];
+
+    reader.onloadend = () => {
+      this.setState({
+        file: file,
+        imagePreviewUrl: reader.result
+      });
+    }
+
+    reader.readAsDataURL(file)
+  }
+
+  removePhoto = () => {
+    this.setState({
+      file: "",
+      imagePreviewUrl: ""
+    });
+  }
 
   handleCheckBoxChange = (e, markeditem) => {
     var selectedMarkItemAs = this.state.selectedMarkItemAs.slice();
@@ -1516,9 +1570,45 @@ class MenuSetup extends Component {
     var selectedItemSelection = this.state.selectedItemSelection;
     var selectedMarkItemAs = this.state.selectedMarkItemAs;
     var selectedDishType = this.state.selectedDishType;
+    const { imagePreviewUrl } = this.state;
+  
     return (
       <Collapse isOpen={selectedDishType == "" ? false : true}>
         <Form action="" method="post" className="form-horizontal">
+          <FormGroup>
+            <Label style={{fontWeight: '600', color: 'black'}}>Image</Label>
+            <div>
+              <input
+                id="fileInput"
+                type="file"
+                ref={this.inputOpenFileRef}
+                onChange={(e)=>this.handleImageChange(e)}
+              />
+            </div>
+            {imagePreviewUrl === "" ?
+            <div onClick={() => this.inputOpenFileRef.current.click()} style={{ cursor:'pointer', marginTop:20, width: "100%", height: 200, display:'flex', alignItems: 'center', backgroundColor: 'rgba(211,211,211,0.7)'}}>
+                <img
+                style={{ margin: 'auto', objectFit: "cover", width: 70, height: 70 }}
+                src={"https://cdn4.iconfinder.com/data/icons/social-communication/142/add_photo-512.png"}
+              />
+              </div>
+              :
+            <img
+              style={{cursor:'pointer', marginTop:20, objectFit: "cover", width: "100%", height: 200 }}
+              onClick={() => this.inputOpenFileRef.current.click()}
+              src={imagePreviewUrl !== "" ? imagePreviewUrl : "https://cdn4.iconfinder.com/data/icons/social-communication/142/add_photo-512.png"}
+            />
+              }
+            {imagePreviewUrl !== "" ?<Button
+              style={{ borderRadius: 0, opacity: 0.9 }}
+              color="danger"
+              block
+              onClick={() => this.removePhoto()}
+            >
+              Remove
+            </Button> : null }
+            <FormFeedback>Please input only jpg / png format</FormFeedback>
+          </FormGroup>
           <FormGroup row>
             <Col md="3">
               <h6>Title</h6>

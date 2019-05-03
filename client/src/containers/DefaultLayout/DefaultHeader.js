@@ -2,6 +2,8 @@ import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
 import { Badge, DropdownItem, DropdownMenu, DropdownToggle, Nav, NavItem, NavLink, Label } from 'reactstrap';
 import PropTypes from 'prop-types';
+import axios from 'axios';
+import apis from "../../apis";
 
 import { AppAsideToggler, AppHeaderDropdown, AppNavbarBrand, AppSidebarToggler } from '@coreui/react';
 
@@ -12,6 +14,37 @@ const propTypes = {
 const defaultProps = {};
 
 class DefaultHeader extends Component {
+
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      catererName: "",
+      profilesrc: "",
+    };
+  }
+
+  componentDidMount() {
+
+    var headers = {
+      'Content-Type': 'application/json',
+    }
+
+    var url = apis.GETcaterer;
+
+    axios.get(url, {withCredentials: true}, {headers: headers})
+      .then((response) => {
+        if (response.status === 200) {
+          this.setState({
+            catererName: typeof response.data[0].catererName !== 'undefined' ? response.data[0].catererName : "",
+            profilesrc: typeof response.data[0].profilesrc !== 'undefined' ? response.data[0].profilesrc : "",
+          })
+        } 
+      })
+      .catch((error) => {
+      });
+  }
+
   render() {
 
     // eslint-disable-next-line
@@ -33,12 +66,12 @@ class DefaultHeader extends Component {
           </NavItem>
 
           <NavItem className="d-md-down-none">
-            <Label style={{marginTop: 5, marginLeft: 10, marginRight: 10}} className="h5">Flannery Restaurant</Label>
+            <Label style={{marginTop: 5, marginLeft: 10, marginRight: 10}} className="h5">{this.state.catererName}</Label>
           </NavItem>
           
           <AppHeaderDropdown style={{marginRight: 20}} direction="down">
             <DropdownToggle nav>
-              <img src={'https://www.brandcrowd.com/gallery/brands/pictures/picture14867764381797.png'} className="img-avatar" alt="admin@bootstrapmaster.com" />
+              <img src={this.state.profilesrc} className="img-avatar" alt="admin@bootstrapmaster.com" />
               <i className="fa fa-chevron-down fa-1x" />
             </DropdownToggle>
             <DropdownMenu right style={{ right: 'auto' }}>

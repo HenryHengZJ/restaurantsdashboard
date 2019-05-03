@@ -33,6 +33,8 @@ import moment from "moment";
 import { format, addDays, subDays } from 'date-fns';
 import "./Dashboard.css";
 import StarRatingComponent from "react-star-rating-component";
+import axios from 'axios';
+import apis from "../../apis";
 
 const ratingicon = require('../../assets/img/star.png');
 
@@ -183,9 +185,14 @@ class Dashboard extends Component {
           time: "1 month ago",
           rating: 5,
         },
-      ]
+      ],
+      catererName: "",
+      profilesrc: "",
+      coversrc: "",
+      catererAddress: "",
+      rating: null,
+      numofreview: null,
     };
-
   }
 
   componentDidMount() {
@@ -207,6 +214,28 @@ class Dashboard extends Component {
       line: newline,
       bar: newbar,
     });
+
+    var headers = {
+      'Content-Type': 'application/json',
+    }
+
+    var url = apis.GETcaterer;
+
+    axios.get(url, {withCredentials: true}, {headers: headers})
+      .then((response) => {
+        if (response.status === 200) {
+          this.setState({
+            catererName: typeof response.data[0].catererName !== 'undefined' ? response.data[0].catererName : "",
+            profilesrc: typeof response.data[0].profilesrc !== 'undefined' ? response.data[0].profilesrc : "",
+            coversrc: typeof response.data[0].coversrc !== 'undefined' ? response.data[0].coversrc : "https://stmed.net/sites/default/files/food-wallpapers-28249-101905.jpg",
+            catererAddress: typeof response.data[0].catererAddress !== 'undefined' ? response.data[0].catererAddress : "",
+            rating: typeof response.data[0].rating !== 'undefined' ? response.data[0].rating : 0,
+            numofreview: typeof response.data[0].numofreview !== 'undefined' ? response.data[0].numofreview : 0,
+          })
+        } 
+      })
+      .catch((error) => {
+      });
   }
 
   getIntervalDates = (startDate, stopDate) => {
@@ -403,7 +432,7 @@ class Dashboard extends Component {
     return (
       <div className="animated fadeIn">
 
-        <img style={ { objectFit:'cover', width: '100%', height: 300 }} src={'https://www.pentneyabbey.com/wp-content/uploads/2016/04/wedding-canapes-wedding-food-trends.jpg'}  />
+        <img style={ { objectFit:'cover', width: '100%', height: 300 }} src={this.state.coversrc}  />
 
         <div className="container">
           <Col xs="0" sm="1" md="3" lg="3" />
@@ -412,8 +441,12 @@ class Dashboard extends Component {
 
             <Card onMouseEnter={() => this.toggle('profileEdit')} onMouseLeave={() => this.toggle('profileEdit')} style={{ textAlign: "center", marginTop: -250 }} >
               <CardBody>
-                <img style={ { objectFit:'cover', width: 80, height: 80 }} src={'https://www.brandcrowd.com/gallery/brands/pictures/picture14867764381797.png'}  />
-                <Label style={ { marginLeft: 10 }} className="h4">Flannery Restaurant</Label>
+              
+                <div style={{width: 80, height: 80, position: 'relative', margin: 'auto', overflow: 'hidden', borderRadius: '50%'}}>
+                  <img style={{ objectFit:'cover', width: 'auto', height: '100%', display: 'inline' }} src={this.state.profilesrc}/>
+                </div>
+              
+                <Label style={{ marginTop:10, marginLeft: 10 }} className="h4">{this.state.catererName}</Label>
                 {this.state.profileEdit ?
                 <a
                   style={{position: 'absolute', right: 20, top:20, cursor: 'pointer', opacity: 0.6}} 
@@ -428,16 +461,22 @@ class Dashboard extends Component {
                     emptyStarColor="#D3D3D3"
                     starCount={5}
                     editing={false}
-                    value={4.7}
+                    value={this.state.rating}
                   />
-                  <b style={{ marginLeft: 5, color: "darkorange" }}>4.7</b>
-                  <Label style={{ fontWeight: '500', marginLeft: 5, color: "darkorange" }}>
-                    (150) Reviews
-                  </Label>
+                  {this.state.rating === 0 ? null : <b style={{ marginLeft: 5, color: "darkorange" }}>4.7</b> }
+                  {this.state.numofreview === 0 ? 
+                    <Label style={{ fontWeight: '500', marginLeft: 5, color: "darkorange" }}>
+                      No Ratings Yet
+                    </Label> 
+                    :
+                    <Label style={{ fontWeight: '500', marginLeft: 5, color: "darkorange" }}>
+                      ({this.state.numofreview}) Reviews
+                    </Label> 
+                  }
                 </Row>
 
                 <Label style={{ marginTop: 10 }} className="h6">
-                  30, O'Connell St, Dublin, Ireland
+                  {this.state.catererAddress}
                 </Label>
 
               </CardBody>

@@ -38,12 +38,14 @@ var myLocalConfig = (passport) => {
 				// if no caterer is found, return the message
 				if (!caterer)
 				{
+					console.log('no user')
 					return done(null, false);
 				}
 					
 				// check caterer's password
 				if (!caterer.validPassword(password))
 				{
+					console.log('no pw')
 					return done(null, false);
 				}
 					
