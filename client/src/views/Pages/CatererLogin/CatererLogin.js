@@ -14,6 +14,7 @@ class CatererLogin extends Component {
 
     this.handleEmailChange = this.handleEmailChange.bind(this);
     this.handlePasswordChange = this.handlePasswordChange.bind(this);
+    this.enterPressed = this.enterPressed.bind(this)
 
     this.state = {
       useremail: "",
@@ -48,6 +49,13 @@ class CatererLogin extends Component {
   handlePasswordChange(e) {
     this.setState({ userpassword: e.target.value, invalidUser: false });
   }
+
+  enterPressed(event) {
+    var code = event.keyCode || event.which;
+    if(code === 13) { //13 is the enter keycode
+       this.login(event)
+    } 
+}
 
   login = e => {
     e.preventDefault();
@@ -162,6 +170,7 @@ class CatererLogin extends Component {
                           type="text"
                           placeholder="Email"
                           autoComplete="email"
+                          onKeyPress={this.enterPressed.bind(this)}
                         />
                       </InputGroup>
                       <InputGroup className="mb-4">
@@ -183,6 +192,7 @@ class CatererLogin extends Component {
                           type="password"
                           placeholder="Password"
                           autoComplete="current-password"
+                          onKeyPress={this.enterPressed.bind(this)}
                         />
                       </InputGroup>
                       {invalidUser ? <Label style={{color: 'red', marginBottom: 20, fontSize: 13}}>Invalid email / password</Label> : null }

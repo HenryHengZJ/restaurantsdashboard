@@ -1063,6 +1063,7 @@ class NameAddress extends Component {
             catererName: typeof response.data[0].catererName !== 'undefined' ? response.data[0].catererName : "",
             catererPhoneNumber: typeof response.data[0].catererPhoneNumber !== 'undefined' ? response.data[0].catererPhoneNumber : "",
             catererStreet: typeof response.data[0].catererAddress !== 'undefined' ? response.data[0].catererAddress : "",
+            catererCounty: typeof response.data[0].catererCounty !== 'undefined' ? response.data[0].catererCounty : "",
             catererPostalCode: typeof response.data[0].catererPostalCode !== 'undefined' ? response.data[0].catererPostalCode : "",
             catererCity: typeof response.data[0].catererCity !== 'undefined' ? response.data[0].catererCity : "",
             catererCountry: typeof response.data[0].catererCountry !== 'undefined' ? response.data[0].catererCountry : ""
@@ -1163,31 +1164,33 @@ class NameAddress extends Component {
 
     const {catererName, catererPhoneNumber, catererStreet, catererCity, catererCounty, catererCountry, catererPostalCode, _id} = this.state
 
-    var phoneNumber;
-    var fulladdress;
-
-    //Phone number format
-    var countrycode = catererCountry.split("+")[1];
-    var firstchar = catererPhoneNumber.charAt(0);
-    if (firstchar === '0') {
-      phoneNumber = catererPhoneNumber.slice( 1 );
-    }
-    else {
-      phoneNumber = catererPhoneNumber.slice();
-    }
-    phoneNumber = '+' + countrycode + phoneNumber
+    var fulladdress = "";
 
     //Full address format
-    fulladdress = catererStreet + ', ' + catererCity + ', ' + catererCounty + ', ' + catererPostalCode + ', ' + catererCountry.split("+")[0];
+    var postalcode = "";
+    if (catererPostalCode !== "") {
+      postalcode = ', ' + catererPostalCode
+    }
+
+    fulladdress = catererStreet + ', ' + catererCity + ', ' + catererCounty + postalcode + ', ' + catererCountry;
+    
+    //Find Country Code
+    var catererCountryCode = "";
+    var itemindex = this.CountryData.findIndex(x => x.value === catererCountry);
+    if (itemindex > 0) {
+      catererCountryCode =  this.CountryData[itemindex].code
+    }
     
     //Data to be saved
     var data = {
       catererName: catererName,
-      catererPhoneNumber: phoneNumber,
-      catererAddress: fulladdress,
+      catererPhoneNumber: catererPhoneNumber,
+      catererAddress: catererStreet,
+      catererFullAddress: fulladdress,
       catererCity: catererCity,
       catererCounty: catererCounty,
-      catererCountry: catererCountry.split("+")[0]
+      catererCountry: catererCountry,
+      catererCountryCode: catererCountryCode,
     }
    // alert(JSON.stringify(data))
 
@@ -1280,7 +1283,7 @@ class NameAddress extends Component {
                   <Input value={this.state.catererCountry} onChange={(e) => this.handleRestaurantCountry(e)} style={{color: this.state.catererCountry == "" ? 'grey': 'black'}} type="select" name="select" id="select" invalid={isCountryEmpty ? true : false}>
                   <option value='' disabled>Select Country</option>
                   {this.CountryData.map(country =>
-                    <option style={{color:'black'}} key={country.value} value={country.value+""+country.code}>{country.value} {country.code}</option>
+                    <option style={{color:'black'}} key={country.value} value={country.value}>{country.value} {country.code}</option>
                   )}
                   </Input>
                 </FormGroup>
