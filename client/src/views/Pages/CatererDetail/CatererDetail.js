@@ -456,7 +456,7 @@ class CatererDetail extends Component {
       restaurantInfo: {
         name: "Flannery Restaurant & Pub",
         profileimg: "https://www.psdgraphics.com/wp-content/uploads/2016/08/restaurant-logo.png",
-        coverimg: "http://www.fedracongressi.com/fedra/wp-content/uploads/2016/09/minisandwich.jpg",
+        coverimg: "https://scm-assets.constant.co/scm/unilever/a6798e909fa57bfd19c3e7f00737e5d6/3905c3ca-155c-4227-ae0e-6db615ae7856.jpg",
         descrip: "Specialized in American Burger style mealset. Our American subs are our specialty, and our Special Grileld with spiced capicola and prosciuttini is the number one customer favorite. Our portions won't leave your stomachs rumbling, and our flavors always go down easy.",
         address: "30, O'Connell St, Dublin, Ireland",
         rating: "4.7",
