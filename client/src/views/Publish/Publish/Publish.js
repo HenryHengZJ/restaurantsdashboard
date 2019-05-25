@@ -72,6 +72,7 @@ class Publish extends Component {
                       onClick={() => this.publish()}
                       color="success"
                       className="float-center"
+                      disabled
                     >
                       <i className="fa fa-rocket fa-1x" aria-hidden="true" />
                       &nbsp; Publish

@@ -35,11 +35,6 @@ export default {
           url: '/caterer/basics/occasion',
           icon: '',
         },
-        {
-          name: 'Account Confirmation',
-          url: '/caterer/basics/validateemail',
-          icon: '',
-        },
       ]
     },
     {

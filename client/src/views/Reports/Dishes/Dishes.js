@@ -28,6 +28,8 @@ import 'react-date-range/dist/theme/default.css'; // theme css file
 import { DateRangePicker, DateRange } from 'react-date-range';
 import { format, addDays, subDays } from 'date-fns';
 import StarRatings from 'react-star-ratings';
+import axios from 'axios';
+import apis from "../../../apis";
 
 const options = {
   tooltips: {
@@ -66,32 +68,8 @@ class Dishes extends Component {
         },
       },
       dateRange: '',
-      topsellingitems: [
-        {
-          itemtitle: 'Sandwich Combo',
-          orderquantity: 108,
-        },
-        {
-          itemtitle: 'Bagel Tray',
-          orderquantity: 87,
-        },
-        {
-          itemtitle: 'Traditional Irish Breakfast',
-          orderquantity: 76,
-        },
-        {
-          itemtitle: 'Chicken Parmigiano',
-          orderquantity: 65,
-        },
-        {
-          itemtitle: 'Lasagna',
-          orderquantity: 54,
-        },
-        {
-          itemtitle: 'Meatball & Cheese Sub',
-          orderquantity: 27,
-        },
-      ],
+      fetchedmenu: [],
+      menuitems: [],
     };
   }
 
@@ -110,7 +88,72 @@ class Dishes extends Component {
       previousDate: previousDate,
       dateRange: finalSelectionDate,
     });
+
+    this.getCatererMenu()
   }
+
+  getCatererMenu= () => {
+    var headers = {
+      'Content-Type': 'application/json',
+    }
+
+    var url = apis.GETmenu;
+
+    axios.get(url, {withCredentials: true}, {headers: headers})
+      .then((response) => {
+        if (response.status === 200) {
+          this.setState({
+            fetchedmenu: response.data,
+          },() => {
+            this.restructureMenu();
+          })
+        } 
+      })
+      .catch((error) => {
+        this.setState({
+          loading: false
+        })
+      });
+  }
+
+  restructureMenu = () => {
+    var finalresult = [];
+
+    var result = this.state.fetchedmenu.reduce(function(r, a) {
+      r[a.categorytag] = r[a.categorytag] || [];
+      r[a.categorytag].push(a);
+      return r;
+    }, Object.create(null));
+
+    for (var key in result) {
+      var result2 = result[key].reduce(function(r, a) {
+        r[a.categoryname] = r[a.categoryname] || [];
+        r[a.categoryname].push(a);
+        return r;
+      }, Object.create(null));
+
+      var parentObject = {
+        menutitle: key,
+        menuitem: []
+      };
+
+      for (var key2 in result2) {
+        var childObject = {
+          categoryname: key2,
+          items: result2[key2]
+        };
+        parentObject["menuitem"].push(childObject);
+      }
+
+      finalresult.push(parentObject);
+    }
+
+    this.setState({
+      menuitems: finalresult,
+      loading: false,
+    })
+  };
+
 
   toggleDropDown = () => {
     this.setState({
@@ -181,32 +224,82 @@ class Dishes extends Component {
     );
   }
 
-  renderMenuBarChart() {
+  renderMenuItems() {
+    
+    var menuitems = this.state.menuitems
 
-    var topsellingitems = this.state.topsellingitems
+    var itemarray = [];
+
+    for(let i = 0; i < menuitems.length; i++){
+
+      itemarray.push(
+        <div >
+          <div >
+            <p style={{fontWeight: '600', color: "black", fontSize: 17, paddingTop: i === 0 ? 0 : 20}}>
+              {menuitems[i].menutitle}
+            </p>
+          </div>
+          {this.renderCategoryMenu(menuitems[i].menuitem)}
+        </div>
+      )
+    } 
+
+    return(
+      <div>
+        {itemarray}
+      </div>
+    )
+  }
+
+  renderCategoryMenu(menuitem) {
+ 
+    var itemarray = [];
+
+    for(let x = 0; x < menuitem.length; x++){
+      itemarray.push(
+        <div>
+          <div >
+            <p style={{fontWeight: '600', color: "#20a8d8", fontSize: 15,  paddingTop: 10}}>
+              {menuitem[x].categoryname}
+            </p>
+          </div>
+          {this.renderMenuBarChart(menuitem[x].items)}
+        </div>
+      )
+    }
+
+    return(
+      <div> 
+        {itemarray}
+      </div>
+    )
+  }
+
+  renderMenuBarChart(items) {
+
     var itemarray = [];
     var barColor;
 
-    for(let i = 0; i < topsellingitems.length; i++){
-      if (topsellingitems[i].orderquantity > 70) {
+    for(let i = 0; i < items.length; i++){
+      if (items[i].soldamount > 70) {
         barColor = "success"
       }
-      else if (topsellingitems[i].orderquantity <= 70 && topsellingitems[i].orderquantity > 30) {
+      else if (items[i].soldamount <= 70 && items[i].soldamount > 30) {
         barColor = "warning"
       }
-      else if (topsellingitems[i].orderquantity <= 30 && topsellingitems[i].orderquantity > 0) {
+      else if (items[i].soldamount <= 30 && items[i].soldamount > 0) {
         barColor = "danger"
       }
       itemarray.push(
         <div className="progress-group mb-4">
           <div className="progress-group-header">
             <p >
-              {topsellingitems[i].itemtitle}
+              {items[i].title}
             </p>
-            <p className="ml-auto font-weight-bold">{topsellingitems[i].orderquantity}</p>
+            <p style={{paddingRight: 20, fontSize: 17, fontWeight: '600'}} className="ml-auto">{items[i].soldamount}</p>
           </div>
           <div className="progress-group-bars">
-            <Progress className="progress-xs" color={barColor} value={topsellingitems[i].orderquantity} />
+            <Progress className="progress-xs" color={barColor} value={items[i].soldamount} />
           </div>
         </div>
       )
@@ -219,49 +312,32 @@ class Dishes extends Component {
     )
   }
 
-  renderTableItems() {
-    var itemarray = [];
-
-    var tableitems = this.state.Dishes;
-
-    for (let i = 0; i < tableitems.length; i++) {
-      itemarray.push(
-        <tr>
-          <td style={{width: '10%'}}>{tableitems[i].name}</td>
-          <td style={{width: '15%'}}>{tableitems[i].location}</td>
-          <td style={{width: '15%'}}>
-            <StarRatings
-              starRatedColor='orange'
-              starSpacing='0px'
-              starDimension='15px'
-              rating={tableitems[i].rating}
-              numberOfStars={5}
-              name='rating'
-            />
-          </td>
-          <td style={{width: '45%'}}>{tableitems[i].comment}</td>
-          <td style={{width: '15%'}}>{tableitems[i].time}</td>
-        </tr>
-      );
-    }
-
-    return <tbody>{itemarray}</tbody>;
-  }
-
-  renderReviewTable() {
+  renderEmptyItems() {
     return (
-      <Table striped responsive>
-        <thead>
-          <tr>
-            <th>Name</th>
-            <th>Location</th>
-            <th>Rating</th>
-            <th>Comment</th>
-            <th>Time</th>
-          </tr>
-        </thead>
-        {this.renderTableItems()}
-      </Table>
+      <Row style={{ marginTop: 90 }}>
+        <Col style={{ textAlign: "center" }} xs="12">
+          <img
+            style={{
+              objectFit: "cover",
+              width: 70,
+              height: 70,
+              opacity: 0.6
+            }}
+            alt={""}
+            src={
+              "https://s3-eu-west-1.amazonaws.com/foodiebeegeneralphoto/empty.png"
+            }
+          />
+        </Col>
+        <Col style={{ textAlign: "center" }} xs="12">
+          <p
+            style={{ fontSize: 18, letterSpacing: 2, marginTop: 30 }}
+            className="big"
+          >
+            You have 0 dishes for now.
+          </p>
+        </Col>
+      </Row>
     );
   }
 
@@ -283,37 +359,9 @@ class Dishes extends Component {
               </CardHeader>
               <CardBody>
                 <div class="table-wrapper-scroll-y my-custom-scrollbar">
-                  {this.renderMenuBarChart()}
+                  {this.state.fetchedmenu.length > 0 ? this.renderMenuItems() : this.renderEmptyItems()}
                 </div>
-                <UncontrolledDropdown style={{marginTop: 10}} isOpen={this.state.dropDownDate}  toggle={() => this.toggleDropDown()}>
-                  <DropdownToggle
-                    style={{
-                      color: "#fff",
-                      borderColor: "#fff",
-                      backgroundColor: "#20a8d8"
-                    }}
-                    caret
-                  >
-                    {this.state.dateRange}
-                  </DropdownToggle>
-                  <DropdownMenu>
-                    <div >
-                      <DateRange
-                         onChange={this.handleRangeChange.bind(this, 'dateRangePicker')}
-                         showSelectionPreview={true}
-                         moveRangeOnFirstSelection={false}
-                         className={'PreviewArea'}
-                         months={1}
-                         ranges={[this.state.dateRangePicker.selection]}
-                         direction="horizontal"
-                         maxDate={this.state.maxDate}
-                      />
-                    </div>
-                     <div className="float-right">
-                      {this.renderDateAction()}     
-                     </div>
-                  </DropdownMenu>
-                </UncontrolledDropdown>
+                
               </CardBody>
             </Card>
           </Col>

@@ -14,6 +14,16 @@ const DefaultLayout = Loadable({
 
 // Pages
 
+const ForgotPassword = Loadable({
+  loader: () => import('./views/Pages/ForgotPassword'),
+  loading
+});
+
+const ResetPassword = Loadable({
+  loader: () => import('./views/Pages/ResetPassword'),
+  loading
+});
+
 const CatererLogin = Loadable({
   loader: () => import('./views/Pages/CatererLogin'),
   loading
@@ -73,6 +83,8 @@ class App extends Component {
     return (
       <HashRouter>
           <Switch>
+            <Route exact path="/forgotpassword" name="Forgot Password" component={ForgotPassword} />
+            <Route exact path="/resetpassword/:resetlink" name="Reset Password" component={ResetPassword} />
             <Route exact path="/deliveryconfirmation" name="Delivery Confirmation" component={DeliveryConfirmation} />
             <Route exact path="/catererdetail" name="Caterer Detail" component={CatererDetail} />
             <Route exact path="/searchcaterer" name="Search Caterer" component={SearchCaterer} />
@@ -81,7 +93,6 @@ class App extends Component {
             <Route exact path="/404" name="Page 404" component={Page404} />
             <Route exact path="/500" name="Page 500" component={Page500} />
             <Route path="/caterer" name="Caterer Dashboard" component={DefaultLayout} />
-            
             <Route path="/" name="CatererLogin" component={CatererLogin} />
           </Switch>
       </HashRouter>

@@ -36,8 +36,8 @@ class DefaultHeader extends Component {
       .then((response) => {
         if (response.status === 200) {
           this.setState({
-            catererName: typeof response.data[0].catererName !== 'undefined' ? response.data[0].catererName : "",
-            profilesrc: typeof response.data[0].profilesrc !== 'undefined' ? response.data[0].profilesrc : "",
+            catererName: typeof response.data[0].catererName !== 'undefined' ? response.data[0].catererName : "Restaurant",
+            profilesrc: typeof response.data[0].profilesrc !== 'undefined' ? response.data[0].profilesrc : "https://s3-eu-west-1.amazonaws.com/foodiebeegeneralphoto/user_default.png",
           })
         } 
       })
@@ -71,14 +71,14 @@ class DefaultHeader extends Component {
           
           <AppHeaderDropdown style={{marginRight: 20}} direction="down">
             <DropdownToggle nav>
-              <img src={this.state.profilesrc} className="img-avatar" alt="admin@bootstrapmaster.com" />
+              <img style={{width: 40, height: 40, position: 'relative', overflow: 'hidden', borderRadius: '50%'}} src={this.state.profilesrc} className="img-avatar" alt="" />
               <i className="fa fa-chevron-down fa-1x" />
             </DropdownToggle>
             <DropdownMenu right style={{ right: 'auto' }}>
               <DropdownItem onClick={e => this.props.onProfileClicked(e)}><i className="fa fa-user"></i> Profile</DropdownItem>
-              <DropdownItem><i className="fa fa-usd"></i> Billings</DropdownItem>
-              <DropdownItem><i className="fa fa-shield"></i> Terms & Conditions</DropdownItem>
-              <DropdownItem onClick={e => this.props.onLogout(e)}><i className="fa fa-lock"></i> Logout</DropdownItem>
+              <DropdownItem onClick={e => this.props.onTermsConditionClicked(e)}><i className="fa fa-shield"></i> Terms & Conditions</DropdownItem>
+              <DropdownItem onClick={e => this.props.onPrivacyPolicyClicked(e)}><i className="fa fa-lock"></i> Privacy Policy</DropdownItem>
+              <DropdownItem onClick={e => this.props.onLogout(e)}><i className="fa fa-sign-out"></i> Logout</DropdownItem>
             </DropdownMenu>
           </AppHeaderDropdown>
         </Nav>

@@ -43,7 +43,15 @@ class NameAddress extends Component {
     this.handleRestaurantPostalCode = this.handleRestaurantPostalCode.bind(this);
     this.handleRestaurantCountry = this.handleRestaurantCountry.bind(this);
     this.handleSave = this.handleSave.bind(this);
+
+    this.inputCoverOpenFileRef = React.createRef()
+    this.inputLogoOpenFileRef = React.createRef()
+
     this.state = {
+      logoFile: '',
+      logoPreviewUrl: '',
+      coverImageFile: '',
+      coverImagePreviewUrl: '',
       _id: "",
       catererName: "",
       isNameEmpty: false,
@@ -1066,7 +1074,11 @@ class NameAddress extends Component {
             catererCounty: typeof response.data[0].catererCounty !== 'undefined' ? response.data[0].catererCounty : "",
             catererPostalCode: typeof response.data[0].catererPostalCode !== 'undefined' ? response.data[0].catererPostalCode : "",
             catererCity: typeof response.data[0].catererCity !== 'undefined' ? response.data[0].catererCity : "",
-            catererCountry: typeof response.data[0].catererCountry !== 'undefined' ? response.data[0].catererCountry : ""
+            catererCountry: typeof response.data[0].catererCountry !== 'undefined' ? response.data[0].catererCountry : "",
+            logoPreviewUrl: typeof response.data[0].profilesrc !== 'undefined' ? response.data[0].profilesrc : "",
+            coverImagePreviewUrl: typeof response.data[0].coversrc !== 'undefined' ? response.data[0].coversrc : ""
+          }, () => {
+            this.checkAllInput()
           })
         } 
       })
@@ -1141,6 +1153,53 @@ class NameAddress extends Component {
     })
   }
 
+  handleLogoChange(e) {
+    e.preventDefault();
+
+    let reader = new FileReader();
+    let file = e.target.files[0];
+
+    reader.onloadend = () => {
+      this.setState({
+        logoFile: file,
+        logoPreviewUrl: reader.result
+      });
+    }
+
+    reader.readAsDataURL(file)
+  }
+
+  removeLogo = () => {
+    this.setState({
+      logoFile: "",
+      logoPreviewUrl: ""
+    });
+  }
+
+
+  handleCoverImageChange(e) {
+    e.preventDefault();
+
+    let reader = new FileReader();
+    let file = e.target.files[0];
+
+    reader.onloadend = () => {
+      this.setState({
+        coverImageFile: file,
+        coverImagePreviewUrl: reader.result
+      });
+    }
+
+    reader.readAsDataURL(file)
+  }
+
+  removeCoverPhoto = () => {
+    this.setState({
+      coverImageFile: "",
+      coverImagePreviewUrl: ""
+    });
+  }
+
   checkAllInput = () => {
     const {catererName, catererPhoneNumber, catererStreet, catererCity, catererCounty, catererCountry} = this.state
     if (catererName != "" && catererPhoneNumber != "" && catererStreet != "" && catererCity != "" && catererCounty != "" && catererCountry != "") {
@@ -1162,7 +1221,7 @@ class NameAddress extends Component {
       isSaving: true,
     })
 
-    const {catererName, catererPhoneNumber, catererStreet, catererCity, catererCounty, catererCountry, catererPostalCode, _id} = this.state
+    const {coverImageFile, logoFile, catererName, catererPhoneNumber, catererStreet, catererCity, catererCounty, catererCountry, catererPostalCode, _id} = this.state
 
     var fulladdress = "";
 
@@ -1182,7 +1241,26 @@ class NameAddress extends Component {
     }
     
     //Data to be saved
-    var data = {
+
+    let formData = new FormData();    //formdata object
+    formData.append('catererName', catererName);
+    formData.append('catererPhoneNumber', catererPhoneNumber);
+    formData.append('catererAddress', catererStreet);
+    formData.append('catererFullAddress', fulladdress);
+    formData.append('catererCity', catererCity);
+    formData.append('catererCounty', catererCounty);
+    formData.append('catererCountry', catererCountry);
+    formData.append('catererCountryCode', catererCountryCode);
+
+    if (coverImageFile !== "") {
+      formData.append('coverimgfiles', coverImageFile);
+    }
+
+    if (logoFile !== "") {
+      formData.append('logofiles', logoFile);
+    }
+
+    /*var data = {
       catererName: catererName,
       catererPhoneNumber: catererPhoneNumber,
       catererAddress: catererStreet,
@@ -1191,16 +1269,16 @@ class NameAddress extends Component {
       catererCounty: catererCounty,
       catererCountry: catererCountry,
       catererCountryCode: catererCountryCode,
-    }
+    }*/
    // alert(JSON.stringify(data))
 
     var headers = {
       'Content-Type': 'application/json',
     }
 
-    var url = apis.UPDATEcaterer;
+    var url = apis.UPDATEcaterernameaddress;
 
-    axios.put(url, data, {withCredentials: true}, {headers: headers})
+    axios.put(url, formData, {withCredentials: true}, {headers: headers})
       .then((response) => {
         if (response.status === 201) {
           toast(<SuccessInfo/>, {
@@ -1228,10 +1306,10 @@ class NameAddress extends Component {
   }
 
   render() {
-    const {isNameEmpty, isPhoneNumberEmpty, isStreetEmpty, isCityEmpty, isCountyEmpty, isCountryEmpty, isNextButtonActive, isProceedButtonVisible, isSaving, addressManual} = this.state
+    const {logoPreviewUrl, coverImagePreviewUrl, isNameEmpty, isPhoneNumberEmpty, isStreetEmpty, isCityEmpty, isCountyEmpty, isCountryEmpty, isNextButtonActive, isProceedButtonVisible, isSaving, addressManual} = this.state
 
     return (
-      <div className="animated fadeIn">
+      <div style={{marginBottom: 40}} className="animated fadeIn">
         <Row className="justify-content-center">
           <Col xs="12" md="6">
             <Card >
@@ -1239,6 +1317,35 @@ class NameAddress extends Component {
                 <strong>What's your business name & address?</strong>
               </CardHeader>
               <CardBody>
+                <FormGroup>
+                  <Label style={{color: 'black'}}>Restaurant Logo</Label>
+                  
+                  <div onClick={() => this.inputLogoOpenFileRef.current.click()} style={{ cursor:'pointer', width: 80, height: 80, position: 'relative', overflow: 'hidden', borderRadius: '50%'}}>
+                    <img 
+                      style={{ objectFit:'cover', width: 'auto', height: '100%', display: 'inline' }}
+                      src={logoPreviewUrl !== "" ? logoPreviewUrl : "https://s3-eu-west-1.amazonaws.com/foodiebeegeneralphoto/user_default.png"} />
+                  </div>
+                  
+                  {logoPreviewUrl !== "" ?
+                  <Button
+                    style={{ marginTop: 10, borderRadius: 0, opacity: 0.9 }}
+                    color="danger"
+                    onClick={() => this.removeLogo()}
+                  >
+                    Remove
+                  </Button> : null }
+
+                  <div style={{marginTop: 10}}>
+                    <input
+                      id="fileInput"
+                      type="file"
+                      ref={this.inputLogoOpenFileRef}
+                      onChange={(e)=>this.handleLogoChange(e)}
+                    />
+                  </div>
+                 
+                  <FormFeedback>Please input only jpg / png format</FormFeedback>
+                </FormGroup>
                 <FormGroup>
                   <Label htmlFor="company">Restaurant *</Label>
                   <Input style={{color: 'black'}} value={this.state.catererName} onChange={(e) => this.handleRestaurantNameChange(e)} type="text" id="company" placeholder="Enter your restaurant name" invalid={isNameEmpty ? true : false} />
@@ -1286,6 +1393,41 @@ class NameAddress extends Component {
                     <option style={{color:'black'}} key={country.value} value={country.value}>{country.value} {country.code}</option>
                   )}
                   </Input>
+                </FormGroup>
+
+                <FormGroup>
+                  <Label style={{color: 'black'}}>Cover Image</Label>
+                  <div>
+                    <input
+                      id="fileInput"
+                      type="file"
+                      ref={this.inputCoverOpenFileRef}
+                      onChange={(e)=>this.handleCoverImageChange(e)}
+                    />
+                  </div>
+                  {coverImagePreviewUrl === "" ?
+                  <div onClick={() => this.inputCoverOpenFileRef.current.click()} style={{ cursor:'pointer', marginTop:20, width: "100%", height: 200, display:'flex', alignItems: 'center', backgroundColor: 'rgba(211,211,211,0.7)'}}>
+                      <img
+                      style={{ margin: 'auto', objectFit: "cover", width: 70, height: 70 }}
+                      src={"https://cdn4.iconfinder.com/data/icons/social-communication/142/add_photo-512.png"}
+                    />
+                    </div>
+                    :
+                  <img
+                    style={{cursor:'pointer', marginTop:20, objectFit: "cover", width: "100%", height: 200 }}
+                    onClick={() => this.inputCoverOpenFileRef.current.click()}
+                    src={coverImagePreviewUrl !== "" ? coverImagePreviewUrl : "https://cdn4.iconfinder.com/data/icons/social-communication/142/add_photo-512.png"}
+                  />
+                    }
+                  {coverImagePreviewUrl !== "" ?<Button
+                    style={{ borderRadius: 0, opacity: 0.9 }}
+                    color="danger"
+                    block
+                    onClick={() => this.removeCoverPhoto()}
+                  >
+                    Remove
+                  </Button> : null }
+                  <FormFeedback>Please input only jpg / png format</FormFeedback>
                 </FormGroup>
 
                 <div className="form-actions">

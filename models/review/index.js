@@ -5,9 +5,11 @@ const ObjectId = Schema.Types.ObjectId
 
 // define the schema for our catererSchema model
 var reviewSchema = mongoose.Schema({
+	customerFirstName: String,
 	customerID: ObjectId,
-	comment: String,
-	rating: Number,
+	customerCity: String,
+	customerComment: String,
+	customerRating: Number,
 }, {
     timestamps: true
 });

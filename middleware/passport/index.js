@@ -28,7 +28,7 @@ var myLocalConfig = (passport) => {
 
 		// asynchronous
 		process.nextTick(function() {
-			Caterer.findOne({ 'catererEmail' :  email }, function(err, caterer) {
+			Caterer.findOne({ 'catererEmail' :  email, 'status': 'verified' }, function(err, caterer) {
 				// if there are any errors, return the error
 				if (err)
 				{

@@ -13,7 +13,8 @@ var openingHoursSchema = mongoose.Schema({
 // define the schema for our catererSchema model
 var catererSchema = mongoose.Schema({
 	catererEmail: String,
-	catererPassword: String,
+    catererPassword: String,
+    catererRegistrationNumber: String,
 	catererName: String,
     catererDescrip: String,
     catererPhoneNumber: String,
@@ -48,10 +49,16 @@ var catererSchema = mongoose.Schema({
     numofreview: Number,
     coversrc: String,
     profilesrc: String,
-    verified: {
-        type: Boolean,
-        default: false
-    }
+    status: {
+        type: String,
+        default: "new"
+    },
+    statusUpdated: {
+        type : Date, 
+        default: Date.now
+    },
+    resetPasswordToken: String,
+    resetPasswordExpires: Date
 }, {
     timestamps: true
 });
@@ -72,44 +79,6 @@ catererSchema.methods.generateJWT = function() {
     id: this._id,
   }, 'foodiebeecaterer', {expiresIn: '24h'} );
 }
-
-catererSchema.methods.toAuthJSON = function() {
-  return {
-    _id			 		: this._id,
-	catererEmail		: this.catererEmail,
-	catererPassword		: this.catererPassword,
-	catererName			: this.catererName,
-    catererDescrip		: this.catererDescrip,
-    catererPhoneNumber	: this.catererPhoneNumber,
-    catererAddress		: this.catererAddress,
-    catererFullAddress  : this.catererFullAddress,
-    catererCity			: this.catererCity,
-    catererCounty		: this.catererCounty,
-    catererCountry		: this.catererCountry,
-    catererCountryCode  : this.catererCountryCode,
-    catererCuisine		: this.catererCuisine,
-    catererOccasion		: this.catererOccasion,
-    catererDietaryConcern : this.catererDietaryConcern,
-    catererPickup		: this.catererPickup,
-	catererDelivery		: this.catererDelivery,
-	deliveryradius		: this.deliveryradius,
-    deliveryfee			: this.deliveryfee,
-	minimumspend		: this.minimumspend,
-	openinghours		: this.openinghours,
-	catererOrderLater	: this.catererOrderLater,
-	inAdvanceMin		: this.inAdvanceMin,
-	inAdvanceDay		: this.inAdvanceDay,
-    phoneReceivable     : this.phoneReceivable,
-    emailReceivable     : this.emailReceivable,
-    rating				: this.rating,
-    numofreview			: this.numofreview,
-    coversrc			: this.coversrc,
-    profilesrc          : this.profilesrc,
-    verified			: this.verified,
-	token		 		: this.generateJWT(),
-  };
-};
-
 
 //Connect to specific database
 const db = mongoose.connection.useDb('foodiebee');

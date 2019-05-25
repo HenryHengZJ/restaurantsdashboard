@@ -27,6 +27,8 @@ import 'react-date-range/dist/theme/default.css'; // theme css file
 import { DateRangePicker, DateRange } from 'react-date-range';
 import { format, addDays, subDays } from 'date-fns';
 import StarRatings from 'react-star-ratings';
+import axios from 'axios';
+import apis from "../../../apis";
 
 const options = {
   tooltips: {
@@ -51,6 +53,7 @@ class Review extends Component {
     this.selectDateRange = this.selectDateRange.bind(this)
 
     this.state = {
+      empty: false,
       maxDate: null,
       currentDate: null,
       previousDate: null,
@@ -65,44 +68,32 @@ class Review extends Component {
         },
       },
       dateRange: '',
-      review: [
-        {
-          name: "Kieran",
-          location: 'Limerick, Ireland',
-          comment: "Everyone was very happy. Hearty sandwiches. Very nice dessert sandwiches",
-          time: "5 days ago",
-          rating: 5,
-        },
-        {
-          name: "Qiana",
-          location: 'Dublin, Ireland',
-          comment: "The food smelled pretty good and staff seemed excited because they eat there on their own time. The only downside is they delivered 45 mins. early, which is better than being late. I guess it didn't matter much since we did sandwiches and not something that would be bad if it got cold (i.e., pasta or other hot entree).",
-          time: "7 days ago",
-          rating: 4,
-        },
-        {
-          name: "Aldo",
-          location: 'Limerick, Ireland',
-          comment: "Food is on time, great experience, food is delicious",
-          time: "8 days ago",
-          rating: 5,
-        },
-        {
-          name: "Connie",
-          location: 'Limerick, Ireland',
-          comment: "The food was delicious and the presentation looked great. Perfect portions. We will order again!",
-          time: "15 days ago",
-          rating: 4,
-        },
-        {
-          name: "Chandra",
-          location: 'Limerick, Ireland',
-          comment: "First time ordering from Italian Gourmet for this group. Everything was a big hit--even though they were a bit early.",
-          time: "1 month ago",
-          rating: 5,
-        },
-      ],
+      dateArray: [],
+      tableitems: [],
     };
+  }
+
+  getLocalStorage = () => {
+
+    var maxDate = moment().toDate();
+
+    var currentDate = moment(sessionStorage.getItem("currentReviewDateString"), 'DD MMM, YYYY').toDate()
+    var previousDate = moment(sessionStorage.getItem("previousReviewDateString"), 'DD MMM, YYYY').toDate()
+
+    var currentDateString = moment(currentDate).format("DD MMM, YYYY")
+    var previousDateString = moment(previousDate).format("DD MMM, YYYY")
+    var finalSelectionDate = previousDateString + ' - ' + currentDateString
+    var finalDateArray = this.getIntervalDates(currentDate, previousDate).reverse();
+
+    this.setState({
+      maxDate: maxDate,
+      currentDate: currentDate,
+      previousDate: previousDate,
+      dateRange: finalSelectionDate,
+      dateArray: finalDateArray,
+    }, () => {
+      this.getReview(currentDateString, previousDateString)
+    })
   }
 
   componentDidMount() {
@@ -119,7 +110,34 @@ class Review extends Component {
       currentDate: currentDate,
       previousDate: previousDate,
       dateRange: finalSelectionDate,
-    });
+      dateArray: finalDateArray,
+    }, () => {
+      this.getReview(currentDateString, previousDateString)
+    })
+  }
+
+  getReview = (currentDateString, previousDateString) => {
+  
+    var headers = {
+      'Content-Type': 'application/json',
+    }
+
+    var url = apis.GETreview + "?lteDate=" + currentDateString + "&gteDate=" + previousDateString;
+
+    axios.get(url, {withCredentials: true}, {headers: headers})
+      .then((response) => {
+        if (response.status === 200) {
+          this.setState({
+            tableitems: response.data,
+            empty: response.data.length === 0 ? true : false
+          })
+        } 
+      })
+      .catch((error) => {
+        this.setState({
+          empty: true 
+        })
+      });
   }
 
   toggleDropDown = () => {
@@ -162,6 +180,11 @@ class Review extends Component {
       dropDownDate: !this.state.dropDownDate,
       currentDate: this.state.dateRangePicker.selection.endDate,
       previousDate: this.state.dateRangePicker.selection.startDate,
+      dateArray: finalDateArray,
+    }, () => {
+      sessionStorage.setItem('currentReviewDateString', endDate)
+      sessionStorage.setItem('previousReviewDateString', startDate)
+      this.getReview(endDate, startDate)
     })
   }
 
@@ -194,25 +217,25 @@ class Review extends Component {
   renderTableItems() {
     var itemarray = [];
 
-    var tableitems = this.state.review;
+    var tableitems = this.state.tableitems;
 
     for (let i = 0; i < tableitems.length; i++) {
       itemarray.push(
         <tr>
-          <td style={{width: '10%'}}>{tableitems[i].name}</td>
-          <td style={{width: '15%'}}>{tableitems[i].location}</td>
+          <td style={{width: '10%'}}>{tableitems[i].customerFirstName}</td>
+          <td style={{width: '15%'}}>{tableitems[i].customerCity}</td>
           <td style={{width: '15%'}}>
             <StarRatings
               starRatedColor='orange'
               starSpacing='0px'
               starDimension='15px'
-              rating={tableitems[i].rating}
+              rating={tableitems[i].customerRating}
               numberOfStars={5}
               name='rating'
             />
           </td>
-          <td style={{width: '45%'}}>{tableitems[i].comment}</td>
-          <td style={{width: '15%'}}>{tableitems[i].time}</td>
+          <td style={{width: '45%'}}>{tableitems[i].customerComment}</td>
+          <td style={{width: '15%'}}>{moment(tableitems[i].createdAt).format("DD MMM, YYYY")}</td>
         </tr>
       );
     }
@@ -220,20 +243,53 @@ class Review extends Component {
     return <tbody>{itemarray}</tbody>;
   }
 
+  renderEmptyItems() {
+    return (
+      <Row style={{ marginTop: 90 }}>
+        <Col style={{ textAlign: "center" }} xs="12">
+          <img
+            style={{
+              objectFit: "cover",
+              width: 70,
+              height: 70,
+              opacity: 0.6
+            }}
+            alt={""}
+            src={
+              "https://s3-eu-west-1.amazonaws.com/foodiebeegeneralphoto/empty.png"
+            }
+          />
+        </Col>
+        <Col style={{ textAlign: "center" }} xs="12">
+          <p
+            style={{ fontSize: 18, letterSpacing: 2, marginTop: 30 }}
+            className="big"
+          >
+            You have 0 reviews for now.
+          </p>
+        </Col>
+      </Row>
+    );
+  }
+ 
+
   renderReviewTable() {
     return (
-      <Table striped responsive>
-        <thead>
-          <tr>
-            <th>Name</th>
-            <th>Location</th>
-            <th>Rating</th>
-            <th>Comment</th>
-            <th>Time</th>
-          </tr>
-        </thead>
-        {this.renderTableItems()}
-      </Table>
+      <div>
+        <Table striped responsive>
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Location</th>
+              <th>Rating</th>
+              <th>Comment</th>
+              <th>Time</th>
+            </tr>
+          </thead>
+          {this.state.empty ? null : this.renderTableItems()}
+          </Table>
+          {this.state.empty ? this.renderEmptyItems() : null }
+        </div>
     );
   }
 

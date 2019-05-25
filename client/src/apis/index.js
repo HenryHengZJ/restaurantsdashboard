@@ -3,6 +3,8 @@ export default {
 
     /*Caterer API*/
     UPDATEcaterer: "/caterer/updatecaterer",
+    UPDATEcatererpassword: "/caterer/updatecatererpassword",
+    UPDATEcaterernameaddress: "/caterer/updatecaterernameaddress",
     GETcaterer: "/caterer/getcaterer",
 
     /*Menu API*/
@@ -13,10 +15,18 @@ export default {
     DELETEmenu: "/menu/deletemenu",
     BULKDELETEmenu: "/menu/bulkdeletemenu",
 
+    /*Order API*/
+    GETorder: "/order/getorder",
+
+    /*Review API*/
+    GETreview: "/review/getreview",
 
     /*Auth API*/
     POSTcatererlogin: "/auth/catererlogin",
-    GETcatererlogout: "/auth/logout"
+    GETcatererlogout: "/auth/logout",
+    POSTpasswordreset: "/auth/resetpassword",
+    GETresetpassword: '/auth/getresetpassword',
+    PUTupdatepassword: '/auth/updatepassword',
   };
 
 

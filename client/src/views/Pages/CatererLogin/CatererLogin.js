@@ -55,7 +55,11 @@ class CatererLogin extends Component {
     if(code === 13) { //13 is the enter keycode
        this.login(event)
     } 
-}
+  }
+
+  forgotPasswordClick = () => {
+    this.props.history.push('/forgotpassword')
+  }
 
   login = e => {
     e.preventDefault();
@@ -215,6 +219,7 @@ class CatererLogin extends Component {
                               fontWeight: "500"
                             }}
                             color="link"
+                            onClick={() => this.forgotPasswordClick()}
                             className="px-4"
                           >
                             Forgot password?

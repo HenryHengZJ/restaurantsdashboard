@@ -60,12 +60,26 @@ class DefaultLayout extends Component {
     this.props.history.push('/caterer/account/profile')
   }
 
+  onTermsConditionClicked(e) {
+    e.preventDefault()
+    this.props.history.push('/caterer/account/termscondition')
+  }
+
+  onPrivacyPolicyClicked(e) {
+    e.preventDefault()
+    this.props.history.push('/caterer/account/privacypolicy')
+  }
+
   render() {
     return (
       <div className="app">
         <AppHeader fixed>
           <Suspense  fallback={this.loading()}>
-            <DefaultHeader onLogout={e=>this.signOut(e)} onProfileClicked={e=>this.onProfileClicked(e)}/>
+            <DefaultHeader 
+            onLogout={e=>this.signOut(e)} 
+            onProfileClicked={e=>this.onProfileClicked(e)} 
+            onTermsConditionClicked={e=>this.onTermsConditionClicked(e)}
+            onPrivacyPolicyClicked={e=>this.onPrivacyPolicyClicked(e)}/>
           </Suspense>
         </AppHeader>
         <div className="app-body">

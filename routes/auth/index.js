@@ -3,12 +3,16 @@ var router = express.Router();
 const jwt = require('jsonwebtoken');
 var passport = require('passport');
 var Caterer = require('../../models/caterer');
+const crypto = require('crypto');
+var mail = require('../../nodeMailerWithTemp');
+var ObjectId = require('mongodb').ObjectID;
+var bcrypt   = require('bcrypt-nodejs');
 
 router.post('/caterersignup', (req, res) => {
 	
     var email = req.body.catererEmail.toLowerCase();
 
-	Caterer.findOne({ 'email' :  email }, function(err, caterer) {
+	Caterer.findOne({ 'catererEmail' :  email }, function(err, caterer) {
 		// if there are any errors, return the error
 		if (err) {
 			return res.status(404).json({
@@ -30,6 +34,49 @@ router.post('/caterersignup', (req, res) => {
             newCaterer.catererPhoneNumber    = req.body.catererPhoneNumber;
             newCaterer.catererAddress        = req.body.catererAddress;
 			newCaterer.save().then(() => res.json(newCaterer));
+		}
+	});
+});
+
+router.post('/resetpassword', (req, res) => {
+	
+    var email = req.body.catererEmail.toLowerCase();
+
+	Caterer.findOne({ 'catererEmail' :  email }, function(err, caterer) {
+		// if there are any errors, return the error
+		if (err) {
+			return res.status(404).json({
+				'message': err
+			});
+		}
+		// check to see if theres already a caterer with that email
+		else if (!caterer) {
+			return res.status(404).json({
+				'message': 'user not exist'
+			});
+		} 
+		else {
+			// create the caterer
+			var newCaterer = new Caterer();
+            const token = crypto.randomBytes(20).toString('hex');
+            caterer.update({
+                resetPasswordToken: token,
+                resetPasswordExpires: Date.now() + 360000,
+            }).then(() => 
+                {
+                    var urlhost = "";
+                    if (process.env.NODE_ENV === 'development') {
+                        urlhost = "http://localhost:3000/#"
+                    }
+                    else  if (process.env.NODE_ENV === 'production') {
+                        urlhost = "https://foodiebeecaterer.herokuapp.com/#"
+                    }
+                    mail.sendResetPasswordEmail('/templates/resetpassword/email.html', email, `${urlhost}/resetpassword/${token}`);
+                    res.status(200).json({
+                        'catererID': caterer._id,
+                    });
+                }
+            );
 		}
 	});
 });
@@ -77,6 +124,43 @@ router.post('/catererlogin', (req, res) => {
         }
       },
     )(req, res);
+});
+
+router.put('/updatepassword', (req, res) => {
+
+	var matchquery;
+    matchquery = {_id: new ObjectId(req.query._id)}
+
+    var userpassword = req.body.catererPassword
+    var updateData = {
+        catererPassword: bcrypt.hashSync(userpassword, bcrypt.genSaltSync(8), null)
+    }
+
+    Caterer.findOneAndUpdate(matchquery, {$set: updateData}, {runValidators: true}, (err, doc) => {
+        if (err) return res.status(500).send({ error: err });
+        return res.status(201).json(doc);
+    });
+});
+
+router.get('/getresetpassword', (req, res) => {
+    console.log(req.query.resetPasswordToken)
+    Caterer.findOne({
+        resetPasswordToken: req.query.resetPasswordToken,
+      }).then((caterer) => {
+        if (caterer === null) {
+          console.error('password reset link is invalid');
+          res.status(403).send('password reset link is invalid');
+        } 
+        else if (new Date() > new Date(caterer.resetPasswordExpires)) {
+            console.error('password reset link has expired');
+            res.status(403).send('password reset link has expired');
+        }
+        else {
+          res.status(200).send({
+            'catererID': caterer._id,
+          });
+        }
+      });
 });
 
 router.get('/testget', passport.authenticate('jwt', {session: false}), (req, res) => {

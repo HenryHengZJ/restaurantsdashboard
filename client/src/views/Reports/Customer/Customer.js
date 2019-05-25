@@ -26,6 +26,8 @@ import 'react-date-range/dist/styles.css'; // main style file
 import 'react-date-range/dist/theme/default.css'; // theme css file
 import { DateRangePicker, DateRange } from 'react-date-range';
 import { format, addDays, subDays } from 'date-fns';
+import axios from 'axios';
+import apis from "../../../apis";
 
 
 const options = {
@@ -54,6 +56,7 @@ class Customer extends Component {
     this.selectDateRange = this.selectDateRange.bind(this)
 
     this.state = {
+      empty: false,
       isTablePressed: true,
       isLineChartPressed: false,
       isBarChartPressed: false,
@@ -71,6 +74,7 @@ class Customer extends Component {
         },
       },
       dateRange: '',
+      dateArray: [],
       line: {
         labels: [],
         datasets: [
@@ -117,42 +121,16 @@ class Customer extends Component {
           }
         ]
       },
-      tableitems: [
-        {
-          name: "Kieran Horan",
-          contact: "+353831861714",
-          type: "New",
-          lastordertime: "27 Aug, 2018, 8:20PM",
-          lastorderid: "344231"
-        },
-        {
-          name: "Cian Burke",
-          contact: "+353831741754",
-          type: "Recurring",
-          lastordertime: "25 Aug, 2018, 4:10PM",
-          lastorderid: "152241"
-        },
-        {
-          name: "Nicole Kidman",
-          contact: "+353831458414",
-          type: "Recurring",
-          lastordertime: "24 Aug, 2018, 7:11PM",
-          lastorderid: "178453"
-        },
-        {
-          name: "Steven King",
-          contact: "+353831544517",
-          type: "New",
-          lastordertime: "24 Aug, 2018, 11:20AM",
-          lastorderid: "127745"
-        },
-      ]
+      tableitems: []
     };
   }
 
-  componentDidMount() {
-    var currentDate = moment().toDate();
-    var previousDate = this.getPreviousDate(currentDate, 7);
+  getLocalStorage = () => {
+    
+    var maxDate = moment().toDate();
+
+    var currentDate = moment(sessionStorage.getItem("currentCustomerDateString"), 'DD MMM, YYYY').toDate()
+    var previousDate = moment(sessionStorage.getItem("previousCustomerDateString"), 'DD MMM, YYYY').toDate()
 
     var currentDateString = moment(currentDate).format("DD MMM, YYYY")
     var previousDateString = moment(previousDate).format("DD MMM, YYYY")
@@ -164,13 +142,102 @@ class Customer extends Component {
     newbar.labels = finalDateArray;
 
     this.setState({
-      maxDate: currentDate,
+      maxDate: maxDate,
       currentDate: currentDate,
       previousDate: previousDate,
       dateRange: finalSelectionDate,
       line: newline,
       bar: newbar,
-    });
+      dateArray: finalDateArray,
+    }, () => {
+      this.getCustomer(currentDateString, previousDateString)
+    })
+  }
+
+  componentDidMount() {
+
+    if (sessionStorage.getItem("currentCustomerDateString") !== null && sessionStorage.getItem("previousCustomerDateString") !== null) {
+      this.getLocalStorage()
+    }
+    else {
+      var currentDate = moment().toDate();
+      var previousDate = this.getPreviousDate(currentDate, 7);
+
+      var currentDateString = moment(currentDate).format("DD MMM, YYYY")
+      var previousDateString = moment(previousDate).format("DD MMM, YYYY")
+      var finalSelectionDate = previousDateString + ' - ' + currentDateString
+      var finalDateArray = this.getIntervalDates(currentDate, previousDate).reverse();
+      var newline = this.state.line;
+      newline.labels = finalDateArray;
+      var newbar = this.state.bar;
+      newbar.labels = finalDateArray;
+
+      this.setState({
+        maxDate: currentDate,
+        currentDate: currentDate,
+        previousDate: previousDate,
+        dateRange: finalSelectionDate,
+        line: newline,
+        bar: newbar,
+        dateArray: finalDateArray,
+      }, () => {
+        this.getCustomer(currentDateString, previousDateString)
+      })
+    }
+  }
+
+  getCustomer = (currentDateString, previousDateString) => {
+  
+    var headers = {
+      'Content-Type': 'application/json',
+    }
+
+    var url = apis.GETorder + "?lteDate=" + currentDateString + "&gteDate=" + previousDateString;
+
+    axios.get(url, {withCredentials: true}, {headers: headers})
+      .then((response) => {
+        if (response.status === 200) {
+          this.setState({
+            tableitems: response.data.length > 0 ? response.data : [],
+            empty: response.data.length === 0 ? true : false
+          }, () => {
+            this.getChartData()
+          })
+        } 
+      })
+      .catch((error) => {
+        this.setState({
+          empty: true 
+        })
+      });
+  }
+
+  getChartData = () => {
+    var linedata = [];
+    var bardata = [];
+    var tableitems = this.state.tableitems
+    var dateArray = this.state.dateArray
+
+    for (let i = 0; i < dateArray.length; i++) {
+      var count = 0
+      for (let x = 0; x < tableitems.length; x++) {
+        if (moment(tableitems[x].createdAt).format("DD MMM, YYYY") === dateArray[i]) {
+          count = count + 1
+        }
+      }
+      linedata.push(count)
+      bardata.push(count)
+    }
+
+    var newline = this.state.line;
+    newline.datasets[0].data = linedata;
+    var newbar = this.state.bar;
+    newbar.datasets[0].data = bardata;
+
+    this.setState({
+      line: newline,
+      bar: newbar,
+    })
   }
 
   toggleDropDown = () => {
@@ -231,7 +298,12 @@ class Customer extends Component {
       currentDate: this.state.dateRangePicker.selection.endDate,
       previousDate: this.state.dateRangePicker.selection.startDate,
       line: newline,
-      bar: newbar
+      bar: newbar,
+      dateArray: finalDateArray,
+    }, () => {
+      sessionStorage.setItem('currentCustomerDateString', endDate)
+      sessionStorage.setItem('previousCustomerDateString', startDate)
+      this.getCustomer(endDate, startDate)
     })
   }
 
@@ -355,11 +427,12 @@ class Customer extends Component {
     for (let i = 0; i < tableitems.length; i++) {
       itemarray.push(
         <tr>
-          <td>{tableitems[i].name}</td>
-          <td>{tableitems[i].contact}</td>
-          <td>{tableitems[i].type}</td>
-          <td>{tableitems[i].lastordertime}</td>
-          <td>{tableitems[i].lastorderid}</td>
+          <td>{typeof tableitems[i].customerDetails !== 'undefined' ? tableitems[i].customerDetails[0].customerFirstName : ""}</td>
+          <td>{typeof tableitems[i].customerDetails !== 'undefined' ? tableitems[i].customerDetails[0].customerPhoneNumber : ""}</td>
+          <td>{typeof tableitems[i].customerDetails !== 'undefined' ? tableitems[i].customerDetails[0].customerCity : ""}</td>
+          <td>New</td>
+          <td>{tableitems[i]._id}</td>
+          <td>{moment(tableitems[i].createdAt).format("DD MMM, YYYY")}</td>
         </tr>
       );
     }
@@ -367,13 +440,44 @@ class Customer extends Component {
     return <tbody>{itemarray}</tbody>;
   }
 
+  renderEmptyItems() {
+    return (
+      <Row style={{ marginTop: 90 }}>
+        <Col style={{ textAlign: "center" }} xs="12">
+          <img
+            style={{
+              objectFit: "cover",
+              width: 70,
+              height: 70,
+              opacity: 0.6
+            }}
+            alt={""}
+            src={
+              "https://s3-eu-west-1.amazonaws.com/foodiebeegeneralphoto/empty.png"
+            }
+          />
+        </Col>
+        <Col style={{ textAlign: "center" }} xs="12">
+          <p
+            style={{ fontSize: 18, letterSpacing: 2, marginTop: 30 }}
+            className="big"
+          >
+            You have 0 customers for now.
+          </p>
+        </Col>
+      </Row>
+    );
+  }
+
   renderTable() {
     return (
+      <div>
       <Table striped responsive>
         <thead>
           <tr>
             <th>Name</th>
             <th>Contact</th>
+            <th>Location</th>
             <th>
               <Row style={{marginLeft: 0}}> 
                 Type
@@ -386,13 +490,15 @@ class Customer extends Component {
                 </Dropdown>
               </Row>
             </th>
-            <th>Last Order Time</th>
             <th>Last Order ID</th>
+            <th>Last Order Time</th>
           </tr>
         </thead>
 
-        {this.renderTableItems()}
-      </Table>
+        {this.state.empty ? null : this.renderTableItems()}
+        </Table>
+        {this.state.empty ? this.renderEmptyItems() : null }
+        </div>
     );
   }
 

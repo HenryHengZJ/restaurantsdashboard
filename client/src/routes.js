@@ -31,6 +31,8 @@ const Review = React.lazy(() => import('./views/Reports/Review'));
 const Dishes = React.lazy(() => import('./views/Reports/Dishes'));
 
 const Profile = React.lazy(() => import('./views/Account/Profile'));
+const TermsCondition = React.lazy(() => import('./views/Account/TermsCondition'));
+const PrivacyPolicy = React.lazy(() => import('./views/Account/PrivacyPolicy'));
 
 /*const Breadcrumbs = React.lazy(() => import('./views/Base/Breadcrumbs'));
 const Cards = React.lazy(() => import('./views/Base/Cards'));
@@ -139,6 +141,8 @@ const routes = [
   { path: '/caterer/users', exact: true,  name: 'Users', component: Users },
   { path: '/caterer/users/:id', exact: true, name: 'User Details', component: User },*/
   { path: '/caterer/account/profile', exact: true, name: 'Profile', component: Profile },
+  { path: '/caterer/account/termscondition', exact: true, name: 'Terms & Conditions', component: TermsCondition },
+  { path: '/caterer/account/privacypolicy', exact: true, name: 'Privacy Policy', component: PrivacyPolicy },
 ];
 
 export default routes;

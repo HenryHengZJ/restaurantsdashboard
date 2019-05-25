@@ -16,7 +16,13 @@ import {
   DropdownItem,
   DropdownMenu,
   DropdownToggle,
-  UncontrolledDropdown
+  UncontrolledDropdown,
+  Modal,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
+  Input,
+  Collapse
 } from "reactstrap";
 import { Bar, Doughnut, Line, Pie, Polar, Radar } from "react-chartjs-2";
 import { CustomTooltips } from "@coreui/coreui-plugin-chartjs-custom-tooltips";
@@ -26,6 +32,8 @@ import 'react-date-range/dist/styles.css'; // main style file
 import 'react-date-range/dist/theme/default.css'; // theme css file
 import { DateRangePicker, DateRange } from 'react-date-range';
 import { format, addDays, subDays } from 'date-fns';
+import axios from 'axios';
+import apis from "../../../apis";
 
 
 const options = {
@@ -54,6 +62,9 @@ class Sales extends Component {
     this.selectDateRange = this.selectDateRange.bind(this)
 
     this.state = {
+      salesModal: false,
+      selectedOrderItem: null,
+      empty: false,
       isTablePressed: true,
       isLineChartPressed: false,
       isBarChartPressed: false,
@@ -70,6 +81,7 @@ class Sales extends Component {
           key: 'selection',
         },
       },
+      dateArray: [],
       dateRange: '',
       line: {
         labels: [],
@@ -81,7 +93,7 @@ class Sales extends Component {
             borderColor: "rgba(75,192,192,1)",
             borderWidth: 2,
             pointHoverBackgroundColor: "rgba(75,192,192,1)",
-            data: [15.00, 29.99, 45.50, 55.00, 57.45, 10.99, 7.99, 2.50]
+            data: []
           }
         ]
       },
@@ -95,104 +107,20 @@ class Sales extends Component {
             borderWidth: 1,
             hoverBackgroundColor: "rgba(255,99,132,0.4)",
             hoverBorderColor: "rgba(255,99,132,1)",
-            data: [15.00, 29.99, 45.50, 55.00, 57.45, 10.99, 7.99, 2.50]
+            data: []
           }
         ]
       },
-      items: [
-        {
-          ordereditem: "Chicken Masala",
-          dishtype: "single",
-          ordertype: "delivery",
-          minimumquantity: "10",
-          totalquantity: "12",
-          serveperunit: "1",
-          priceperunit: "8.00",
-          additionalcharge: "2.50",
-          deliveryfee: "3.00",
-          totalprice: "101.50"
-        },
-        {
-          ordereditem: "Sandwich Platter",
-          dishtype: "bulk",
-          ordertype: "pickup",
-          minimumquantity: "1",
-          totalquantity: "4",
-          serveperunit: "10",
-          priceperunit: "24.00",
-          additionalcharge: "0.50",
-          deliveryfee: "3.00",
-          totalprice: "99.50"
-        }
-      ],
-      tableitems: [
-        {
-          orderID: "334567",
-          time: "29 Aug, 2018, 4:35PM",
-          orderitems: [
-            {
-              title: "Chicken Masala Platter",
-              quantity: "2"
-            },
-            {
-              title: "Fish & Chips Catering",
-              quantity: "2"
-            }
-          ],
-          totalprice: "89.00",
-          ordertype: "Delivery",
-          payment: "Cash"
-        },
-        {
-          orderID: "111423",
-          time: "27 Aug, 2018, 8:20PM",
-          orderitems: [
-            {
-              title: "Tan tan chicken",
-              quantity: "1"
-            }
-          ],
-          totalprice: "25.99",
-          ordertype: "Delivery",
-          payment: "Card"
-        },
-        {
-          orderID: "178123",
-          time: "26 Aug, 2018, 11:37AM",
-          orderitems: [
-            {
-              title: "Pasta Chili",
-              quantity: "1"
-            }
-          ],
-          totalprice: "15.00",
-          ordertype: "Pickup",
-          payment: "Card"
-        },
-        {
-          orderID: "178123",
-          time: "21 Aug, 2018, 5:35PM",
-          orderitems: [
-            {
-              title: "Sandwich Trio Platter",
-              quantity: "1"
-            },
-            {
-              title: "Croissant Combo",
-              quantity: "3"
-            }
-          ],
-          totalprice: "65.50",
-          ordertype: "Pickup",
-          payment: "Cash"
-        }
-      ]
+      tableitems: []
     };
   }
 
-  componentDidMount() {
-    var currentDate = moment().toDate();
-    var previousDate = this.getPreviousDate(currentDate, 7);
+  getLocalStorage = () => {
+
+    var maxDate = moment().toDate();
+
+    var currentDate = moment(sessionStorage.getItem("currentSalesDateString"), 'DD MMM, YYYY').toDate()
+    var previousDate = moment(sessionStorage.getItem("previousSalesDateString"), 'DD MMM, YYYY').toDate()
 
     var currentDateString = moment(currentDate).format("DD MMM, YYYY")
     var previousDateString = moment(previousDate).format("DD MMM, YYYY")
@@ -204,13 +132,120 @@ class Sales extends Component {
     newbar.labels = finalDateArray;
 
     this.setState({
-      maxDate: currentDate,
+      maxDate: maxDate,
       currentDate: currentDate,
       previousDate: previousDate,
       dateRange: finalSelectionDate,
       line: newline,
       bar: newbar,
-    });
+      dateArray: finalDateArray,
+    }, () => {
+      this.getSales(currentDateString, previousDateString)
+    })
+  }
+
+  componentDidMount() {
+
+    if (sessionStorage.getItem("currentSalesDateString") !== null && sessionStorage.getItem("previousSalesDateString") !== null) {
+      this.getLocalStorage()
+    }
+    else {
+      var currentDate = moment().toDate();
+      var previousDate = this.getPreviousDate(currentDate, 7);
+
+      var currentDateString = moment(currentDate).format("DD MMM, YYYY")
+      var previousDateString = moment(previousDate).format("DD MMM, YYYY")
+      var finalSelectionDate = previousDateString + ' - ' + currentDateString
+      var finalDateArray = this.getIntervalDates(currentDate, previousDate).reverse();
+      var newline = this.state.line;
+      newline.labels = finalDateArray;
+      var newbar = this.state.bar;
+      newbar.labels = finalDateArray;
+
+      this.setState({
+        maxDate: currentDate,
+        currentDate: currentDate,
+        previousDate: previousDate,
+        dateRange: finalSelectionDate,
+        line: newline,
+        bar: newbar,
+        dateArray: finalDateArray,
+      }, () => {
+        this.getSales(currentDateString, previousDateString)
+      })
+    }
+  }
+
+  getSales = (currentDateString, previousDateString) => {
+  
+    var headers = {
+      'Content-Type': 'application/json',
+    }
+
+    var url = apis.GETorder + "?lteDate=" + currentDateString + "&gteDate=" + previousDateString;
+
+    axios.get(url, {withCredentials: true}, {headers: headers})
+      .then((response) => {
+        if (response.status === 200) {
+          this.setState({
+            tableitems: response.data,
+            empty: response.data.length === 0 ? true : false
+          }, () => {
+            this.getChartData()
+          })
+        } 
+      })
+      .catch((error) => {
+        this.setState({
+          empty: true 
+        })
+      });
+  }
+
+  getChartData = () => {
+    var linedata = [];
+    var bardata = [];
+    var tableitems = this.state.tableitems
+    var dateArray = this.state.dateArray
+
+    for (let i = 0; i < dateArray.length; i++) {
+      var sales = 0
+      for (let x = 0; x < tableitems.length; x++) {
+        if (moment(tableitems[x].createdAt).format("DD MMM, YYYY") === dateArray[i]) {
+          sales = sales + Number(tableitems[x].totalOrderPrice).toFixed(2)
+        }
+      }
+      linedata.push(sales)
+      bardata.push(sales)
+    }
+
+    var newline = this.state.line;
+    newline.datasets[0].data = linedata;
+    var newbar = this.state.bar;
+    newbar.datasets[0].data = bardata;
+
+    this.setState({
+      line: newline,
+      bar: newbar,
+    })
+  }
+
+  
+  tableItemClicked = (_id) => {
+    
+    var itemindex = this.state.tableitems.findIndex(x => x._id == _id);
+
+    this.setState({
+      selectedOrderItem: this.state.tableitems[itemindex]
+    }, () => {
+      this.toggleSalesModal()
+    })
+  }
+
+  toggleSalesModal = () => {
+    this.setState({
+      salesModal: !this.state.salesModal
+    })
   }
 
   toggleDropDown = () => {
@@ -271,7 +306,12 @@ class Sales extends Component {
       currentDate: this.state.dateRangePicker.selection.endDate,
       previousDate: this.state.dateRangePicker.selection.startDate,
       line: newline,
-      bar: newbar
+      bar: newbar,
+      dateArray: finalDateArray,
+    }, () => {
+      sessionStorage.setItem('currentSalesDateString', endDate)
+      sessionStorage.setItem('previousSalesDateString', startDate)
+      this.getSales(endDate, startDate)
     })
   }
 
@@ -389,7 +429,7 @@ class Sales extends Component {
   renderOrderItems(index) {
     var orderitemarray = [];
 
-    var orderitems = this.state.tableitems[index].orderitems;
+    var orderitems = this.state.tableitems[index].orderItem;
 
     for (let i = 0; i < orderitems.length; i++) {
       orderitemarray.push(
@@ -404,6 +444,212 @@ class Sales extends Component {
     return <td>{orderitemarray}</td>;
   }
 
+  renderSelectedOrderSelectionItem(selectionitem) {
+    var itemstext = "";
+
+    for (let i = 0; i < selectionitem.length; i++) {
+      if (i == 0) {
+        itemstext = selectionitem[i].selectionitemtitle;
+      } else {
+        itemstext = itemstext + ", " + selectionitem[i].selectionitemtitle;
+      }
+    }
+    return (
+      <div>
+        <Label style={{ cursor: "pointer", opacity: 0.7 }}>{itemstext}</Label>
+      </div>
+    );
+  }
+
+  renderSelectedOrderSelection(selection) {
+    var itemsarray = [];
+
+    for (let i = 0; i < selection.length; i++) {
+      itemsarray.push(
+        <p key={i} style={{ textSize: 13, opacity: 0.7, margin: 0 }}>
+          <span>&#8226;</span> {selection[i].selectioncategory}:
+          {this.renderSelectedOrderSelectionItem(selection[i].selectionitem)}
+        </p>
+      );
+    }
+
+    return <div>{itemsarray}</div>;
+  }
+
+  renderInstruction(instruction) {
+    var itemsarray = [];
+
+    for (let i = 0; i < 1; i++) {
+      itemsarray.push(
+        <p key={i} style={{ textSize: 13, opacity: 0.7, margin: 0 }}>
+          <span>&#8226;</span> Instruction:
+          <div>
+            <Label style={{ cursor: "pointer", opacity: 0.7 }}>
+              {instruction}
+            </Label>
+          </div>
+        </p>
+      );
+    }
+
+    return <div>{itemsarray}</div>;
+  }
+
+  renderSelectedOrderTableItems() {
+    const { selectedOrderItem } = this.state;
+
+    var itemarray = [];
+
+    var orderItem = selectedOrderItem.orderItem;
+
+    for (let i = 0; i < orderItem.length; i++) {
+      itemarray.push(
+        <tr>
+          <td style={{ fontWeight: "500" }}>{orderItem[i].quantity}</td>
+          <td style={{ textAlign: "start" }}>
+            <p
+              style={{
+                marginBottom: 5,
+                fontWeight: "500",
+                color: "#20a8d8",
+                overflow: "hidden"
+              }}
+            >
+              {orderItem[i].title}
+            </p>
+
+            <p
+              style={{
+                fontStyle: "italic",
+                marginBottom: 5,
+                textSize: 13,
+                opacity: 0.7
+              }}
+            >
+              serves {orderItem[i].serveperunit}
+            </p>
+            {typeof orderItem[i].selection === "undefined"
+              ? null
+              : this.renderSelectedOrderSelection(orderItem[i].selection)}
+            {typeof orderItem[i].instruction === "undefined"
+              ? null
+              : this.renderInstruction(orderItem[i].instruction)}
+          </td>
+
+          <td style={{ width: "20%", textAlign: "start" }}>
+            €{Number(orderItem[i].totalprice).toFixed(2)}
+          </td>
+        </tr>
+      );
+    }
+
+    return <tbody>{itemarray}</tbody>;
+  }
+
+  rendeSelectedOrderItems() {
+    const { selectedOrderItem } = this.state;
+    return (
+      <div style={{ textAlign: "start" }}>
+        <Table responsive className="mb-0 d-none d-sm-table">
+          <thead className="thead-light">
+            <tr>
+              <th>Qty</th>
+              <th>Items</th>
+              <th>Price</th>
+            </tr>
+          </thead>
+          {this.renderSelectedOrderTableItems()}
+        </Table>
+
+        <Row style={{ marginTop: 20 }}>
+          <Col>
+            <Card
+              style={{
+                borderColor: "#20a8d8"
+              }}
+            >
+              <CardBody style={{ margin: 0, padding: 10 }}>
+                <h6
+                  style={{
+                    marginTop: 5,
+                    textAlign: "center",
+                    color: "#20a8d8"
+                  }}
+                >
+                  {selectedOrderItem.orderType}
+                </h6>
+              </CardBody>
+            </Card>
+          </Col>
+        </Row>
+
+        <Collapse isOpen={selectedOrderItem.orderType === "Delivery"}>
+          <Table borderless>
+            <tbody>
+              <tr>
+                <td style={{ fontSize: 16, textAlign: "start" }}>
+                  Delivery Fee
+                </td>
+                <td style={{ fontSize: 16, textAlign: "end" }}>
+                  €{Number(2).toFixed(2)}
+                </td>
+              </tr>
+            </tbody>
+          </Table>
+        </Collapse>
+
+        <div
+          style={{
+            height: 1,
+            backgroundColor: "gray",
+            opacity: 0.5,
+            width: "100%"
+          }}
+        />
+
+        <Table borderless>
+          <tbody>
+            <tr>
+              <td
+                style={{ fontSize: 16, fontWeight: "600", textAlign: "start" }}
+              >
+                TOTAL
+              </td>
+              <td style={{ fontSize: 16, fontWeight: "600", textAlign: "end" }}>
+                €{Number(selectedOrderItem.totalOrderPrice).toFixed(2)}
+              </td>
+            </tr>
+            <tr>
+              <td
+                style={{ fontSize: 16, fontWeight: "600", textAlign: "start" }}
+              >
+                Paid By
+              </td>
+              <td style={{ fontSize: 16, fontWeight: "600", textAlign: "end" }}>
+                {selectedOrderItem.paymentType}
+              </td>
+            </tr>
+          </tbody>
+        </Table>
+      </div>
+    );
+  }
+
+  renderOrderModal() {
+    const { selectedOrderItem } = this.state;
+    return (
+      <Modal
+        isOpen={this.state.salesModal}
+        toggle={() => this.toggleSalesModal()}
+      >
+        <ModalHeader toggle={() => this.toggleSalesModal()}>
+          Order #{selectedOrderItem._id}
+        </ModalHeader>
+        <ModalBody>{this.rendeSelectedOrderItems()}</ModalBody>
+      </Modal>
+    );
+  }
+
   renderTableItems() {
     var itemarray = [];
 
@@ -411,15 +657,15 @@ class Sales extends Component {
 
     for (let i = 0; i < tableitems.length; i++) {
       itemarray.push(
-        <tr>
-          <td>{tableitems[i].orderID}</td>
-          <td>{tableitems[i].time}</td>
+        <tr style={{cursor: 'pointer'}} onClick={() => this.tableItemClicked(tableitems[i]._id)}>
+          <td>{tableitems[i]._id}</td>
+          <td>{moment(tableitems[i].createdAt).format("DD MMM, YYYY")}</td>
           {this.renderOrderItems(i)}
-          <td>{tableitems[i].totalprice}</td>
-          <td>{tableitems[i].ordertype}</td>
+          <td>{Number(tableitems[i].totalOrderPrice).toFixed(2)}</td>
+          <td>{tableitems[i].orderType}</td>
           <td>
-            {tableitems[i].payment}
-            {tableitems[i].payment == "Card" ?
+            {tableitems[i].paymentType}
+            {tableitems[i].paymentType == "Card" ?
               <i className="fa fa-cc-visa" style={{ fontSize: 20 + 'px', marginLeft: 10}}></i>
               :
               <i className="fa fa-money" style={{ fontSize: 24 + 'px', marginLeft: 10 }}></i>
@@ -432,44 +678,77 @@ class Sales extends Component {
     return <tbody>{itemarray}</tbody>;
   }
 
+  renderEmptyItems() {
+    return (
+      <Row style={{ marginTop: 90 }}>
+        <Col style={{ textAlign: "center" }} xs="12">
+          <img
+            style={{
+              objectFit: "cover",
+              width: 70,
+              height: 70,
+              opacity: 0.6
+            }}
+            alt={""}
+            src={
+              "https://s3-eu-west-1.amazonaws.com/foodiebeegeneralphoto/empty.png"
+            }
+          />
+        </Col>
+        <Col style={{ textAlign: "center" }} xs="12">
+          <p
+            style={{ fontSize: 18, letterSpacing: 2, marginTop: 30 }}
+            className="big"
+          >
+            You have 0 sales for now.
+          </p>
+        </Col>
+      </Row>
+    );
+  }
+ 
+
   renderTable() {
     return (
-      <Table striped responsive>
-        <thead>
-          <tr>
-            <th>Order ID</th>
-            <th>Time</th>
-            <th>Items</th>
-            <th>Price (€)</th>
-            <th>
-              <Row style={{marginLeft: 0}}> 
-                Type
-                <Dropdown isOpen={this.state.dropDownType} toggle={() => this.toggleType()} size="sm">
-                  <DropdownToggle style={{margin:0, padding:0, paddingRight: 5, backgroundColor: 'white', borderWidth: 0}} caret />
-                  <DropdownMenu>
-                    <DropdownItem onClick={() => alert('Delivery Clicked')}>Delivery</DropdownItem>
-                    <DropdownItem onClick={() => alert('Pickup Clicked')}>Pickup</DropdownItem>
-                  </DropdownMenu>
-                </Dropdown>
-              </Row>
-            </th>
-            <th>
-              <Row style={{marginLeft: 0}}> 
-                Payment
-                <Dropdown isOpen={this.state.dropDownPayment} toggle={() => this.togglePayment()} size="sm">
-                  <DropdownToggle style={{margin:0, padding:0, paddingRight: 5, backgroundColor: 'white', borderWidth: 0}} caret />
-                  <DropdownMenu>
-                    <DropdownItem onClick={() => alert('Card Clicked')}>Card</DropdownItem>
-                    <DropdownItem onClick={() => alert('Cash Clicked')}>Cash</DropdownItem>
-                  </DropdownMenu>
-                </Dropdown>
-              </Row>
-            </th>
-          </tr>
-        </thead>
-
-        {this.renderTableItems()}
-      </Table>
+      <div>
+        <Table striped >
+          <thead>
+            <tr>
+              <th>Order ID</th>
+              <th>Time</th>
+              <th>Items</th>
+              <th>Price (€)</th>
+              <th>
+                <Row style={{marginLeft: 0}}> 
+                  Type
+                  <Dropdown isOpen={this.state.dropDownType} toggle={() => this.toggleType()} size="sm">
+                    <DropdownToggle style={{margin:0, padding:0, paddingRight: 5, backgroundColor: 'white', borderWidth: 0}} caret />
+                    <DropdownMenu>
+                      <DropdownItem onClick={() => alert('Delivery Clicked')}>Delivery</DropdownItem>
+                      <DropdownItem onClick={() => alert('Pickup Clicked')}>Pickup</DropdownItem>
+                    </DropdownMenu>
+                  </Dropdown>
+                </Row>
+              </th>
+              <th>
+                <Row style={{marginLeft: 0}}> 
+                  Payment
+                  <Dropdown isOpen={this.state.dropDownPayment} toggle={() => this.togglePayment()} size="sm">
+                    <DropdownToggle style={{margin:0, padding:0, paddingRight: 5, backgroundColor: 'white', borderWidth: 0}} caret />
+                    <DropdownMenu>
+                      <DropdownItem onClick={() => alert('Card Clicked')}>Card</DropdownItem>
+                      <DropdownItem onClick={() => alert('Cash Clicked')}>Cash</DropdownItem>
+                    </DropdownMenu>
+                  </Dropdown>
+                </Row>
+              </th>
+              
+            </tr>
+          </thead>
+          {this.state.empty ? null : this.renderTableItems()}
+        </Table>
+        {this.state.empty ? this.renderEmptyItems() : null }
+      </div>
     );
   }
 
@@ -568,6 +847,7 @@ class Sales extends Component {
               </CardBody>
             </Card>
           </Col>
+          {this.state.selectedOrderItem !== null ? this.renderOrderModal() : null}
         </Row>
       </div>
     );

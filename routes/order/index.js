@@ -2,12 +2,40 @@ var express = require('express');
 var router = express.Router();
 var Order = require('../../models/order');
 var ObjectId = require('mongodb').ObjectID;
+var passport = require('passport');
+var moment = require('moment');
 
-router.get('/getorder', (req, res) => {
-    Order.find( (err,doc) => {
+router.get('/getorder', passport.authenticate('jwt', {session: false}), (req, res) => {
+
+    const { user } = req;
+    var userID = user.catererID
+
+	var matchquery = {catererID: new ObjectId(userID)};
+
+    if (typeof req.query.lteDate !== 'undefined' && typeof req.query.gteDate !== 'undefined') {
+		var gteDate = moment(req.query.gteDate, 'DD MMM, YYYY').toDate()
+		var lteDate = moment(req.query.lteDate, 'DD MMM, YYYY').add(1, 'days').toDate()
+        matchquery = {"createdAt":{$gte: new Date(gteDate.toISOString()),$lte: new Date(lteDate.toISOString())}}
+    }
+	
+    /*Order.find(matchquery).sort({createdAt: -1}).exec((err,doc) => {
         if (err) return res.status(500).send({ error: err });
         return res.status(200).json(doc);
-    });
+    });*/
+
+	Order.aggregate([ 
+        {$match: matchquery},
+        {$lookup: {
+            from: "customer", 
+            localField: "customerID", 
+            foreignField: "_id", 
+            as: "customerDetails" }
+        },
+        { $sort : { createdAt : -1 } }
+      ], (err,doc) => {
+         if (err) return res.status(500).send({ error: err });
+         return res.status(200).json(doc);
+      });
 });
 
 router.put('/updateorder', (req, res) => {

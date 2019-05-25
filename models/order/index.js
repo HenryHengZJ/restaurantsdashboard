@@ -16,13 +16,21 @@ var selectionSchema = mongoose.Schema({
 	selectionitem: [selectionItemSchema],
 });
 
-var orderSchema = mongoose.Schema({
-	menuID: ObjectId,
-	customerID: ObjectId,
+var cartSchema = mongoose.Schema({
+	title: String,
+	serveperunit: Number,
 	quantity: Number,
 	instruction: String,
+	menuID: ObjectId,
+	totalprice: Number,
 	selection: [selectionSchema],
-	totalPrice: Number,
+});
+
+var orderSchema = mongoose.Schema({
+	orderItem: [cartSchema],
+	catererID: ObjectId,
+	customerID: ObjectId,
+	totalOrderPrice: Number,
 	orderType: String,
 	orderStatus: String,
 	paymentType: String,
