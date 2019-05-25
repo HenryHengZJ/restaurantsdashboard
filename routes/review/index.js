@@ -10,14 +10,16 @@ router.get('/getreview', passport.authenticate('jwt', {session: false}), (req, r
     const { user } = req;
     var userID = user.catererID
 
-	var matchquery = {catererID: new ObjectId(userID)};
+	var matchquery = {};
 
     if (typeof req.query.lteDate !== 'undefined' && typeof req.query.gteDate !== 'undefined') {
 		var gteDate = moment(req.query.gteDate, 'DD MMM, YYYY').toDate()
 		var lteDate = moment(req.query.lteDate, 'DD MMM, YYYY').add(1, 'days').toDate()
         matchquery = {"createdAt":{$gte: new Date(gteDate.toISOString()),$lte: new Date(lteDate.toISOString())}}
     }
-	
+
+    matchquery.catererID = new ObjectId(userID)
+
     Review.find(matchquery).sort({createdAt: -1}).exec((err,doc) => {
         if (err) return res.status(500).send({ error: err });
         return res.status(200).json(doc);

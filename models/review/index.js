@@ -7,6 +7,7 @@ const ObjectId = Schema.Types.ObjectId
 var reviewSchema = mongoose.Schema({
 	customerFirstName: String,
 	customerID: ObjectId,
+	catererID: ObjectId,
 	customerCity: String,
 	customerComment: String,
 	customerRating: Number,
