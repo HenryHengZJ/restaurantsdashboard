@@ -125,12 +125,14 @@ class Dashboard extends Component {
               '#6f42c1',
               '#e83e8c',
             ],
-            customerlast7days: 0,
-            customeralltime: 0
+            newcustomerlast7days: 0,
+            recurringcustomerlast7days: 0,
+            totalcustomers: 0,
           }
         ],
       },
       topsellingitems: [],
+      dateArray: [],
       review: [],
       catererName: "",
       profilesrc: "",
@@ -143,7 +145,7 @@ class Dashboard extends Component {
 
   componentDidMount() {
     var currentDate = new Date();
-    var previousDate = subDays(new Date(), 7);
+    var previousDate = subDays(currentDate, 7);
 
     var currentDateString = moment(currentDate).format("DD MMM, YYYY")
     var previousDateString = moment(previousDate).format("DD MMM, YYYY")
@@ -161,6 +163,7 @@ class Dashboard extends Component {
       previousDate: previousDate,
       orderline: newline,
       salesbar: newbar,
+      dateArray: finalDateArray,
     });
 
     var headers = {
@@ -180,7 +183,11 @@ class Dashboard extends Component {
             rating: typeof response.data[0].rating !== 'undefined' ? response.data[0].rating : 0,
             numofreview: typeof response.data[0].numofreview !== 'undefined' ? response.data[0].numofreview : 0,
           }, () => {
-            this.putInitialData(this.state.catererName)
+          //  this.putInitialData(this.state.catererName)
+            this.getOrderSales(currentDateString, previousDateString)
+            this.getCustomer(currentDateString, previousDateString)
+            this.getMenuItems()
+            this.getReview(currentDateString, previousDateString)
           })
         } 
       })
@@ -205,70 +212,71 @@ class Dashboard extends Component {
       var newpie = this.state.customerpie
       var piedata = [20, 44]
       newpie.datasets[0].data = piedata
-      newpie.datasets[0].customerlast7days = 150
-      newpie.datasets[0].customeralltime = 20075
+      newpie.datasets[0].newcustomerlast7days = 150
+      newpie.datasets[0].recurringcustomerlast7days = 200
+      newpie.datasets[0].totalcustomers = 350
   
       var topsellingitems = [
         {
-          itemtitle: 'Sandwich Combo',
-          orderquantity: 108,
+          title: 'Sandwich Combo',
+          soldamount: 108,
         },
         {
-          itemtitle: 'Bagel Tray',
-          orderquantity: 87,
+          title: 'Bagel Tray',
+          soldamount: 87,
         },
         {
-          itemtitle: 'Traditional Irish Breakfast',
-          orderquantity: 76,
+          title: 'Traditional Irish Breakfast',
+          soldamount: 76,
         },
         {
-          itemtitle: 'Chicken Parmigiano',
-          orderquantity: 65,
+          title: 'Chicken Parmigiano',
+          soldamount: 65,
         },
         {
-          itemtitle: 'Lasagna',
-          orderquantity: 54,
+          title: 'Lasagna',
+          soldamount: 54,
         },
         {
-          itemtitle: 'Meatball & Cheese Sub',
-          orderquantity: 27,
+          title: 'Meatball & Cheese Sub',
+          soldamount: 27,
         },
       ]
       var review = [
         {
-          name: "Kieran",
-          location: 'Limerick, Ireland',
-          comment: "Everyone was very happy. Hearty sandwiches. Very nice dessert sandwiches",
-          time: "5 days ago",
-          rating: 5,
+          customerFirstName: "Kieran",
+          customerCity: 'Limerick, Ireland',
+          customerComment: "Everyone was very happy. Hearty sandwiches. Very nice dessert sandwiches",
+          createdAt: "5 days ago",
+          customerRating: 5,
         },
         {
-          name: "Qiana",
-          location: 'Dublin, Ireland',
-          comment: "The food smelled pretty good and staff seemed excited because they eat there on their own time. The only downside is they delivered 45 mins. early, which is better than being late. I guess it didn't matter much since we did sandwiches and not something that would be bad if it got cold (i.e., pasta or other hot entree).",
-          time: "7 days ago",
-          rating: 4,
+          customerFirstName: "Qiana",
+          customerCity: 'Dublin, Ireland',
+          customerComment: "The food smelled pretty good and staff seemed excited because they eat there on their own time. The only downside is they delivered 45 mins. early, which is better than being late. I guess it didn't matter much since we did sandwiches and not something that would be bad if it got cold (i.e., pasta or other hot entree).",
+          createdAt: "7 days ago",
+          customerRating: 4,
         },
         {
-          name: "Aldo",
-          location: 'Limerick, Ireland',
-          comment: "Food is on time, great experience, food is delicious",
-          time: "8 days ago",
-          rating: 5,
+          customerFirstName: "Aldo",
+          customerCity: 'Limerick, Ireland',
+          customerComment: "Food is on time, great experience, food is delicious",
+          createdAt: "8 days ago",
+          customerRating: 5,
         },
         {
-          name: "Connie",
-          location: 'Limerick, Ireland',
-          comment: "The food was delicious and the presentation looked great. Perfect portions. We will order again!",
-          time: "15 days ago",
-          rating: 4,
+          customerFirstName: "Connie",
+          customerCity: 'Limerick, Ireland',
+          customerComment: "The food was delicious and the presentation looked great. Perfect portions. We will order again!",
+          createdAt: "15 days ago",
+          customerRating: 4,
         },
         {
-          name: "Chandra",
-          location: 'Limerick, Ireland',
-          comment: "First time ordering from Italian Gourmet for this group. Everything was a big hit--even though they were a bit early.",
-          time: "1 month ago",
-          rating: 5,
+          customerFirstName: "Chandra",
+          customerCity: 'Limerick, Ireland',
+          customerComment: "First time ordering from Italian Gourmet for this group. Everything was a big hit--even though they were a bit early.",
+          createdAt: "1 month ago",
+          customerRating: 5,
         },
       ]
 
@@ -285,7 +293,183 @@ class Dashboard extends Component {
         numofreview
       });
     }
+  }
 
+  getOrderSales = (currentDateString, previousDateString) => {
+  
+    var headers = {
+      'Content-Type': 'application/json',
+    }
+
+    var queryurl = apis.GETorder + "?lteDate=" + currentDateString + "&gteDate=" + previousDateString;
+    var allqueryrurl = apis.GETorder;
+
+    var axiosarray = [
+      axios.get(queryurl, {withCredentials: true}, {headers: headers}),
+      axios.get(allqueryrurl, {withCredentials: true}, {headers: headers})
+    ]
+    axios.all(axiosarray)
+    .then(axios.spread((query_response, allquery_response) => {
+      if (query_response.status === 200 && allquery_response.status === 200) {
+        this.getOrderChartData(query_response.data, allquery_response.data.length)      
+        this.getSalesChartData(query_response.data, allquery_response.data)    
+      } 
+    }))
+    .catch((error) => {
+    });
+  }
+
+  getMenuItems = () => {
+    var headers = {
+      'Content-Type': 'application/json',
+    }
+
+    var url = apis.GETmenu + "?dashboard=true";
+
+    axios.get(url, {withCredentials: true}, {headers: headers})
+      .then((response) => {
+        if (response.status === 200) {
+          this.setState({
+            topsellingitems: response.data
+          })
+        } 
+      })
+      .catch((error) => {
+      });
+  }
+  
+  getCustomer = (currentDateString, previousDateString) => {
+  
+    var headers = {
+      'Content-Type': 'application/json',
+    }
+
+    var queryurl = apis.GETorder_customer + "?lteDate=" + currentDateString + "&gteDate=" + previousDateString;
+    var allqueryrurl = apis.GETorder_customer;
+
+    var axiosarray = [
+      axios.get(queryurl, {withCredentials: true}, {headers: headers}),
+      axios.get(allqueryrurl, {withCredentials: true}, {headers: headers})
+    ]
+    axios.all(axiosarray)
+    .then(axios.spread((query_response, allquery_response) => {
+      if (query_response.status === 200 && allquery_response.status === 200) {
+        
+        this.getCustomersChartData(query_response.data, allquery_response.data.length)         
+      } 
+    }))
+    .catch((error) => {
+    });
+  }
+
+  getReview = (currentDateString, previousDateString) => {
+  
+    var headers = {
+      'Content-Type': 'application/json',
+    }
+
+    var url = apis.GETreview + "?lteDate=" + currentDateString + "&gteDate=" + previousDateString;
+
+    axios.get(url, {withCredentials: true}, {headers: headers})
+      .then((response) => {
+        if (response.status === 200) {
+          this.setState({
+            review: response.data,
+          })
+        } 
+      })
+      .catch((error) => {
+        this.setState({
+          empty: true 
+        })
+      });
+  }
+
+  getOrderChartData = (orderdata, allordercount) => {
+    var linedata = [];
+    var dateArray = this.state.dateArray
+
+    for (let i = 0; i < dateArray.length; i++) {
+      var count = 0
+      for (let x = 0; x < orderdata.length; x++) {
+        if (moment(orderdata[x].createdAt).format("DD MMM, YYYY") === dateArray[i]) {
+          count = count + 1
+        }
+      }
+      linedata.push(count)
+    }
+
+    var newline = this.state.orderline;
+    newline.datasets[0].data = linedata;
+    newline.datasets[0].orderlast7days = orderdata.length
+    newline.datasets[0].orderalltime = allordercount
+
+    this.setState({
+      orderline: newline,
+    })
+  }
+
+  getSalesChartData = (orderdata, allorderdata) => {
+    var bardata = [];
+    var dateArray = this.state.dateArray
+
+    var last7sales = 0;
+    var allsales = 0;
+
+    for (let x = 0; x < allorderdata.length; x++) {
+      allsales = allsales + allorderdata[x].totalOrderPrice
+    }
+
+    for (let i = 0; i < dateArray.length; i++) {
+      var sales = 0
+      for (let x = 0; x < orderdata.length; x++) {
+        if (moment(orderdata[x].createdAt).format("DD MMM, YYYY") === dateArray[i]) {
+          sales = sales + orderdata[x].totalOrderPrice
+        }
+      }
+      bardata.push(sales)
+      last7sales = last7sales + sales
+    }
+
+    var newbar = this.state.salesbar;
+    newbar.datasets[0].data = bardata;
+    newbar.datasets[0].saleslast7days = Number(last7sales).toFixed(2)
+    newbar.datasets[0].salesalltime = Number(allsales).toFixed(2)
+
+    this.setState({
+      salesbar: newbar,
+    })
+  }
+
+  getCustomersChartData = (customerdata, allcustomerscount) => {
+    var newcustomer_val = 0;
+    var recurringcustomer_val = 0;
+
+    for (let x = 0; x < customerdata.length; x++) {
+      if (customerdata[x].customerDetails[0].status === "new") {
+        newcustomer_val = newcustomer_val + 1
+      }
+      else if (customerdata[x].customerDetails[0].status === "recurring") {
+        recurringcustomer_val = recurringcustomer_val + 1
+      }
+    }
+
+    var newpie = this.state.customerpie
+    var piedata = []
+    if (newcustomer_val === 0 && recurringcustomer_val === 0 ) {
+      piedata = []
+    }
+    else {
+      piedata = [newcustomer_val, recurringcustomer_val]
+    }
+    newpie.datasets[0].data = piedata
+    newpie.datasets[0].newcustomerlast7days = newcustomer_val
+    newpie.datasets[0].recurringcustomerlast7days = recurringcustomer_val
+    newpie.datasets[0].totalcustomers = allcustomerscount
+
+    this.setState({
+      customerpie: newpie,
+    })
   }
 
   getIntervalDates = (startDate, stopDate) => {
@@ -298,6 +482,10 @@ class Dashboard extends Component {
     }
     return dateArray;
   };
+
+  numberWithCommas = (x) => {
+    return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  }
 
   toggle(which) {
     this.setState({ [which]: !this.state[which] });
@@ -325,25 +513,25 @@ class Dashboard extends Component {
     var barColor;
 
     for(let i = 0; i < topsellingitems.length; i++){
-      if (topsellingitems[i].orderquantity > 70) {
+      if (topsellingitems[i].soldamount > 70) {
         barColor = "success"
       }
-      else if (topsellingitems[i].orderquantity <= 70 && topsellingitems[i].orderquantity > 30) {
+      else if (topsellingitems[i].soldamount <= 70 && topsellingitems[i].soldamount > 30) {
         barColor = "warning"
       }
-      else if (topsellingitems[i].orderquantity <= 30 && topsellingitems[i].orderquantity > 0) {
+      else if (topsellingitems[i].soldamount <= 30 && topsellingitems[i].soldamount > 0) {
         barColor = "danger"
       }
       itemarray.push(
         <div className="progress-group mb-4">
           <div className="progress-group-header">
             <span className="progress-group-text">
-              {topsellingitems[i].itemtitle}
+              {topsellingitems[i].title}
             </span>
-            <span className="ml-auto font-weight-bold">{topsellingitems[i].orderquantity}</span>
+            <span className="ml-auto font-weight-bold">{topsellingitems[i].soldamount}</span>
           </div>
           <div className="progress-group-bars">
-            <Progress className="progress-xs" color={barColor} value={topsellingitems[i].orderquantity} />
+            <Progress className="progress-xs" color={barColor} value={topsellingitems[i].soldamount} />
           </div>
         </div>
       )
@@ -388,7 +576,7 @@ class Dashboard extends Component {
     )
   }
 
-  renderPieChartTitle(title, newcustomer, recurring_customer) {
+  renderPieChartTitle(title, newcustomer, recurring_customer, totalcustomers) {
     return(
       <CardHeader style={{backgroundColor: 'white'}}>
         <Label style={ { marginLeft: 10, marginBottom: 10 }} className="h6">{title}</Label>
@@ -405,6 +593,8 @@ class Dashboard extends Component {
           <Label style={ { marginLeft: 10 , opacity: 0.6}}>New Customer</Label>
           <Label style={ { marginLeft: 30 }} className="h4">{recurring_customer}</Label>
           <Label style={ { marginLeft: 10 , opacity: 0.6}}>Recurring Customer</Label>
+          <Label style={ { marginLeft: 30 }} className="h4">{totalcustomers}</Label>
+          <Label style={ { marginLeft: 10 , opacity: 0.6}}>Total Customer</Label>
         </div>
       </CardHeader>
     )
@@ -450,19 +640,19 @@ class Dashboard extends Component {
     for (let i = 0; i < tableitems.length; i++) {
       itemarray.push(
         <tr>
-          <td style={{width: '10%'}}>{tableitems[i].name}</td>
-          <td style={{width: '15%'}}>{tableitems[i].location}</td>
+          <td style={{width: '10%'}}>{tableitems[i].customerFirstName}</td>
+          <td style={{width: '15%'}}>{tableitems[i].customerCity}</td>
           <td style={{width: '15%'}}>
             <StarRatingComponent
               name="rating"
               emptyStarColor="#D3D3D3"
               starCount={5}
               editing={false}
-              value={tableitems[i].rating}
+              value={tableitems[i].customerRating}
             />
           </td>
-          <td style={{width: '45%'}}>{tableitems[i].comment}</td>
-          <td style={{width: '15%'}}>{tableitems[i].time}</td>
+          <td style={{width: '45%'}}>{tableitems[i].customerComment}</td>
+          <td style={{width: '15%'}}>{moment(tableitems[i].createdAt).format("DD MMM, YYYY")}</td>
         </tr>
       );
     }
@@ -647,7 +837,7 @@ class Dashboard extends Component {
         <Row style= {{marginTop: 25}} className="justify-content-center">
           <Col xs="12" md="6">
             <Card onMouseEnter={() => this.toggle('orderEdit')} onMouseLeave={() => this.toggle('orderEdit')}>
-              {this.renderChartTitle('Orders', this.state.orderline.datasets[0].orderlast7days, this.state.orderline.datasets[0].orderalltime)}
+              {this.renderChartTitle('Orders', this.numberWithCommas(this.state.orderline.datasets[0].orderlast7days), this.numberWithCommas(this.state.orderline.datasets[0].orderalltime))}
               <CardBody>
                 {this.renderLineChart()}
               </CardBody>
@@ -656,7 +846,7 @@ class Dashboard extends Component {
 
           <Col xs="12" md="6">
             <Card onMouseEnter={() => this.toggle('salesEdit')} onMouseLeave={() => this.toggle('salesEdit')}>
-              {this.renderChartTitle('Sales', this.state.salesbar.datasets[0].saleslast7days, this.state.salesbar.datasets[0].salesalltime)}
+              {this.renderChartTitle('Sales', '€' + this.numberWithCommas(this.state.salesbar.datasets[0].saleslast7days), '€' + this.numberWithCommas(this.state.salesbar.datasets[0].salesalltime))}
               <CardBody>
                 {this.renderBarChart()}
               </CardBody>
@@ -686,7 +876,7 @@ class Dashboard extends Component {
 
           <Col xs="12" md="6">
             <Card onMouseEnter={() => this.toggle('customerEdit')} onMouseLeave={() => this.toggle('customerEdit')}>
-              {this.renderPieChartTitle('Customer', this.state.customerpie.datasets[0].customerlast7days, this.state.customerpie.datasets[0].customeralltime)}
+              {this.renderPieChartTitle('Customer', this.state.customerpie.datasets[0].newcustomerlast7days, this.state.customerpie.datasets[0].recurringcustomerlast7days, this.state.customerpie.datasets[0].totalcustomers)}
               <CardBody>
                 {this.state.customerpie.datasets[0].data.length > 0 ? this.renderPieChart() : this.renderEmptyCustomer()}
               </CardBody>

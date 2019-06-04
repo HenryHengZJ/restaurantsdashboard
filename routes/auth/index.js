@@ -7,6 +7,7 @@ const crypto = require('crypto');
 var mail = require('../../nodeMailerWithTemp');
 var ObjectId = require('mongodb').ObjectID;
 var bcrypt   = require('bcrypt-nodejs');
+require('dotenv').config();
 
 router.post('/caterersignup', (req, res) => {
 	
@@ -114,7 +115,7 @@ router.post('/catererlogin', (req, res) => {
                 }
                 else {
                     /** generate a signed json web token and return it in the response */
-                    const token = jwt.sign(payload, "FoodieBeeSecretKey", {expiresIn: '24h'} );
+                    const token = jwt.sign(payload, process.env.jwtSecretKey, {expiresIn: '24h'} );
 
                     /** assign our jwt to the cookie */
                     res.cookie('jwt', token, { httpOnly: true});

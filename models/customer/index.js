@@ -2,6 +2,7 @@
 var mongoose = require('mongoose');
 var bcrypt   = require('bcrypt-nodejs');
 const jwt = require('jsonwebtoken');
+require('dotenv').config();
 
 // define the schema for our customerSchema model
 var customerSchema = mongoose.Schema({
@@ -43,7 +44,7 @@ customerSchema.methods.generateJWT = function() {
   return jwt.sign({
     customerEmail: this.customerEmail,
     id: this._id,
-  }, 'FoodieBeeSecretKey', {expiresIn: '24h'} );
+  }, process.env.jwtSecretKey, {expiresIn: '24h'} );
 }
 
 //Connect to specific database

@@ -36,9 +36,12 @@ import './CatererDetail.css'
 import NavBar from '../../../components/NavBar/NavBar';
 import Footer from '../../../components/Footer/Footer';
 import Dotdotdot from "react-dotdotdot";
+import ContentLoader, { Facebook } from "react-content-loader";
 import Radio from '@material-ui/core/Radio';
 import Checkbox from '@material-ui/core/Checkbox';
 import StarRatingComponent from "react-star-rating-component";
+import axios from "axios";
+import apis from "../../../apis";
 
 const glutenfreeIcon = require('../../../assets/img/glutenfree1.png');
 const hotIcon = require('../../../assets/img/fire.png');
@@ -52,11 +55,17 @@ class CatererDetail extends Component {
   constructor(props) {
     super(props);
 
+    this.refObj = {}
+
     this.toggleMenuModal = this.toggleMenuModal.bind(this);
     this.handleQuantityChange = this.handleQuantityChange.bind(this);
     this.handleSpecialInstruction = this.handleSpecialInstruction.bind(this);
 
     this.state = {
+      todayDay: null,
+      loading: true,
+      cartloading: true,
+      orderType: "delivery",
       updateCartItem: false,
       selectedPrice: 0,
       selectedSelection: [],
@@ -67,354 +76,11 @@ class CatererDetail extends Component {
       menuModalOpen: false,
       selectedMenu: "All Menu",
       menuDropDownOpen: false,
-      fetchedmenu: [
-        {
-          _id: '1',
-          title: "Hot Dog",
-          categoryname: "Appetizer",
-          categorytag: "Appetizer",
-          descrip:
-            "Tomato sauce, oregano, mozzarella and fresh basil. Home made hot dog with extra cheese plus toppings such as garlic dips",
-          dishtype: "single",
-          serveperunit: 1,
-          minimumquantity: 1,
-          markitem: ["Hot", "Spicy"],
-          priceperunit: 4.50,
-          selection: [
-            {
-              selectioncategory: "Starter",
-              selectionmaxnum: 2,
-              selectionitem: [
-                {
-                  selectionitemtitle: "Pork Rib",
-                  selectionitemprice: 2.00
-                },
-                {
-                  selectionitemtitle: "Sring Roll",
-                  selectionitemprice: 1.00
-                },
-                {
-                  selectionitemtitle: "Fried Ball",
-                  selectionitemprice: 1.00
-                },
-                {
-                  selectionitemtitle: "Hot n Sour Soup",
-                  selectionitemprice: 1.50
-                }
-              ]
-            },
-            {
-              selectioncategory: "Bread",
-              selectionmaxnum: 1,
-              selectionitem: [
-                {
-                  selectionitemtitle: "Pita Bread",
-                  selectionitemprice: 0.00
-                },
-                {
-                  selectionitemtitle: "Tortilla Bread",
-                  selectionitemprice: 0.00
-                }
-              ]
-            }
-          ],
-        },
-        {
-          _id: '2',
-          title: "Breakfast Prosciutto",
-          categoryname: "Appetizer",
-          categorytag: "Appetizer",
-          descrip: "Tomato sauce, mozzarella, prosciutto",
-          dishtype: "bulk",
-          serveperunit: 6,
-          minimumquantity: 1,
-          markitem: ["Halal", "Healthy"],
-          priceperunit: 28.00,
-        },
-        {
-          _id: '3',
-          title: "Meatball with Swedish Pork Rib",
-          categoryname: "Appetizer",
-          categorytag: "Appetizer",
-          descrip: "Tomato sauce, mozzarella, prosciutto",
-          dishtype: "bulk",
-          serveperunit: 4,
-          minimumquantity: 1,
-          markitem: [],
-          priceperunit: 15.00,
-          selection: [],
-        },
-        {
-          _id: '4',
-          title: "Fried Rice Ball",
-          categoryname: "Appetizer",
-          categorytag: "Appetizer",
-          descrip: "Golden fried rice ball with tomato sauce dip",
-          dishtype: "bulk",
-          serveperunit: 4,
-          minimumquantity: 1,
-          markitem: ["Vegetarian", "Hot"],
-          priceperunit: 15.00,
-          selection: [],
-        },
-        {
-          _id: '5',
-          title: "Tortilla Wrap",
-          categoryname: "Morning wraps",
-          categorytag: "Appetizer",
-          descrip: "Tomato sauce, oregano, mozzarella and fresh basil",
-          dishtype: "bulk",
-          serveperunit: 4,
-          minimumquantity: 2,
-          markitem: ["Hot"],
-          priceperunit: 12.00,
-          selection: [],
-        },
-        {
-          _id: '6',
-          title: "Mexican Burrito",
-          categoryname: "Morning wraps",
-          categorytag: "Appetizer",
-          descrip: "Tomato sauce, mozzarella, prosciutto",
-          dishtype: "single",
-          serveperunit: 1,
-          minimumquantity: 4,
-          markitem: ["Spicy", "Hot"],
-          priceperunit: 5.00,
-          selection: [],
-        },
-        {
-          _id: '7',
-          title: "Cheese Egg",
-          categoryname: "Supa Breakfast",
-          categorytag: "Breakfast",
-          descrip:
-            "Tomato sauce, oregano, mozzarella and fresh basil. Home made hot dog with extra cheese plus toppings such as garlic dips",
-          dishtype: "bulk",
-          serveperunit: 4,
-          minimumquantity: 1,
-          markitem: ["Hot", "Spicy"],
-          priceperunit: 10.00,
-          selection: [],
-        },
-        {
-          _id: '8',
-          title: "English Breakfast with Tea",
-          categoryname: "Supa Breakfast",
-          categorytag: "Breakfast",
-          descrip: "Tomato sauce, mozzarella, prosciutto",
-          dishtype: "bulk",
-          serveperunit: 6,
-          minimumquantity: 1,
-          markitem: ["Hot", "Healthy"],
-          priceperunit: 22.00,
-          selection: [],
-        }
-      ],
-      menu: [
-        /*{
-          menutitle: "Appetizer",
-          menuitem: [
-            {
-              categoryname: "Appetizer",
-              items: [
-                {
-                  title: "Hot Dog",
-                  descrip:
-                    "Tomato sauce, oregano, mozzarella and fresh basil. Home made hot dog with extra cheese plus toppings such as garlic dips",
-                  dishtype: "single",
-                  serveperunit: 1,
-                  minimumquantity: 1,
-                  markitem: ["Hot", "Spicy"],
-                  priceperunit: 4.50,
-                  selection: [
-                    {
-                      selectioncategory: "Starter",
-                      selectionmaxnum: 2,
-                      selectionitem: [
-                        {
-                          selectionitemtitle: "Pork Rib",
-                          selectionitemprice: 2.00
-                        },
-                        {
-                          selectionitemtitle: "Sring Roll",
-                          selectionitemprice: 1.00
-                        },
-                        {
-                          selectionitemtitle: "Fried Ball",
-                          selectionitemprice: 1.00
-                        },
-                        {
-                          selectionitemtitle: "Hot n Sour Soup",
-                          selectionitemprice: 1.50
-                        }
-                      ]
-                    },
-                    {
-                      selectioncategory: "Bread",
-                      selectionmaxnum: 1,
-                      selectionitem: [
-                        {
-                          selectionitemtitle: "Pita Bread",
-                          selectionitemprice: 0.00
-                        },
-                        {
-                          selectionitemtitle: "Tortilla Bread",
-                          selectionitemprice: 0.00
-                        }
-                      ]
-                    }
-                  ],
-                },
-                {
-                  title: "Breakfast Prosciutto",
-                  descrip: "Tomato sauce, mozzarella, prosciutto",
-                  dishtype: "bulk",
-                  serveperunit: 6,
-                  minimumquantity: 1,
-                  markitem: ["Halal", "Healthy"],
-                  priceperunit: 28.00,
-                 
-                },
-                {
-                  title: "Meatball with Swedish Pork Rib",
-                  descrip: "Tomato sauce, mozzarella, prosciutto",
-                  dishtype: "bulk",
-                  serveperunit: 4,
-                  minimumquantity: 1,
-                  markitem: [],
-                  priceperunit: 15.00,
-                  selection: [],
-                },
-                {
-                  title: "Fried Rice Ball",
-                  descrip: "Golden fried rice ball with tomato sauce dip",
-                  dishtype: "bulk",
-                  serveperunit: 4,
-                  minimumquantity: 1,
-                  markitem: ["Vegetarian", "Hot"],
-                  priceperunit: 15.00,
-                  selection: [],
-                }
-              ]
-            },
-            {
-              categoryname: "Morning Wraps",
-              items: [
-                {
-                  title: "Tortilla Wraps",
-                  descrip: "Tomato sauce, oregano, mozzarella and fresh basil",
-                  dishtype: "bulk",
-                  serveperunit: 4,
-                  minimumquantity: 2,
-                  markitem: ["Hot"],
-                  priceperunit: 12.00,
-                  selection: [],
-                },
-                {
-                  title: "Mexican Bagel",
-                  descrip: "Tomato sauce, mozzarella, prosciutto",
-                  dishtype: "single",
-                  serveperunit: 1,
-                  minimumquantity: 4,
-                  markitem: ["Spicy", "Hot"],
-                  priceperunit: 5.00,
-                  selection: [],
-                }
-              ]
-            }
-          ]
-        },
-        {
-          menutitle: "Breakfast",
-          menuitem: [
-            {
-              categoryname: "Supa Breakfast",
-              items: [
-                {
-                  title: "Cheese Egg",
-                  descrip:
-                    "Tomato sauce, oregano, mozzarella and fresh basil. Home made hot dog with extra cheese plus toppings such as garlic dips",
-                  dishtype: "bulk",
-                  serveperunit: 4,
-                  minimumquantity: 1,
-                  markitem: ["Hot", "Spicy"],
-                  priceperunit: 10.00,
-                  selection: [],
-                },
-                {
-                  title: "English Breakfast with Tea",
-                  descrip: "Tomato sauce, mozzarella, prosciutto",
-                  dishtype: "bulk",
-                  serveperunit: 6,
-                  minimumquantity: 1,
-                  markitem: ["Hot", "Healthy"],
-                  priceperunit: 22.00,
-                  selection: [],
-                }
-              ]
-            }
-          ]
-        }*/
-      ],
-      menutitle: [
-        "All Menu",
-        "Appetizer",
-        "Breakfast",
-        "Sandwiches",
-        "Salads",
-        "Catering",
-        "Entrees",
-        "Lunches",
-        "Pizza",
-        "Sides",
-        "Desserts",
-        "Beverages"
-      ],
-      cartitem: [
-        /*{
-          _id: '1',
-          quantity: 1,
-          title: "Pasta Bolognese with Cheese and Mushroom",
-          instruction: 'More spicy please. Extra pepper and chili sauce',
-          selection: [
-            {
-              selectioncategory: "Starter",
-              selectionmaxnum: 2,
-              selectionitem: [
-                {
-                  selectionitemtitle: "Pork Rib",
-                  selectionitemprice: 2.00
-                },
-                {
-                  selectionitemtitle: "Hot n Sour Soup",
-                  selectionitemprice: 2.00
-                },
-               
-              ]
-            },
-            {
-              selectioncategory: "Bread",
-              selectionmaxnum: 1,
-              selectionitem: [
-                {
-                  selectionitemtitle: "Pita Bread",
-                  selectionitemprice: 0.00
-                }
-              ]
-            }
-          ],
-          serveperunit: 3,
-          totalprice: 12.00
-        },
-        {
-          _id: '2',
-          quantity: 2,
-          title: "Item",
-          serveperunit: 1,
-          totalprice: 15.00
-        }*/
-      ],
+      fetchedmenu: [],
+      menu: [],
+      menutitle: [],
+      cartitem: [],
+      cartToBeOrder: [],
       review: [
         {
           name: "Kieran",
@@ -454,22 +120,33 @@ class CatererDetail extends Component {
       ],
       quantity: [1,2,3,4,5,6,7,8,9,10,11,12,13],
       restaurantInfo: {
-        name: "Flannery Restaurant & Pub",
-        profileimg: "https://www.psdgraphics.com/wp-content/uploads/2016/08/restaurant-logo.png",
-        coverimg: "https://scm-assets.constant.co/scm/unilever/a6798e909fa57bfd19c3e7f00737e5d6/3905c3ca-155c-4227-ae0e-6db615ae7856.jpg",
-        descrip: "Specialized in American Burger style mealset. Our American subs are our specialty, and our Special Grileld with spiced capicola and prosciuttini is the number one customer favorite. Our portions won't leave your stomachs rumbling, and our flavors always go down easy.",
-        address: "30, O'Connell St, Dublin, Ireland",
+        /*catererID: "",
+        catererName: "Flannery Restaurant & Pub",
+        profilesrc: "https://www.psdgraphics.com/wp-content/uploads/2016/08/restaurant-logo.png",
+        coversrc: "http://www.fedracongressi.com/fedra/wp-content/uploads/2016/09/minisandwich.jpg",
+        catererDescrip: "Specialized in American Burger style mealset. Our American subs are our specialty, and our Special Grileld with spiced capicola and prosciuttini is the number one customer favorite. Our portions won't leave your stomachs rumbling, and our flavors always go down easy.",
+        catererAddress: "30, O'Connell St, Dublin, Ireland",
         rating: "4.7",
         numofreview: "150",
-        workinghours: "Mon-Fri: 10am-3pm",
+        openinghours: "Mon-Fri: 10am-3pm",
         deliveryfee: 3,
-        minspending: 50
-      }
+        minimumspend: 50*/
+      },
+      orderNotOverMinSpending: false
     };
   }
 
   componentDidMount() {
-    this.restructureMenu();
+    this.getCatererDetail();
+    this.getCatererMenu();
+
+    var days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    var d = new Date();
+    var dayName = days[d.getDay()];
+
+    this.setState({
+      todayDay: dayName
+    });
   }
 
   restructureMenu = () => {
@@ -507,8 +184,75 @@ class CatererDetail extends Component {
     console.log(JSON.stringify(finalresult));
 
     this.setState({
-      menu: finalresult
-    });
+      menu: finalresult,
+      loading: false,
+    },() => {
+      this.listmenu()
+    })
+  }
+
+  
+  listmenu = () => {
+    var menu = this.state.menu
+    var menutitleArray = ["All Menu"];
+    for (let i = 0; i < menu.length; i++) { 
+      var menutitle = menu[i].menutitle
+      menutitleArray.push(menutitle)
+    }
+    this.setState({
+      menutitle: menutitleArray
+    })
+  }
+
+  getCatererDetail= () => {
+    var headers = {
+      'Content-Type': 'application/json',
+    }
+
+    var url = apis.GETcaterer;
+
+    axios.get(url, {withCredentials: true}, {headers: headers})
+      .then((response) => {
+        if (response.status === 200) {
+          var restaurantInfo = this.state.restaurantInfo
+          restaurantInfo.catererID = response.data[0]._id;
+          restaurantInfo.catererName = typeof response.data[0].catererName !== 'undefined' ? response.data[0].catererName : "";
+          restaurantInfo.profilesrc = typeof response.data[0].profilesrc !== 'undefined' ? response.data[0].profilesrc : "";
+          restaurantInfo.coversrc = typeof response.data[0].coversrc !== 'undefined' ? response.data[0].coversrc : "https://stmed.net/sites/default/files/food-wallpapers-28249-101905.jpg";
+          restaurantInfo.catererAddress = typeof response.data[0].catererAddress !== 'undefined' ? response.data[0].catererAddress : "";
+          restaurantInfo.rating = typeof response.data[0].rating !== 'undefined' ? response.data[0].rating : 0;
+          restaurantInfo.numofreview = typeof response.data[0].numofreview !== 'undefined' ? response.data[0].numofreview : 0;
+          restaurantInfo.deliveryfee = typeof response.data[0].deliveryfee !== 'undefined' ? response.data[0].deliveryfee : 0;
+          restaurantInfo.minimumspend = typeof response.data[0].minimumspend !== 'undefined' ? response.data[0].minimumspend : 0;
+          restaurantInfo.openinghours = typeof response.data[0].openinghours !== 'undefined' ? response.data[0].openinghours : [];
+          this.setState({
+            restaurantInfo: restaurantInfo
+          })
+        } 
+      })
+      .catch((error) => {
+      });
+  }
+
+  getCatererMenu= () => {
+    var headers = {
+      'Content-Type': 'application/json',
+    }
+
+    var url = apis.GETmenu;
+
+    axios.get(url, {withCredentials: true}, {headers: headers})
+      .then((response) => {
+        if (response.status === 200) {
+          this.setState({
+            fetchedmenu: response.data,
+          },() => {
+            this.restructureMenu();
+          })
+        } 
+      })
+      .catch((error) => {
+      });
   }
 
   signIn(e) {
@@ -520,8 +264,21 @@ class CatererDetail extends Component {
     this.setState({
       selectedMenu: selectedMenu,
       menuDropDownOpen: false
-    });
+    }, () => {
+      var index = this.state.menu.findIndex(x => x.menutitle === selectedMenu);
+      if (index > 0) {
+        this.refObj[index].current.scrollIntoView({behavior: 'smooth'});
+      }
+    })
   };
+
+  selectOrderType = (orderType) => {
+    this.setState({
+      orderType,
+    },() => {
+      this.calculateCartTotalPrice()
+    })
+  }
 
   menuItemClicked = (_id) => {
     var menuindex = this.state.fetchedmenu.findIndex(x => x._id==_id);
@@ -549,9 +306,6 @@ class CatererDetail extends Component {
     if (previewVal) {
       alert("Items Checked Out!")
     }
-    else {
-      this.props.history.push('deliveryconfirmation')
-    }
   }
 
   toggleCuisineDropDown = () => {
@@ -578,14 +332,6 @@ class CatererDetail extends Component {
     });
   };
 
-  cartItemDelete = index => {
-    var newcart = this.state.cartitem;
-    newcart.splice(index, 1);
-    this.setState({
-      cartitem: newcart
-    });
-  };
-
   findIcon = (iconname) => {
     var iconPath;
     if (iconname == 'Hot') { iconPath = hotIcon }
@@ -598,11 +344,17 @@ class CatererDetail extends Component {
   }
 
   calculateCartTotalPrice = () => {
-    const {cartitem} = this.state
+    const {cartitem, orderType, restaurantInfo, fetchedmenu} = this.state
+
     var cartTotalPrice = 0;
 
     for (let i = 0; i < cartitem.length; i++) { 
       cartTotalPrice =  cartTotalPrice + cartitem[i].totalprice;
+    }
+
+
+    if (orderType === "delivery") {
+      cartTotalPrice =  cartTotalPrice + restaurantInfo.deliveryfee
     }
 
     return (Number(cartTotalPrice).toFixed(2));
@@ -699,6 +451,24 @@ class CatererDetail extends Component {
       this.toggleMenuModal()
     })
   }
+
+  deleteCart = (index) => {
+
+    this.setState({
+      cartloading: true
+    })
+    
+    const {selectedPrice, selectedSelection, selectedQuantity, activeMenu, specialInstruction, cartToBeOrder, orderType, restaurantInfo} = this.state;
+
+    var newCartItem = this.state.cartitem.slice();
+    newCartItem.splice(index, 1)
+
+    this.setState({
+      cartitem: newCartItem
+    },() => {
+      this.toggleMenuModal()
+    })
+  };
 
   updateCart = () => {
     const {selectedPrice, selectedSelection, selectedQuantity, activeMenu, specialInstruction} = this.state;
@@ -829,33 +599,98 @@ class CatererDetail extends Component {
   }
 
  
-  renderNavItem(menutitle) {
-    return (
-      <NavItem>
-        <NavLink
-          onClick={() => this.navItemClicked(menutitle)}
-          style={{
-            paddingRight: 20,
-            paddingLeft: menutitle === "All Menu" ? 0 : 20,
-            fontWeight: "600",
-            color: this.state.selectedMenu === menutitle ? "#20a8d8" : "black",
-            fontSize: 15
-          }}
-          href="#"
-        >
-          {" "}
-          {menutitle}
-        </NavLink>
-        <div
-          style={{
-            height: 2,
-            width: "100%",
-            backgroundColor:
-              this.state.selectedMenu === menutitle ? "#20a8d8" : "transparent"
-          }}
-        />
-      </NavItem>
-    );
+  renderNavItem() {
+
+    var itemsarray = [];
+
+    var menutitle = this.state.menutitle;
+
+    for (let i = 0; i < menutitle.length; i++) {
+      if(i > 4 && i < menutitle.length) {
+        itemsarray.push(
+          <NavItem>
+            <UncontrolledDropdown
+              nav
+              isOpen={this.state.menuDropDownOpen}
+              toggle={() => {
+                this.toggleCuisineDropDown();
+              }}
+            >
+              <DropdownToggle
+                style={{
+                  fontWeight: "600",
+                  color:
+                    this.state.menutitle
+                      .slice(5, menutitle.length)
+                      .includes(this.state.selectedMenu) ||
+                    this.state.menuDropDownOpen
+                      ? "#20a8d8"
+                      : "black",
+                  backgroundColor: "white",
+                  fontSize: 15
+                }}
+                nav
+                caret
+              >
+                {this.state.menutitle
+                  .slice(5, menutitle.length)
+                  .includes(this.state.selectedMenu)
+                  ? this.state.selectedMenu
+                  : "More"}
+              </DropdownToggle>
+              <DropdownMenu right style={{ right: "auto" }}>
+                <Table style={{ margin: 0 }} borderless>
+                  <tbody>{this.renderMoreMenu(5, 12)}</tbody>
+                </Table>
+              </DropdownMenu>
+            </UncontrolledDropdown>
+            <div
+              style={{
+                height: 2,
+                width: "100%",
+                backgroundColor: this.state.menutitle
+                  .slice(5, menutitle.length)
+                  .includes(this.state.selectedMenu)
+                  ? "#20a8d8"
+                  : "transparent"
+              }}
+            />
+          </NavItem>
+        )
+        break
+      }
+      else {
+        itemsarray.push(
+          <NavItem>
+            <NavLink
+              onClick={() => this.navItemClicked(menutitle[i])}
+              style={{
+                paddingRight: 20,
+                paddingLeft: menutitle[i] === "All Menu" ? 0 : 20,
+                fontWeight: "600",
+                color: this.state.selectedMenu === menutitle[i] ? "#20a8d8" : "black",
+                fontSize: 15
+              }}
+              href="#"
+            >
+              {" "}
+              {menutitle[i]}
+            </NavLink>
+            <div
+              style={{
+                height: 2,
+                width: "100%",
+                backgroundColor:
+                  this.state.selectedMenu === menutitle[i] ? "#20a8d8" : "transparent"
+              }}
+            />
+          </NavItem>
+        );
+      }
+    }
+
+    return  <Nav className="float-left" pills>{itemsarray}</Nav>;
+
   }
 
   renderMoreMenu(startindex, lastindex) {
@@ -1153,7 +988,7 @@ class CatererDetail extends Component {
                 width: 15,
                 objectFit: "cover"
               }}
-              onClick={() => this.cartItemDelete(i)}
+              onClick={() => this.deleteCart(i)}
               src={closeIcon}
               alt=""
             />
@@ -1169,6 +1004,58 @@ class CatererDetail extends Component {
     return (
       <CardBody style={{ textAlign: "center" }}>
         <Table borderless>{this.renderTableItems()}</Table>
+
+        <Row>
+          <Col>
+            <Card
+              style={{
+                cursor: "pointer",
+                borderColor: this.state.orderType === "delivery" ? "#20a8d8" : null
+              }}
+              onMouseOver=""
+              onClick={() => this.selectOrderType("delivery")}
+            >
+              <CardBody style={{margin: 0, padding:10}}>
+                <h6 style={{ marginTop: 5, textAlign: "center", color: this.state.orderType === "delivery" ? "#20a8d8" : null }}>
+                  Delivery
+                </h6>
+              </CardBody>
+            </Card>
+          </Col>
+          <Col>
+            <Card
+              style={{
+                cursor: "pointer",
+                borderColor: this.state.orderType === "pickup" ? "#20a8d8" : null
+              }}
+              onMouseOver=""
+              onClick={() => this.selectOrderType("pickup")}
+            >
+              <CardBody style={{margin: 0, padding:10}}>
+                <h6 style={{ marginTop: 5, textAlign: "center", color: this.state.orderType === "pickup" ? "#20a8d8" : null }}>
+                  Pick Up
+                </h6>
+              </CardBody>
+            </Card>
+          </Col>
+        </Row>
+
+        <Collapse isOpen={this.state.orderType === "delivery"} >
+          <Table borderless>
+            <tbody>
+              <tr>
+                <td
+                  style={{ fontSize: 16, textAlign: "start" }}
+                >
+                  Delivery Fee
+                </td>
+                <td style={{ fontSize: 16, textAlign: "end" }}>
+                  €{Number(this.state.restaurantInfo.deliveryfee).toFixed(2)}
+                </td>
+              </tr>
+            </tbody>
+          </Table>
+        </Collapse>
 
         <div
           style={{
@@ -1209,6 +1096,21 @@ class CatererDetail extends Component {
           Checkout
         </Button>
 
+        {this.state.orderNotOverMinSpending ? 
+        <div>
+        <Label
+          style={{
+            marginTop: 20,
+            color: "red",
+            textAlign: "center",
+            fontSize: 15
+          }}
+        >
+          Total order price has to be more than minimum order €{Number(this.state.restaurantInfo.minimumspend).toFixed(2)}
+        </Label>
+        </div>
+        : null }
+
         <div>
         <Label
           style={{
@@ -1218,7 +1120,7 @@ class CatererDetail extends Component {
             fontSize: 15
           }}
         >
-          Minimum Order Value: €50.00
+          Minimum Order Value: €{Number(this.state.restaurantInfo.minimumspend).toFixed(2)}
         </Label>
         </div>
 
@@ -1288,7 +1190,7 @@ class CatererDetail extends Component {
             fontSize: 15
           }}
         >
-          Minimum Order Value: €50.00
+           Minimum Order Value: €{Number(this.state.restaurantInfo.minimumspend).toFixed(2)}
         </Label>
         </div>
       </CardBody>
@@ -1329,8 +1231,10 @@ class CatererDetail extends Component {
     var menutab = this.state.menu;
 
     for (let i = 0; i < menutab.length; i++) {
+      this.refObj[i] = React.createRef();
       menuarray.push(
-        <Col xs="12">
+        <Col key={i} xs="12">
+          <div ref={this.refObj[i]} > </div>
           {i === 0 ? null : (
             <div
               style={{
@@ -1343,15 +1247,14 @@ class CatererDetail extends Component {
               }}
             />
           )}
-          {this.renderCategory(menutab[i].menuitem, i)}
+          {this.renderCategory(menutab[i].menuitem)}
         </Col>
       );
     }
 
     return (
-    <Row>
+    <Row >
       {menuarray}
-     
     </Row>
     );
   }
@@ -1400,7 +1303,7 @@ class CatererDetail extends Component {
                         textOverflow: "ellipsis",
                         overflow: "hidden",
                         whiteSpace: "nowrap",
-                        maxWidth: 180,
+                        maxWidth: 150,
                         width: "100%",
                         textAlign: "start",
                         cursor: "pointer",
@@ -1542,7 +1445,7 @@ class CatererDetail extends Component {
       <Row>
         <Col xs="12">
           <Label style={{ marginBottom: 30, fontSize: 19, }} className="h5">
-            Reviews for Flannery Resturant & Pub
+            Reviews for {this.state.restaurantInfo.catererName}
           </Label>
         </Col>
         {itemsarray}
@@ -1559,17 +1462,19 @@ class CatererDetail extends Component {
     var restaurantInfo = this.state.restaurantInfo
     return (
       <Row>
-        <img
-          style={{ objectFit: "cover", width: 80, height: 80 }}
-          src={this.state.restaurantInfo.profileimg}
-        />
-        <Label style={{ marginLeft: 10, marginTop: 20 }} className="h4">
-          {restaurantInfo.name}
-        </Label>
+        <div style={{ marginLeft: 10, width: 80, height: 80, position: 'relative', overflow: 'hidden', borderRadius: '50%'}}>
+          <img style={{ objectFit:'cover', width: 'auto', height: '100%', display: 'inline' }} src={this.state.restaurantInfo.profilesrc}/>
+        </div>
+              
+        <Col xs="12">
+          <Label style={{ marginTop: 20 }} className="h4">
+            {restaurantInfo.catererName}
+          </Label>
+        </Col>
 
         <Col xs="12">
           <Label style={{ marginTop:10, fontWeight: '600' }}>
-            {restaurantInfo.address}
+            {restaurantInfo.catererAddress}
           </Label>
         </Col>
 
@@ -1582,10 +1487,15 @@ class CatererDetail extends Component {
             editing={false}
             value={restaurantInfo.rating}
           />
-          <b style={{ marginLeft: 5, color: "darkorange" }}>4.7</b>
+           {restaurantInfo.rating === 0 ? null : <b style={{ marginLeft: 5, color: "darkorange" }}>{restaurantInfo.rating}</b> }
+          {restaurantInfo.numofreview === 0 ? 
+          <Label style={{ fontWeight: '500', marginLeft: 5, color: "darkorange" }}>
+            No Ratings Yet
+          </Label>
+          :
           <Label style={{ fontWeight: '500', marginLeft: 5, color: "darkorange" }}>
             ({restaurantInfo.numofreview}) Reviews
-          </Label>
+          </Label>}
         </Row>
         </Col>
 
@@ -1596,22 +1506,69 @@ class CatererDetail extends Component {
         </Col>
         <Col style={{margin: 0, padding : 0}} xs="12">
           <Table style={{margin: 0, padding : 0}} borderless>
-            <tbody>
+          <tbody>
               <tr>
-                <td><p style={{padding: 0, margin: 0}}>Working Hours:</p></td>
-                <td className="h6">{restaurantInfo.workinghours}</td>
+                <td><p style={{padding: 0, margin: 0, fontWeight: '600'}}>Delivery Fee:</p></td>
+                <td><p style={{padding: 0, margin: 0}}>€{Number(restaurantInfo.deliveryfee).toFixed(2)}</p></td>
               </tr>
               <tr>
-                <td><p style={{padding: 0, margin: 0}}>Delivery Fee:</p></td>
-                <td className="h6">€{Number(restaurantInfo.deliveryfee).toFixed(2)}</td>
+                <td><p style={{padding: 0, margin: 0, fontWeight: '600'}}>Minimum Spending:</p></td>
+                <td><p style={{padding: 0, margin: 0}}>€{Number(restaurantInfo.minimumspend).toFixed(2)}</p></td>
               </tr>
               <tr>
-                <td><p style={{padding: 0, margin: 0}}>Minimum Spending:</p></td>
-                <td className="h6">€{Number(restaurantInfo.minspending).toFixed(2)}</td>
+                <td><p style={{padding: 0, margin: 0, fontWeight: '600'}}>Opening Hours:</p></td>
+                <td><p style={{padding: 0, margin: 0}}>{this.renderOpeningHours()}</p></td>
               </tr>
             </tbody>
           </Table>
         </Col>
+      </Row>
+    );
+  }
+
+  reformatInput = (time) => {
+    if (time.length > 3 ) {
+      time = time.slice(0, 2) + ":" + time.slice(2, 4)
+      
+    }
+    else {
+      time = "0" + time.slice(0, 1) + ":" + time.slice(1, 3)
+    }
+    return time
+  }
+
+  renderOpeningHours() {
+    var itemsarray = [];
+
+    var openinghours = this.state.restaurantInfo.openinghours;
+
+    if (typeof this.state.restaurantInfo.openinghours !== 'undefined') {
+      if (openinghours.length > 0) {
+        for (let i = 0; i < openinghours.length; i++) {
+          itemsarray.push(
+            <Col xs="6" sm="6" md="4" lg="4">
+              <span style={{fontWeight: this.state.todayDay === openinghours[i].day ? '700' : null}}>
+                <p style={{margin: 0}}>
+                  {openinghours[i].day}
+                </p>
+                {openinghours[i].starttime === 0 && openinghours[i].closetime === 0 ? 
+                 <p style={{margin: 0, marginBottom: 10}}>Off</p>
+                 :
+                <p style={{margin: 0, marginBottom: 10}}>
+                  {this.reformatInput(openinghours[i].starttime.toString())}&nbsp;-&nbsp;{this.reformatInput(openinghours[i].closetime.toString())}
+                </p>
+                }
+              </span>
+            </Col>
+          );
+        }
+      }
+    }
+
+    return (
+      <Row
+      >
+        {itemsarray}
       </Row>
     );
   }
@@ -1656,6 +1613,7 @@ class CatererDetail extends Component {
     for (let i = 0; i < markitem.length; i++) {
       iconarray.push(
         <img
+          key={i} 
           style={{
             marginLeft: 5,
             marginBottom: 5,
@@ -1680,6 +1638,33 @@ class CatererDetail extends Component {
     );
   }
 
+  renderLoadingItems() {
+    var itemsarray = [];
+
+    for (let i = 0; i < 6; i++) {
+      itemsarray.push(
+        <Col key={i} xs="12" sm="6" md="6" lg="6">
+          <ContentLoader height="350">
+            <rect x="0" y="0" rx="6" ry="6" width="100%" height="220" />
+            <rect x="0" y="240" rx="4" ry="4" width="300" height="13" />
+            <rect x="0" y="265" rx="3" ry="3" width="100%" height="20" />
+          </ContentLoader>
+        </Col>
+      );
+    }
+
+    return (
+      <Row
+        style={{
+          marginTop: 10
+        }}
+      >
+        {itemsarray}
+      </Row>
+    );
+  }
+
+
   render() {
     const {
       preview,
@@ -1700,7 +1685,7 @@ class CatererDetail extends Component {
             >
               <img
                 style={{ objectFit: "cover", width: "100%", height: 300 }}
-                src={this.state.restaurantInfo.coverimg}
+                src={this.state.restaurantInfo.coversrc}
               />
 
               <Col xs="0" sm="1" md="3" lg="3" />
@@ -1710,13 +1695,12 @@ class CatererDetail extends Component {
                   style={{ textAlign: "center", marginTop: -250 }}
                 >
                   <CardBody>
-                    <img
-                      style={{ objectFit: "cover", width: 80, height: 80 }}
-                      src={this.state.restaurantInfo.profileimg}
-                    />
-                    <Label style={{ marginLeft: 10 }} className="h4">
-                      {this.state.restaurantInfo.name}
-                    </Label>
+                    
+                    <div style={{width: 80, height: 80, position: 'relative', margin: 'auto', overflow: 'hidden', borderRadius: '50%'}}>
+                      <img style={{ objectFit:'cover', width: 'auto', height: '100%', display: 'inline' }} src={this.state.restaurantInfo.profilesrc}/>
+                    </div>
+
+                    <Label style={{ marginTop:10, marginLeft: 10 }} className="h4">{this.state.restaurantInfo.catererName}</Label>
 
                     <Row className="justify-content-center">
                       <StarRatingComponent
@@ -1726,10 +1710,15 @@ class CatererDetail extends Component {
                         editing={false}
                         value={this.state.restaurantInfo.rating}
                       />
-                      <b style={{ marginLeft: 5, color: "darkorange" }}>4.7</b>
+                      {this.state.restaurantInfo.rating === 0 ? null : <b style={{ marginLeft: 5, color: "darkorange" }}>{this.state.restaurantInfo.rating}</b> }
+                      {this.state.restaurantInfo.numofreview === 0 ? 
+                      <Label style={{ fontWeight: '500', marginLeft: 5, color: "darkorange" }}>
+                        No Ratings Yet
+                      </Label>
+                      :
                       <Label style={{ fontWeight: '500', marginLeft: 5, color: "darkorange" }}>
                         ({this.state.restaurantInfo.numofreview}) Reviews
-                      </Label>
+                      </Label>}
                     </Row>
 
                     <Label style={{ marginTop: 10 }} className="h6">
@@ -1743,65 +1732,12 @@ class CatererDetail extends Component {
               <Col xs="0" sm="1" md="3" lg="3" />
 
               <Col style={{ marginTop: 30, marginBottom: 20 }} xs="12" md="12">
-                <Nav className="float-left" pills>
-                  {this.renderNavItem(this.state.menutitle[0])}
-                  {this.renderNavItem(this.state.menutitle[1])}
-                  {this.renderNavItem(this.state.menutitle[2])}
-                  {this.renderNavItem(this.state.menutitle[3])}
-                  {this.renderNavItem(this.state.menutitle[4])}
-                  <NavItem>
-                    <UncontrolledDropdown
-                      nav
-                      isOpen={this.state.menuDropDownOpen}
-                      toggle={() => {
-                        this.toggleCuisineDropDown();
-                      }}
-                    >
-                      <DropdownToggle
-                        style={{
-                          fontWeight: "600",
-                          color:
-                            this.state.menutitle
-                              .slice(5, menutitlelength)
-                              .includes(this.state.selectedMenu) ||
-                            this.state.menuDropDownOpen
-                              ? "#20a8d8"
-                              : "black",
-                          backgroundColor: "white",
-                          fontSize: 15
-                        }}
-                        nav
-                        caret
-                      >
-                        {this.state.menutitle
-                          .slice(5, menutitlelength)
-                          .includes(this.state.selectedMenu)
-                          ? this.state.selectedMenu
-                          : "More"}
-                      </DropdownToggle>
-                      <DropdownMenu right style={{ right: "auto" }}>
-                        <Table style={{ margin: 0 }} borderless>
-                          <tbody>{this.renderMoreMenu(5, 12)}</tbody>
-                        </Table>
-                      </DropdownMenu>
-                    </UncontrolledDropdown>
-                    <div
-                      style={{
-                        height: 2,
-                        width: "100%",
-                        backgroundColor: this.state.menutitle
-                          .slice(5, menutitlelength)
-                          .includes(this.state.selectedMenu)
-                          ? "#20a8d8"
-                          : "transparent"
-                      }}
-                    />
-                  </NavItem>
-                </Nav>
+                {this.renderNavItem()}
+                
               </Col>
 
               <Col style={{ marginTop: 20 }} xs="12" sm="12" md="7" lg="7">
-                {this.renderMenu()}
+                {this.state.loading ? this.renderLoadingItems() : this.renderMenu()}
               </Col>
 
               <Col style={{ marginTop: 20 }} xs="0" sm="0" md="5" lg="5">

@@ -57,18 +57,25 @@ class OpeningHours extends Component {
       _id: "",
       mondaystartingtime: '',
       mondayclosingtime: '',
+      mondaychecked: null,
       tuesdaystartingtime: '',
       tuesdayclosingtime: '',
+      tuesdaychecked: null,
       wednesdaystartingtime: '',
       wednesdayclosingtime: '',
+      wednesdaychecked: null,
       thursdaystartingtime: '',
       thursdayclosingtime: '',
+      thursdaychecked: null,
       fridaystartingtime: '',
       fridayclosingtime: '',
+      fridaychecked: null,
       saturdaystartingtime: '',
       saturdayclosingtime: '',
+      saturdaychecked: null,
       sundaystartingtime: '',
       sundayclosingtime: '',
+      sundaychecked: null,
       isProceedButtonVisible: false,
       isSaving: false,
     };
@@ -92,43 +99,50 @@ class OpeningHours extends Component {
               if (openinghours[i].day === 'Monday') {
                 this.setState({
                   mondaystartingtime: this.reformatInput(openinghours[i].starttime.toString()),
-                  mondayclosingtime:  this.reformatInput(openinghours[i].closetime.toString())
+                  mondayclosingtime:  this.reformatInput(openinghours[i].closetime.toString()),
+                  mondaychecked: openinghours[i].starttime === 0 && openinghours[i].closetime === 0 ? false : true
                 })
               }
               else if (openinghours[i].day === 'Tuesday') {
                 this.setState({
                   tuesdaystartingtime: this.reformatInput(openinghours[i].starttime.toString()),
-                  tuesdayclosingtime:  this.reformatInput(openinghours[i].closetime.toString())
+                  tuesdayclosingtime:  this.reformatInput(openinghours[i].closetime.toString()),
+                  tuesdaychecked: openinghours[i].starttime === 0 && openinghours[i].closetime === 0 ? false : true
                 })
               }
               else if (openinghours[i].day === 'Wednesday') {
                 this.setState({
                   wednesdaystartingtime: this.reformatInput(openinghours[i].starttime.toString()),
-                  wednesdayclosingtime:  this.reformatInput(openinghours[i].closetime.toString())
+                  wednesdayclosingtime:  this.reformatInput(openinghours[i].closetime.toString()),
+                  wednesdaychecked: openinghours[i].starttime === 0 && openinghours[i].closetime === 0 ? false : true
                 })
               }
               else if (openinghours[i].day === 'Thursday') {
                 this.setState({
                   thursdaystartingtime: this.reformatInput(openinghours[i].starttime.toString()),
-                  thursdayclosingtime:  this.reformatInput(openinghours[i].closetime.toString())
+                  thursdayclosingtime:  this.reformatInput(openinghours[i].closetime.toString()),
+                  thursdaychecked: openinghours[i].starttime === 0 && openinghours[i].closetime === 0 ? false : true
                 })
               }
               else if (openinghours[i].day === 'Friday') {
                 this.setState({
                   fridaystartingtime: this.reformatInput(openinghours[i].starttime.toString()),
-                  fridayclosingtime:  this.reformatInput(openinghours[i].closetime.toString())
+                  fridayclosingtime:  this.reformatInput(openinghours[i].closetime.toString()),
+                  fridaychecked: openinghours[i].starttime === 0 && openinghours[i].closetime === 0 ? false : true
                 })
               }
               else if (openinghours[i].day === 'Saturday') {
                 this.setState({
                   saturdaystartingtime: this.reformatInput(openinghours[i].starttime.toString()),
-                  saturdayclosingtime: this.reformatInput(openinghours[i].closetime.toString())
+                  saturdayclosingtime: this.reformatInput(openinghours[i].closetime.toString()),
+                  saturdaychecked: openinghours[i].starttime === 0 && openinghours[i].closetime === 0 ? false : true
                 })
               }
               else if (openinghours[i].day === 'Sunday') {
                 this.setState({
                   sundaystartingtime: this.reformatInput(openinghours[i].starttime.toString()),
-                  sundayclosingtime:  this.reformatInput(openinghours[i].closetime.toString())
+                  sundayclosingtime:  this.reformatInput(openinghours[i].closetime.toString()),
+                  sundaychecked: openinghours[i].starttime === 0 && openinghours[i].closetime === 0 ? false : true
                 })
               }
             }
@@ -178,45 +192,45 @@ class OpeningHours extends Component {
       isSaving: true,
     })
 
-    const {_id, mondaystartingtime, mondayclosingtime, tuesdaystartingtime, tuesdayclosingtime, wednesdaystartingtime, wednesdayclosingtime,
-      thursdaystartingtime, thursdayclosingtime, fridaystartingtime, fridayclosingtime, saturdaystartingtime, saturdayclosingtime, sundaystartingtime, sundayclosingtime} = this.state
+    const {_id, mondaychecked, mondaystartingtime, mondayclosingtime, tuesdaychecked, tuesdaystartingtime, tuesdayclosingtime, wednesdaychecked, wednesdaystartingtime, wednesdayclosingtime,
+      thursdaychecked, thursdaystartingtime, thursdayclosingtime, fridaychecked, fridaystartingtime, fridayclosingtime, saturdaychecked, saturdaystartingtime, saturdayclosingtime, sundaychecked, sundaystartingtime, sundayclosingtime} = this.state
 
     var data = {
       openinghours:  [
         {
           day: "Monday",
-          starttime: this.state.mondaystartingtime.includes(":") ? Number(this.state.mondaystartingtime.replace(":", "")) : this.state.mondaystartingtime,
-          closetime: this.state.mondayclosingtime.includes(":") ? Number(this.state.mondayclosingtime.replace(":", "")) : this.state.mondayclosingtime,
+          starttime: !mondaychecked? 0 : this.state.mondaystartingtime.includes(":") ? Number(this.state.mondaystartingtime.replace(":", "")) : this.state.mondaystartingtime,
+          closetime: !mondaychecked? 0 : this.state.mondayclosingtime.includes(":") ? Number(this.state.mondayclosingtime.replace(":", "")) : this.state.mondayclosingtime,
         },
         {
           day: "Tuesday",
-          starttime: this.state.tuesdaystartingtime.includes(":") ? Number(this.state.tuesdaystartingtime.replace(":", "")) : this.state.tuesdaystartingtime,
-          closetime: this.state.tuesdayclosingtime.includes(":") ? Number(this.state.tuesdayclosingtime.replace(":", "")) : this.state.tuesdayclosingtime,
+          starttime: !tuesdaychecked? 0 : this.state.tuesdaystartingtime.includes(":") ? Number(this.state.tuesdaystartingtime.replace(":", "")) : this.state.tuesdaystartingtime,
+          closetime: !tuesdaychecked? 0 : this.state.tuesdayclosingtime.includes(":") ? Number(this.state.tuesdayclosingtime.replace(":", "")) : this.state.tuesdayclosingtime,
         },
         {
           day: "Wednesday",
-          starttime: this.state.wednesdaystartingtime.includes(":") ? Number(this.state.wednesdaystartingtime.replace(":", "")) : this.state.wednesdaystartingtime,
-          closetime: this.state.wednesdayclosingtime.includes(":") ? Number(this.state.wednesdayclosingtime.replace(":", "")) : this.state.wednesdayclosingtime,
+          starttime: !wednesdaychecked? 0 : this.state.wednesdaystartingtime.includes(":") ? Number(this.state.wednesdaystartingtime.replace(":", "")) : this.state.wednesdaystartingtime,
+          closetime: !wednesdaychecked? 0 : this.state.wednesdayclosingtime.includes(":") ? Number(this.state.wednesdayclosingtime.replace(":", "")) : this.state.wednesdayclosingtime,
         },
         {
           day: "Thursday",
-          starttime: this.state.thursdaystartingtime.includes(":") ? Number(this.state.thursdaystartingtime.replace(":", "")) : this.state.thursdaystartingtime,
-          closetime: this.state.thursdayclosingtime.includes(":") ? Number(this.state.thursdayclosingtime.replace(":", "")) : this.state.thursdayclosingtime,
+          starttime: !thursdaychecked? 0 : this.state.thursdaystartingtime.includes(":") ? Number(this.state.thursdaystartingtime.replace(":", "")) : this.state.thursdaystartingtime,
+          closetime: !thursdaychecked? 0 : this.state.thursdayclosingtime.includes(":") ? Number(this.state.thursdayclosingtime.replace(":", "")) : this.state.thursdayclosingtime,
         },
         {
           day: "Friday",
-          starttime: this.state.fridaystartingtime.includes(":") ? Number(this.state.fridaystartingtime.replace(":", "")) : this.state.fridaystartingtime,
-          closetime: this.state.fridayclosingtime.includes(":") ? Number(this.state.fridayclosingtime.replace(":", "")) : this.state.fridayclosingtime,
+          starttime: !fridaychecked? 0 : this.state.fridaystartingtime.includes(":") ? Number(this.state.fridaystartingtime.replace(":", "")) : this.state.fridaystartingtime,
+          closetime: !fridaychecked? 0 : this.state.fridayclosingtime.includes(":") ? Number(this.state.fridayclosingtime.replace(":", "")) : this.state.fridayclosingtime,
         },
         {
           day: "Saturday",
-          starttime: this.state.saturdaystartingtime.includes(":") ? Number(this.state.saturdaystartingtime.replace(":", "")) : this.state.saturdaystartingtime,
-          closetime: this.state.saturdayclosingtime.includes(":") ? Number(this.state.saturdayclosingtime.replace(":", "")) : this.state.saturdayclosingtime,
+          starttime: !saturdaychecked? 0 : this.state.saturdaystartingtime.includes(":") ? Number(this.state.saturdaystartingtime.replace(":", "")) : this.state.saturdaystartingtime,
+          closetime: !saturdaychecked? 0 : this.state.saturdayclosingtime.includes(":") ? Number(this.state.saturdayclosingtime.replace(":", "")) : this.state.saturdayclosingtime,
         },
         {
           day: "Sunday",
-          starttime: this.state.sundaystartingtime.includes(":") ? Number(this.state.sundaystartingtime.replace(":", "")) : this.state.sundaystartingtime,
-          closetime: this.state.sundayclosingtime.includes(":") ? Number(this.state.sundayclosingtime.replace(":", "")) : this.state.sundayclosingtime,
+          starttime: !sundaychecked? 0 : this.state.sundaystartingtime.includes(":") ? Number(this.state.sundaystartingtime.replace(":", "")) : this.state.sundaystartingtime,
+          closetime: !sundaychecked? 0 : this.state.sundayclosingtime.includes(":") ? Number(this.state.sundayclosingtime.replace(":", "")) : this.state.sundayclosingtime,
         },
       ]
     }
@@ -249,6 +263,34 @@ class OpeningHours extends Component {
           isSaving: false,
         })
       });
+  }
+
+  switchMonday = () => {
+    this.setState({mondaychecked: !this.state.mondaychecked});
+  }
+
+  switchTuesday = () => {
+    this.setState({tuesdaychecked: !this.state.tuesdaychecked});
+  }
+
+  switchWednesday = () => {
+    this.setState({wednesdaychecked: !this.state.wednesdaychecked});
+  }
+
+  switchThursday = () => {
+    this.setState({thursdaychecked: !this.state.thursdaychecked});
+  }
+
+  switchFriday = () => {
+    this.setState({fridaychecked: !this.state.fridaychecked});
+  }
+
+  switchSaturday = () => {
+    this.setState({saturdaychecked: !this.state.saturdaychecked});
+  }
+
+  switchSunday = () => {
+    this.setState({sundaychecked: !this.state.sundaychecked});
   }
 
   onMondayStartingTimeChange(mondaystartingtime) {
@@ -345,10 +387,13 @@ class OpeningHours extends Component {
                       <td>
                         <Row style={{margin: 10}}>
                           <TimeField 
-                            style={{textAlign: 'center', width: 80, padding: '5px 8px'}} value={mondaystartingtime} onChange={this.onMondayStartingTimeChange} />
+                            disabled={!this.state.mondaychecked} style={{textAlign: 'center', width: 80, padding: '5px 8px'}} value={mondaystartingtime} onChange={this.onMondayStartingTimeChange} />
                           <Label style={{marginTop: 5, marginLeft: 10, marginRight: 10, justifyContent: 'center', alignSelf: 'center'}}>-</Label>
                           <TimeField 
-                            style={{textAlign: 'center', width: 80, padding: '5px 8px'}} value={mondayclosingtime} onChange={this.onMondayClosingTimeChange} />
+                            disabled={!this.state.mondaychecked} style={{textAlign: 'center', width: 80, padding: '5px 8px'}} value={mondayclosingtime} onChange={this.onMondayClosingTimeChange} />
+                          <div style={{marginLeft:10}}>
+                            <AppSwitch onChange={() => this.switchMonday()} className={'mx-1 float-right'} variant={'3d'} color={'success'} checked={this.state.mondaychecked} label dataOn={'On'} dataOff={'Off'}/>   
+                          </div>
                         </Row>
                       </td>
                     </tr>
@@ -360,10 +405,13 @@ class OpeningHours extends Component {
                       <td>
                         <Row style={{margin: 10}}>
                           <TimeField 
-                            style={{textAlign: 'center', width: 80, padding: '5px 8px'}} value={tuesdaystartingtime} onChange={this.onTuesdayStartingTimeChange} />
+                            disabled={!this.state.tuesdaychecked} style={{textAlign: 'center', width: 80, padding: '5px 8px'}} value={tuesdaystartingtime} onChange={this.onTuesdayStartingTimeChange} />
                           <Label style={{marginTop: 5, marginLeft: 10, marginRight: 10, justifyContent: 'center', alignSelf: 'center'}}>-</Label>
                           <TimeField 
-                            style={{textAlign: 'center', width: 80, padding: '5px 8px'}} value={tuesdayclosingtime} onChange={this.onTuesdayClosingTimeChange} />
+                            disabled={!this.state.tuesdaychecked} style={{textAlign: 'center', width: 80, padding: '5px 8px'}} value={tuesdayclosingtime} onChange={this.onTuesdayClosingTimeChange} />
+                          <div style={{marginLeft:10}}>
+                            <AppSwitch onChange={() => this.switchTuesday()} className={'mx-1 float-right'} variant={'3d'} color={'success'} checked={this.state.tuesdaychecked} label dataOn={'On'} dataOff={'Off'}/>   
+                          </div>
                         </Row>
                       </td>
                     </tr>
@@ -375,10 +423,13 @@ class OpeningHours extends Component {
                       <td>
                         <Row style={{margin: 10}}>
                           <TimeField 
-                            style={{textAlign: 'center', width: 80, padding: '5px 8px'}} value={wednesdaystartingtime} onChange={this.onWednesdayStartingTimeChange} />
+                            disabled={!this.state.wednesdaychecked} style={{textAlign: 'center', width: 80, padding: '5px 8px'}} value={wednesdaystartingtime} onChange={this.onWednesdayStartingTimeChange} />
                           <Label style={{marginTop: 5, marginLeft: 10, marginRight: 10, justifyContent: 'center', alignSelf: 'center'}}>-</Label>
                           <TimeField 
-                            style={{textAlign: 'center', width: 80, padding: '5px 8px'}} value={wednesdayclosingtime} onChange={this.onWednesdayClosingTimeChange} />
+                            disabled={!this.state.wednesdaychecked} style={{textAlign: 'center', width: 80, padding: '5px 8px'}} value={wednesdayclosingtime} onChange={this.onWednesdayClosingTimeChange} />
+                          <div style={{marginLeft:10}}>
+                            <AppSwitch onChange={() => this.switchWednesday()} className={'mx-1 float-right'} variant={'3d'} color={'success'} checked={this.state.wednesdaychecked} label dataOn={'On'} dataOff={'Off'}/>   
+                          </div>
                         </Row>
                       </td>
                     </tr>
@@ -390,10 +441,13 @@ class OpeningHours extends Component {
                       <td>
                         <Row style={{margin: 10}}>
                           <TimeField 
-                            style={{textAlign: 'center', width: 80, padding: '5px 8px'}} value={thursdaystartingtime} onChange={this.onThursdayStartingTimeChange} />
+                            disabled={!this.state.thursdaychecked} style={{textAlign: 'center', width: 80, padding: '5px 8px'}} value={thursdaystartingtime} onChange={this.onThursdayStartingTimeChange} />
                           <Label style={{marginTop: 5, marginLeft: 10, marginRight: 10, justifyContent: 'center', alignSelf: 'center'}}>-</Label>
                           <TimeField 
-                            style={{textAlign: 'center', width: 80, padding: '5px 8px'}} value={thursdayclosingtime} onChange={this.onThursdayClosingTimeChange} />
+                            disabled={!this.state.thursdaychecked} style={{textAlign: 'center', width: 80, padding: '5px 8px'}} value={thursdayclosingtime} onChange={this.onThursdayClosingTimeChange} />
+                          <div style={{marginLeft:10}}>
+                            <AppSwitch onChange={() => this.switchThursday()} className={'mx-1 float-right'} variant={'3d'} color={'success'} checked={this.state.thursdaychecked} label dataOn={'On'} dataOff={'Off'}/>                   
+                          </div>
                         </Row>
                       </td>
                     </tr>
@@ -405,10 +459,13 @@ class OpeningHours extends Component {
                       <td>
                         <Row style={{margin: 10}}>
                           <TimeField 
-                            style={{textAlign: 'center', width: 80, padding: '5px 8px'}} value={fridaystartingtime} onChange={this.onFridayStartingTimeChange} />
+                            disabled={!this.state.fridaychecked} style={{textAlign: 'center', width: 80, padding: '5px 8px'}} value={fridaystartingtime} onChange={this.onFridayStartingTimeChange} />
                           <Label style={{marginTop: 5, marginLeft: 10, marginRight: 10, justifyContent: 'center', alignSelf: 'center'}}>-</Label>
                           <TimeField 
-                            style={{textAlign: 'center', width: 80, padding: '5px 8px'}} value={fridayclosingtime} onChange={this.onFridayClosingTimeChange} />
+                            disabled={!this.state.fridaychecked} style={{textAlign: 'center', width: 80, padding: '5px 8px'}} value={fridayclosingtime} onChange={this.onFridayClosingTimeChange} />
+                          <div style={{marginLeft:10}}>
+                            <AppSwitch onChange={() => this.switchFriday()} className={'mx-1 float-right'} variant={'3d'} color={'success'} checked={this.state.fridaychecked} label dataOn={'On'} dataOff={'Off'}/>                   
+                          </div>
                         </Row>
                       </td>
                     </tr>
@@ -420,10 +477,13 @@ class OpeningHours extends Component {
                       <td>
                         <Row style={{margin: 10}}>
                           <TimeField 
-                            style={{textAlign: 'center', width: 80, padding: '5px 8px'}} value={saturdaystartingtime} onChange={this.onSaturdayStartingTimeChange} />
+                            disabled={!this.state.saturdaychecked} style={{textAlign: 'center', width: 80, padding: '5px 8px'}} value={saturdaystartingtime} onChange={this.onSaturdayStartingTimeChange} />
                           <Label style={{marginTop: 5, marginLeft: 10, marginRight: 10, justifyContent: 'center', alignSelf: 'center'}}>-</Label>
                           <TimeField 
-                            style={{textAlign: 'center', width: 80, padding: '5px 8px'}} value={saturdayclosingtime} onChange={this.onSaturdayClosingTimeChange} />
+                            disabled={!this.state.saturdaychecked} style={{textAlign: 'center', width: 80, padding: '5px 8px'}} value={saturdayclosingtime} onChange={this.onSaturdayClosingTimeChange} />
+                          <div style={{marginLeft:10}}>
+                            <AppSwitch onChange={() => this.switchSaturday()} className={'mx-1 float-right'} variant={'3d'} color={'success'} checked={this.state.saturdaychecked} label dataOn={'On'} dataOff={'Off'}/>                   
+                          </div>
                         </Row>
                       </td>
                     </tr>
@@ -435,10 +495,13 @@ class OpeningHours extends Component {
                       <td>
                         <Row style={{margin: 10}}>
                           <TimeField 
-                            style={{textAlign: 'center', width: 80, padding: '5px 8px'}} value={sundaystartingtime} onChange={this.onSundayStartingTimeChange} />
+                            disabled={!this.state.sundaychecked} style={{textAlign: 'center', width: 80, padding: '5px 8px'}} value={sundaystartingtime} onChange={this.onSundayStartingTimeChange} />
                           <Label style={{marginTop: 5, marginLeft: 10, marginRight: 10, justifyContent: 'center', alignSelf: 'center'}}>-</Label>
                           <TimeField 
-                            style={{textAlign: 'center', width: 80, padding: '5px 8px'}} value={sundayclosingtime} onChange={this.onSundayClosingTimeChange} />
+                            disabled={!this.state.sundaychecked} style={{textAlign: 'center', width: 80, padding: '5px 8px'}} value={sundayclosingtime} onChange={this.onSundayClosingTimeChange} />
+                          <div style={{marginLeft:10}}>
+                            <AppSwitch onChange={() => this.switchSunday()} className={'mx-1 float-right'} variant={'3d'} color={'success'} checked={this.state.sundaychecked} label dataOn={'On'} dataOff={'Off'}/>                   
+                          </div>
                         </Row>
                       </td>
                     </tr>

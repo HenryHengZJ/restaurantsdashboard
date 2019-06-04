@@ -3,8 +3,8 @@ require('dotenv').config();
 
 var s3 = 
 	new aws.S3({ 
-	  accessKeyId: "AKIAICRTNHOAPWZP2X7Q",
-	  secretAccessKey: "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",
+	  accessKeyId: process.env.s3accessKeyId,
+	  secretAccessKey: process.env.s3secretAccessKey,
 	  sslEnabled:true
 	});
 

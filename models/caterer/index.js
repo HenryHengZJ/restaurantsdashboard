@@ -2,6 +2,7 @@
 var mongoose = require('mongoose');
 var bcrypt   = require('bcrypt-nodejs');
 const jwt = require('jsonwebtoken');
+require('dotenv').config();
 
 // define the schema for our openingHoursSchema model
 var openingHoursSchema = mongoose.Schema({
@@ -58,7 +59,8 @@ var catererSchema = mongoose.Schema({
         default: Date.now
     },
     resetPasswordToken: String,
-    resetPasswordExpires: Date
+    resetPasswordExpires: Date,
+    catererPaymentAccoundID: String
 }, {
     timestamps: true
 });
@@ -77,7 +79,7 @@ catererSchema.methods.generateJWT = function() {
   return jwt.sign({
     catererEmail: this.catererEmail,
     id: this._id,
-  }, 'foodiebeecaterer', {expiresIn: '24h'} );
+  }, process.env.jwtSecretKey, {expiresIn: '24h'} );
 }
 
 //Connect to specific database

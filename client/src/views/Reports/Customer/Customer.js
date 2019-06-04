@@ -85,7 +85,7 @@ class Customer extends Component {
             pointHoverBackgroundColor: "rgba(75,192,192,1)",
             borderWidth: 2,
             fill: false,
-            data: [1, 8, 11, 10, 5, 4, 2, 7],
+            data: [],
           },
           {
             label: 'Recurring Customer',
@@ -94,7 +94,7 @@ class Customer extends Component {
             pointHoverBackgroundColor: "rgba(150,73,191,1)",
             borderWidth: 2,
             fill: false,
-            data: [11, 4, 5, 6, 7, 8, 9, 1],
+            data: [],
           }
         ]
       },
@@ -108,7 +108,7 @@ class Customer extends Component {
             borderWidth: 1,
             hoverBackgroundColor: "rgba(255,99,132,0.4)",
             hoverBorderColor: "rgba(255,99,132,1)",
-            data: [1, 8, 11, 10, 5, 4, 2, 7],
+            data: [],
           },
           {
             label: "Recurring Customer",
@@ -117,7 +117,7 @@ class Customer extends Component {
             borderWidth: 1,
             hoverBackgroundColor: "rgba(36,201,27,0.4)",
             hoverBorderColor: "rgba(36,201,27,1)",
-            data: [11, 4, 5, 6, 7, 8, 9, 1],
+            data: [],
           }
         ]
       },
@@ -192,7 +192,7 @@ class Customer extends Component {
       'Content-Type': 'application/json',
     }
 
-    var url = apis.GETorder + "?lteDate=" + currentDateString + "&gteDate=" + previousDateString;
+    var url = apis.GETorder_customer + "?lteDate=" + currentDateString + "&gteDate=" + previousDateString;
 
     axios.get(url, {withCredentials: true}, {headers: headers})
       .then((response) => {
@@ -213,26 +213,41 @@ class Customer extends Component {
   }
 
   getChartData = () => {
-    var linedata = [];
-    var bardata = [];
+    var new_linedata = [];
+    var recurring_linedata = [];
+    var new_bardata = [];
+    var recurring_bardata = [];
     var tableitems = this.state.tableitems
     var dateArray = this.state.dateArray
 
     for (let i = 0; i < dateArray.length; i++) {
-      var count = 0
+      var newcount = 0
+      var recurringcount = 0
       for (let x = 0; x < tableitems.length; x++) {
         if (moment(tableitems[x].createdAt).format("DD MMM, YYYY") === dateArray[i]) {
-          count = count + 1
+
+          if (tableitems[x].customerDetails[0].status === 'new') {
+            newcount = newcount + 1
+          }
+          else if (tableitems[x].customerDetails[0].status === 'recurring') {
+            recurringcount = recurringcount + 1
+          }
         }
       }
-      linedata.push(count)
-      bardata.push(count)
+      new_linedata.push(newcount)
+      new_bardata.push(newcount)
+
+      recurring_linedata.push(recurringcount)
+      recurring_bardata.push(recurringcount)
     }
 
     var newline = this.state.line;
-    newline.datasets[0].data = linedata;
+    newline.datasets[0].data = new_linedata;
+    newline.datasets[1].data = recurring_linedata;
+
     var newbar = this.state.bar;
-    newbar.datasets[0].data = bardata;
+    newbar.datasets[0].data = new_bardata;
+    newbar.datasets[1].data = recurring_bardata;
 
     this.setState({
       line: newline,
@@ -329,6 +344,10 @@ class Customer extends Component {
       isLineChartPressed: false,
       isBarChartPressed: true,
     });
+  }
+
+  capitalizeFirstLetter = (string) => {
+    return string.charAt(0).toUpperCase() + string.slice(1);
   }
 
   renderLineChart() {
@@ -430,7 +449,7 @@ class Customer extends Component {
           <td>{typeof tableitems[i].customerDetails !== 'undefined' ? tableitems[i].customerDetails[0].customerFirstName : ""}</td>
           <td>{typeof tableitems[i].customerDetails !== 'undefined' ? tableitems[i].customerDetails[0].customerPhoneNumber : ""}</td>
           <td>{typeof tableitems[i].customerDetails !== 'undefined' ? tableitems[i].customerDetails[0].customerCity : ""}</td>
-          <td>New</td>
+          <td>{typeof tableitems[i].customerDetails !== 'undefined' ? this.capitalizeFirstLetter(tableitems[i].customerDetails[0].status) : "New"}</td>
           <td>{tableitems[i]._id}</td>
           <td>{moment(tableitems[i].createdAt).format("DD MMM, YYYY")}</td>
         </tr>

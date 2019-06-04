@@ -30,7 +30,16 @@ router.get('/getmenu', passport.authenticate('jwt', {session: false}), (req, res
     var matchquery;
     matchquery = {catererID: new ObjectId(userID)}
 
-    Menu.find(matchquery).sort({createdAt: -1}).exec((err,doc) => {
+    var menuquery;
+
+    if (typeof req.query.dashboard !== 'undefined' && req.query.dashboard === 'true') {
+        menuquery =  Menu.find(matchquery).sort({soldamount: -1}).limit(6)
+    }
+    else {
+        menuquery =  Menu.find(matchquery).sort({createdAt: -1})
+    }
+
+    menuquery.exec((err,doc) => {
         if (err) return res.status(500).send({ error: err });
         return res.status(200).json(doc);
     });

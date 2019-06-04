@@ -212,7 +212,7 @@ class Sales extends Component {
       var sales = 0
       for (let x = 0; x < tableitems.length; x++) {
         if (moment(tableitems[x].createdAt).format("DD MMM, YYYY") === dateArray[i]) {
-          sales = sales + Number(tableitems[x].totalOrderPrice).toFixed(2)
+          sales = sales + tableitems[x].totalOrderPrice
         }
       }
       linedata.push(sales)

@@ -42,6 +42,7 @@ var menuRoutes   = require('./routes/menu');
 var orderRoutes   = require('./routes/order');
 var reviewRoutes   = require('./routes/review');
 var authRoutes   = require('./routes/auth');
+var paymentRoutes   = require('./routes/payment');
 
 // routes ======================================================================
 app.use('/test', testRoutes);
@@ -51,6 +52,7 @@ app.use('/menu', menuRoutes);
 app.use('/order', orderRoutes);
 app.use('/review', reviewRoutes);
 app.use('/auth', authRoutes);
+app.use('/payment', paymentRoutes);
 
 //Static file declaration
 app.use(express.static(path.join(__dirname, 'client/build')));

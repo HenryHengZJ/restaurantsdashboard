@@ -24,7 +24,7 @@ import { NameAddress, Description, Website, Cuisine, Occasion, ValidateEmail} fr
 import { Pickup, Delivery, OpeningHours, OrderLater } from './Services';
 import { ReceiveOrder, MenuSetup } from './OrdersMenu';
 import { Order, Sales, Customer, Review, Dishes } from './Order';
-import { OnlinePayment } from './Payment';
+import { TopPayment } from './Payment';
 import { Publish } from './Publish';
 
 export {
@@ -46,7 +46,7 @@ export {
   OrderLater,
   ReceiveOrder,
   MenuSetup,
-  OnlinePayment,
+  TopPayment,
   Order,
   Sales,
   Customer,

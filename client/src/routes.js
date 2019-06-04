@@ -20,7 +20,7 @@ const OrderLater = React.lazy(() => import('./views/Services/OrderLater'));
 const ReceiveOrder = React.lazy(() => import('./views/OrdersMenu/ReceiveOrder'));
 const MenuSetup = React.lazy(() => import('./views/OrdersMenu/MenuSetup'));
 
-const OnlinePayment = React.lazy(() => import('./views/Payment/OnlinePayment'));
+const TopPayment = React.lazy(() => import('./views/Payment/TopPayment'));
 
 const Publish = React.lazy(() => import('./views/Publish/Publish'));
 
@@ -90,8 +90,8 @@ const routes = [
   { path: '/caterer/ordersmenu', exact: true, name: 'Orders & Menu', component: ReceiveOrder },
   { path: '/caterer/ordersmenu/receiveorder', name: 'Receive Order', component: ReceiveOrder },
   { path: '/caterer/ordersmenu/menusetup', name: 'Menu Setup', component: MenuSetup },
-  { path: '/caterer/payment', exact: true, name: 'Payment', component: OnlinePayment },
-  { path: '/caterer/payment/onlinepayment', name: 'Online Payment', component: OnlinePayment },
+  { path: '/caterer/payment', exact: true, name: 'Payment', component: TopPayment },
+  { path: '/caterer/payment/onlinepayment', name: 'Online Payment', component: TopPayment },
   { path: '/caterer/reports', exact: true, name: 'Reports', component: Order },
   { path: '/caterer/reports/order', name: 'Order', component: Order },
   { path: '/caterer/reports/sales', name: 'Sales', component: Sales },

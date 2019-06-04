@@ -179,30 +179,11 @@ class Profile extends Component {
     });
   };
 
-  renderEmailSent() {
-    return (
-      <Card>
-        <CardHeader>
-          <strong>Email Sent</strong>
-        </CardHeader>
-        <CardBody>
-          <Label>
-            We have sent an email of the steps to change your password.
-          </Label>
-        </CardBody>
-        <CardFooter>
-          <Button
-            onClick={() => this.okClicked()}
-            className="float-right"
-            type="submit"
-            color="primary"
-          >
-            OK
-          </Button>
-        </CardFooter>
-      </Card>
-    );
-  }
+  backClicked = () => {
+    this.setState({
+      isChangePasswordClicked: false
+    });
+  };
 
   renderChangePassword() {
     return (
@@ -265,7 +246,18 @@ class Profile extends Component {
             {this.state.invalidPassword ? <Label style={{color: 'red', marginBottom: 20, fontSize: 13}}>* Passwords do not match</Label> : null }
           </Form>
         </CardBody>
-        <CardFooter>
+        <CardFooter style={{backgroundColor: 'white'}}>
+      
+          <Button
+            className="float-left"
+            type="reset"
+            color="primary"
+            outline
+            onClick={() => this.backClicked()}
+          >
+            Back
+          </Button>
+                
           <Button
             onClick={() => this.updatePassword()}
             className="float-right"
@@ -328,15 +320,7 @@ class Profile extends Component {
                     </FormGroup>
                   </Form>
                 </CardBody>
-                <CardFooter>
-                  <Button
-                    style={{ marginLeft: 10 }}
-                    className="float-right"
-                    type="reset"
-                    color="secondary"
-                  >
-                    Cancel
-                  </Button>
+                <CardFooter style={{backgroundColor: 'white'}}>
                   <Button
                     onClick={() => this.saveChangesClicked()}
                     className="float-right"

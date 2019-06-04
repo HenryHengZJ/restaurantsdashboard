@@ -4,8 +4,17 @@ import './polyfill'
 import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
-import App from './App';
+import InnerApp from './App';
 import * as serviceWorker from './serviceWorker';
+import { StripeProvider } from "react-stripe-elements";
+
+const App = () => {
+    return (
+      <StripeProvider apiKey="pk_test_MQ87thwBK9MIVEqLB3jXQfHB00HFSE8cVS">
+        <InnerApp />
+      </StripeProvider>
+    );
+  };
 
 ReactDOM.render(<App />, document.getElementById('root'));
 

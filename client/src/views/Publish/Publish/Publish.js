@@ -46,6 +46,16 @@ class Publish extends Component {
     alert('Publish')
   }
 
+  openTermsofUse = () => {
+   // window.open('https://www.foodiebee.eu/termscondition', '_blank');
+   this.props.history.push('/caterer/account/termscondition')
+  }
+
+  openPrivacyPolicy = () => {
+   // window.open('https://www.foodiebee.eu/privacypolicy', '_blank');
+    this.props.history.push('/caterer/account/privacypolicy')
+  }
+
   render() {
   
     return (
@@ -62,9 +72,18 @@ class Publish extends Component {
                     <Label style={{lineHeight: 2}} className="h6">Are you ready to publish your store to FoodieBee platform?</Label>
                     <Label style={{lineHeight: 2, marginTop: 20}} >Once published, your store will be visible to our main site: www.foodiebee.com. By publishing your store to live, you agree to the</Label>
                     <div>
-                      <a className="h6" href="">Terms of Use</a>
+
+                      <Button color="link" onClick={() => this.openTermsofUse()} style={{ fontSize: 14, marginLeft: 0, paddingLeft:0, paddingRight:5, marginBottom:2, fontWeight: '500',color: "#20a8d8" }} >
+                        Terms & Conditions
+                      </Button>
+                    
+
                       <span style={{color:'black'}}> and </span>
-                      <a className="h6" href="">Privacy Policy</a>
+
+                      <Button color="link" onClick={() => this.openPrivacyPolicy()} style={{ fontSize: 14, paddingLeft:5, paddingRight:5, marginBottom:2, fontWeight: '500',color: "#20a8d8" }} >
+                        Privacy Policy
+                      </Button>
+                    
                     </div>
 
                     <Button

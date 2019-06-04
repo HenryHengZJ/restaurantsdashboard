@@ -77,6 +77,9 @@ router.put('/updatecatererpassword', passport.authenticate('jwt', {session: fals
                 catererPassword: caterer.generateHash(newpassword)
             }).then(() => res.status(201).json(caterer));
         } 
+        else {
+            return res.status(401).send({ error: 'invalid password' });
+        } 
     });
 });
 

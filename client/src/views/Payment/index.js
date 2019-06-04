@@ -1,5 +1,5 @@
-import OnlinePayment from './OnlinePayment';
+import ElementPayment from './ElementPayment';
 
 export {
-  OnlinePayment
+  ElementPayment
 };
