@@ -23,6 +23,7 @@
     "classnames": "^2.2.6",
     "concurrently": "^4.1.0",
     "core-js": "^2.6.5",
+    "dotenv-webpack": "^1.7.0",
     "enzyme": "^3.9.0",
     "enzyme-adapter-react-16": "^1.9.1",
     "flag-icon-css": "^3.2.1",
@@ -44,6 +45,7 @@
     "react-router-config": "^4.4.0-beta.6",
     "react-router-dom": "^4.3.1",
     "react-simple-timefield": "^2.0.1",
+    "react-sound": "^1.2.0",
     "react-star-rating-component": "^1.4.1",
     "react-star-ratings": "^2.3.0",
     "react-stripe-elements": "^3.0.0",
@@ -66,7 +68,7 @@
   "eslintConfig": {
     "extends": "react-app"
   },
-  "proxy": "http://localhost:5000",
+  "proxy": "http://localhost:8080",
   "browserslist": [
     ">0.2%",
     "not dead",

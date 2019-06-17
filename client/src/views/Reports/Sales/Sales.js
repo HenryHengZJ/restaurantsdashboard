@@ -182,7 +182,7 @@ class Sales extends Component {
       'Content-Type': 'application/json',
     }
 
-    var url = apis.GETorder + "?lteDate=" + currentDateString + "&gteDate=" + previousDateString;
+    var url = apis.GETorder + "?paymentStatus=succeeded" + "&lteDate=" + currentDateString + "&gteDate=" + previousDateString;
 
     axios.get(url, {withCredentials: true}, {headers: headers})
       .then((response) => {
@@ -264,6 +264,10 @@ class Sales extends Component {
     this.setState({
       dropDownType: !this.state.dropDownType
     })
+  }
+
+  capitalizeFirstLetter = (string) => {
+    return string.charAt(0).toUpperCase() + string.slice(1);
   }
 
   getPreviousDate = (currentDate, days) => {
@@ -576,27 +580,58 @@ class Sales extends Component {
                     color: "#20a8d8"
                   }}
                 >
-                  {selectedOrderItem.orderType}
+                  {this.capitalizeFirstLetter(selectedOrderItem.orderType)}
                 </h6>
               </CardBody>
             </Card>
           </Col>
         </Row>
 
-        <Collapse isOpen={selectedOrderItem.orderType === "Delivery"}>
-          <Table borderless>
-            <tbody>
+        <Table borderless>
+          <tbody>
+            {selectedOrderItem.orderType === "delivery" ? 
               <tr>
-                <td style={{ fontSize: 16, textAlign: "start" }}>
+                <td style={{ fontSize: 14, fontWeight: "600", textAlign: "start" }}>
                   Delivery Fee
                 </td>
-                <td style={{ fontSize: 16, textAlign: "end" }}>
-                  €{Number(2).toFixed(2)}
+                <td style={{ fontSize: 15, textAlign: "end" }}>
+                  €{Number(selectedOrderItem.deliveryfee).toFixed(2)}
                 </td>
               </tr>
-            </tbody>
-          </Table>
-        </Collapse>
+              :
+              null
+            }
+            <tr>
+              <td style={{ fontSize: 14, fontWeight: "600", textAlign: "start" }}>
+                Delivery Date
+              </td>
+              <td style={{ fontSize: 15, textAlign: "end" }}>
+                {moment(selectedOrderItem.deliverydate).format("DD MMM, YYYY")}
+              </td>
+            </tr>
+            <tr>
+              <td style={{ fontSize: 14, fontWeight: "600", textAlign: "start" }}>
+                Delivery Time
+              </td>
+              <td style={{ fontSize: 15, textAlign: "end" }}>
+                {moment(selectedOrderItem.deliverytime, "HH:mm").format("hh:mm A")}
+              </td>
+            </tr>
+            {selectedOrderItem.orderType === "delivery" ? 
+            <tr>
+              <td
+                style={{ fontWeight: "600", fontSize: 14, textAlign: "start" }}
+              >
+                Deliver To
+              </td>
+              <td style={{ fontSize: 15, textAlign: "end" }}>
+                {selectedOrderItem.deliveryaddress} 
+              </td>
+            </tr>
+            :
+            null}
+          </tbody>
+        </Table>
 
         <div
           style={{
@@ -611,22 +646,22 @@ class Sales extends Component {
           <tbody>
             <tr>
               <td
-                style={{ fontSize: 16, fontWeight: "600", textAlign: "start" }}
+                style={{ fontSize: 15, fontWeight: "600", textAlign: "start" }}
               >
                 TOTAL
               </td>
-              <td style={{ fontSize: 16, fontWeight: "600", textAlign: "end" }}>
+              <td style={{ fontSize: 17, color: 'black', fontWeight: "600", textAlign: "end" }}>
                 €{Number(selectedOrderItem.totalOrderPrice).toFixed(2)}
               </td>
             </tr>
             <tr>
               <td
-                style={{ fontSize: 16, fontWeight: "600", textAlign: "start" }}
+                style={{ fontSize: 15, fontWeight: "600", textAlign: "start" }}
               >
-                Paid By
+                Payment Type
               </td>
-              <td style={{ fontSize: 16, fontWeight: "600", textAlign: "end" }}>
-                {selectedOrderItem.paymentType}
+              <td style={{ fontSize: 15, textAlign: "end" }}>
+                <img style={{objectFit:'cover', width: 50, height: 50 }} src={selectedOrderItem.paymentType === "visa" ? "https://foodiebeegeneralphoto.s3-eu-west-1.amazonaws.com/visa.png" : selectedOrderItem.paymentType === "mastercard" ? "https://foodiebeegeneralphoto.s3-eu-west-1.amazonaws.com/mastercard.png" : selectedOrderItem.paymentType === "amex" ? "https://foodiebeegeneralphoto.s3-eu-west-1.amazonaws.com/americanexpress.png" : null}  />
               </td>
             </tr>
           </tbody>
@@ -635,7 +670,7 @@ class Sales extends Component {
     );
   }
 
-  renderOrderModal() {
+  renderSalesModal() {
     const { selectedOrderItem } = this.state;
     return (
       <Modal
@@ -645,7 +680,38 @@ class Sales extends Component {
         <ModalHeader toggle={() => this.toggleSalesModal()}>
           Order #{selectedOrderItem._id}
         </ModalHeader>
+
         <ModalBody>{this.rendeSelectedOrderItems()}</ModalBody>
+
+        {selectedOrderItem.paymentStatus === "incomplete" ? 
+        <ModalFooter>
+          <Button disabled style={{ opacity: 1, fontSize: 17, padding: 10, fontWeight: '600'}} block onClick={() => this.toggleOrderModal()} color="warning">
+            Payment Incomplete
+          </Button>
+        </ModalFooter>
+        :
+        selectedOrderItem.paymentStatus === "succeeded" ? 
+        <ModalFooter>
+          <Button disabled style={{ opacity: 1, marginTop: 7, fontSize: 17, padding: 10, fontWeight: '600'}} block color="success">
+            Payment Succeeded
+          </Button>
+        </ModalFooter>
+        :
+        selectedOrderItem.paymentStatus === "refunded" ? 
+        <ModalFooter>
+          <Button disabled style={{ opacity: 1, marginTop: 7, fontSize: 17, padding: 10, fontWeight: '600'}} block color="danger">
+            Payment Refunded
+          </Button>
+        </ModalFooter>
+        :
+        selectedOrderItem.paymentStatus === "uncaptured" ? 
+        <ModalFooter>
+          <Button disabled style={{ opacity: 1, marginTop: 7, fontSize: 17, padding: 10, fontWeight: '600'}} block color="secondary">
+            Payment Uncaptured
+          </Button>
+        </ModalFooter>
+        :
+        null }
       </Modal>
     );
   }
@@ -660,16 +726,32 @@ class Sales extends Component {
         <tr style={{cursor: 'pointer'}} onClick={() => this.tableItemClicked(tableitems[i]._id)}>
           <td>{tableitems[i]._id}</td>
           <td>{moment(tableitems[i].createdAt).format("DD MMM, YYYY")}</td>
+          <td>{moment(tableitems[i].deliverytime, "HH:mm").format("hh:mm A")}</td>
+          <td>{moment(tableitems[i].deliverydate).format("DD MMM, YYYY")}</td>
+          <td>{this.capitalizeFirstLetter(tableitems[i].orderType)}</td>
+          <td>{tableitems[i].deliveryaddress}</td>
           {this.renderOrderItems(i)}
           <td>{Number(tableitems[i].totalOrderPrice).toFixed(2)}</td>
-          <td>{tableitems[i].orderType}</td>
           <td>
-            {tableitems[i].paymentType}
-            {tableitems[i].paymentType == "Card" ?
-              <i className="fa fa-cc-visa" style={{ fontSize: 20 + 'px', marginLeft: 10}}></i>
-              :
-              <i className="fa fa-money" style={{ fontSize: 24 + 'px', marginLeft: 10 }}></i>
-            }
+            <img style={{objectFit:'cover', width: 50, height: 50 }} src={tableitems[i].paymentType === "visa" ? "https://foodiebeegeneralphoto.s3-eu-west-1.amazonaws.com/visa.png" : tableitems[i].paymentType === "mastercard" ? "https://foodiebeegeneralphoto.s3-eu-west-1.amazonaws.com/mastercard.png" : tableitems[i].paymentType === "amex" ? "https://foodiebeegeneralphoto.s3-eu-west-1.amazonaws.com/americanexpress.png" : null}  />
+          </td>
+          <td>
+            <Badge
+              color=
+              {
+                  tableitems[i].paymentStatus === "incomplete"
+                  ? "warning"
+                  : tableitems[i].paymentStatus === "succeeded"
+                  ? "success"
+                  : tableitems[i].paymentStatus === "refunded"
+                  ? "danger"
+                  : tableitems[i].paymentStatus === "uncaptured"
+                  ? "secondary"
+                  : null
+              }
+            >
+              {this.capitalizeFirstLetter(tableitems[i].paymentStatus)}
+            </Badge>
           </td>
         </tr>
       );
@@ -715,9 +797,9 @@ class Sales extends Component {
           <thead>
             <tr>
               <th>Order ID</th>
-              <th>Time</th>
-              <th>Items</th>
-              <th>Price (€)</th>
+              <th>Ordered Time</th>
+              <th>Delivery Time</th>
+              <th>Delivery Date</th>
               <th>
                 <Row style={{marginLeft: 0}}> 
                   Type
@@ -730,9 +812,12 @@ class Sales extends Component {
                   </Dropdown>
                 </Row>
               </th>
+              <th>Delivery Address</th>
+              <th>Items</th>
+              <th>Price (€)</th>
               <th>
                 <Row style={{marginLeft: 0}}> 
-                  Payment
+                  Payment Type
                   <Dropdown isOpen={this.state.dropDownPayment} toggle={() => this.togglePayment()} size="sm">
                     <DropdownToggle style={{margin:0, padding:0, paddingRight: 5, backgroundColor: 'white', borderWidth: 0}} caret />
                     <DropdownMenu>
@@ -742,7 +827,7 @@ class Sales extends Component {
                   </Dropdown>
                 </Row>
               </th>
-              
+              <th>Payment Status</th>
             </tr>
           </thead>
           {this.state.empty ? null : this.renderTableItems()}
@@ -847,7 +932,7 @@ class Sales extends Component {
               </CardBody>
             </Card>
           </Col>
-          {this.state.selectedOrderItem !== null ? this.renderOrderModal() : null}
+          {this.state.selectedOrderItem !== null ? this.renderSalesModal() : null}
         </Row>
       </div>
     );

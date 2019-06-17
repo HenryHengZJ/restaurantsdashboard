@@ -531,7 +531,7 @@ class OnlinePayment extends Component {
 
       <div className="animated fadeIn">
         <Row className="justify-content-center">
-          <Col xs="12" md="9" sm="9" lg="6">
+          <Col xs="12" md="9" sm="9" lg="9">
             {this.state.loading ? 
             this.renderLoadingItems() 
             :

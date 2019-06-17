@@ -3,6 +3,17 @@ var router = express.Router();
 require('dotenv').config();
 const stripe = require('stripe')(process.env.STRIPE_KEY);
 
+router.get('/get_customer_paymentaccount', (req, res) => { 
+
+	stripe.customers.retrieve(req.query.customerPaymentAccoundID, function(err, customer) {
+		if (err) return res.status(500).send({ error: err });
+		res.status(200).json(customer);
+	});
+	
+});
+
+//////////////////////////////////////CATERER///////////////////////////////////////////////////
+
 router.post('/create_caterer_paymentaccount', (req, res) => { 
 
   console.log(req.body)
@@ -24,27 +35,7 @@ router.post('/create_caterer_paymentaccount', (req, res) => {
 	
 });
 
-router.post('/create_customer_paymentaccount', (req, res) => { 
 
-	stripe.customers.create({
-		email: req.body.email,
-		description: 'New Customer!',
-		source: 'tok_visa' 
-	}).then(function(err, acct) {
-		if (err) return res.status(500).send({ error: err });
-		return res.send(acct);
-	});
-	
-});
-
-router.get('/get_customer_paymentaccount', (req, res) => { 
-
-	stripe.customers.retrieve(req.query.catererPaymentAccoundID, function(err, customer) {
-		if (err) return res.status(500).send({ error: err });
-		res.status(200).json(customer);
-	});
-	
-});
 
 router.get('/get_caterer_paymentaccount', (req, res) => { 
 
@@ -162,6 +153,12 @@ router.put('/update_caterer_person', (req, res) => {
   
 });
 
+router.post('/caterer_confirm_payment', (request, res) => { 
+	stripe.paymentIntents.confirm(request.body.paymentIntentID, function(err, intent) {
+		if (err) return res.status(500).send({ error: err });
+		res.status(200).json(intent);
+	});
+});
 
 router.post('/confirm_payment', async (request, response) => {
     try {

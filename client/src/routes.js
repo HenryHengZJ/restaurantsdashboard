@@ -14,7 +14,7 @@ const ValidateEmail = React.lazy(() => import('./views/Basics/ValidateEmail'));
 const Pickup = React.lazy(() => import('./views/Services/Pickup'));
 const Delivery = React.lazy(() => import('./views/Services/Delivery'));
 const MinSpending = React.lazy(() => import('./views/Services/MinSpending'));
-const OpeningHours = React.lazy(() => import('./views/Services/OpeningHours'));
+const DeliveryHours = React.lazy(() => import('./views/Services/DeliveryHours'));
 const OrderLater = React.lazy(() => import('./views/Services/OrderLater'));
 
 const ReceiveOrder = React.lazy(() => import('./views/OrdersMenu/ReceiveOrder'));
@@ -85,7 +85,7 @@ const routes = [
   { path: '/caterer/services/pickup', name: 'Pickup', component: Pickup },
   { path: '/caterer/services/delivery', name: 'Delivery', component: Delivery },
   { path: '/caterer/services/minspending', name: 'Minimum Spending', component: MinSpending },
-  { path: '/caterer/services/openinghours', name: 'Opening Hours', component: OpeningHours },
+  { path: '/caterer/services/deliveryhours', name: 'Delivery Hours', component: DeliveryHours },
   { path: '/caterer/services/orderlater', name: 'Order for Later', component: OrderLater },
   { path: '/caterer/ordersmenu', exact: true, name: 'Orders & Menu', component: ReceiveOrder },
   { path: '/caterer/ordersmenu/receiveorder', name: 'Receive Order', component: ReceiveOrder },

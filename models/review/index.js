@@ -8,6 +8,7 @@ var reviewSchema = mongoose.Schema({
 	customerFirstName: String,
 	customerID: ObjectId,
 	catererID: ObjectId,
+	catererName: String,
 	customerCity: String,
 	customerComment: String,
 	customerRating: Number,

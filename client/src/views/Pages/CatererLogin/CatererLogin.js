@@ -67,7 +67,7 @@ class CatererLogin extends Component {
     const {useremail, userpassword} = this.state;
 
     var data = {
-      email: useremail,
+      email: useremail.toLowerCase(),
       password: userpassword
     }
 
@@ -97,7 +97,7 @@ class CatererLogin extends Component {
   };
 
   openEmail = () => {
-    window.location.href = `mailto:support@foodiebee.com`;
+    window.location.href = `mailto:support@foodiebee.eu`;
   }
 
   signUp = () => {
@@ -233,7 +233,7 @@ class CatererLogin extends Component {
                     >
                       Have a question?&nbsp;
                       <Button color="link" onClick={() => this.openEmail()} style={{ fontWeight: '500',color: "#20a8d8" }} >
-                        <p style={{padding: 0, marginTop: 10}}>support@foodiebee.com</p>
+                        <p style={{padding: 0, marginTop: 10}}>support@foodiebee.eu</p>
                       </Button>
                     </p>
                   </CardBody>

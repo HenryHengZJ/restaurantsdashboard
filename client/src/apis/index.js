@@ -7,6 +7,9 @@ export default {
     UPDATEcaterernameaddress: "/caterer/updatecaterernameaddress",
     GETcaterer: "/caterer/getcaterer",
 
+    /*Published API*/
+    UPDATE_catererPublished: "/catererPublished/update_caterer_published",
+
     /*Menu API*/
     UPDATEmenu: "/menu/updatemenu",
     BULKUPDATEmenu: "/menu/bulkupdatemenu",
@@ -18,6 +21,8 @@ export default {
     /*Order API*/
     GETorder: "/order/getorder",
     GETorder_customer: "/order/getorder_customer",
+    PUTacceptorder_order: "/order/acceptorder",
+    PUTreject_order: "/order/rejectorder",
 
     /*Payment API*/
     GETcaterer_paymentaccount: "/payment/get_caterer_paymentaccount",

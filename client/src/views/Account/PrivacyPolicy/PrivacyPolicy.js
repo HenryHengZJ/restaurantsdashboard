@@ -24,7 +24,7 @@ class PrivacyPolicy extends Component {
           title: "1. Contact Details",
           descrip: [
             `If you have any queries or requests concerning this privacy policy or how we handle your data more generally, please get in touch with us using the following details.
-              - By contacting our general customer services team at: support@foodiebee.com
+              - By contacting our general customer services team at: support@foodiebee.eu
               `
           ]
         },

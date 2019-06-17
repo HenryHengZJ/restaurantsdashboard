@@ -436,7 +436,7 @@ class DisplayBankAccount extends Component {
 
     for (let i = 0; i < paymentcarddetails.length; i++) {
       itemsarray.push(
-        <Col xs="12" >
+        <Col xs="12" md="9" >
           <Card className="card-1" style={{ marginBottom: 40, padding:20}}>
             <CardBody style={{ margin: 0, padding: 0 }}>
 

@@ -301,18 +301,22 @@ class Dashboard extends Component {
       'Content-Type': 'application/json',
     }
 
-    var queryurl = apis.GETorder + "?lteDate=" + currentDateString + "&gteDate=" + previousDateString;
-    var allqueryrurl = apis.GETorder;
+    var orderqueryurl = apis.GETorder + "?lteDate=" + currentDateString + "&gteDate=" + previousDateString;
+    var salesqueryurl = apis.GETorder + "?paymentStatus=succeeded" + "&lteDate=" + currentDateString + "&gteDate=" + previousDateString;
+    var orderallqueryrurl = apis.GETorder;
+    var salesallqueryrurl = apis.GETorder + "?paymentStatus=succeeded";
 
     var axiosarray = [
-      axios.get(queryurl, {withCredentials: true}, {headers: headers}),
-      axios.get(allqueryrurl, {withCredentials: true}, {headers: headers})
+      axios.get(orderqueryurl, {withCredentials: true}, {headers: headers}),
+      axios.get(salesqueryurl, {withCredentials: true}, {headers: headers}),
+      axios.get(orderallqueryrurl, {withCredentials: true}, {headers: headers}),
+      axios.get(salesallqueryrurl, {withCredentials: true}, {headers: headers})
     ]
     axios.all(axiosarray)
-    .then(axios.spread((query_response, allquery_response) => {
-      if (query_response.status === 200 && allquery_response.status === 200) {
-        this.getOrderChartData(query_response.data, allquery_response.data.length)      
-        this.getSalesChartData(query_response.data, allquery_response.data)    
+    .then(axios.spread((order_query_response, sales_query_response, order_allquery_response, sales_allquery_response) => {
+      if (order_query_response.status === 200 && sales_query_response.status === 200 && order_allquery_response.status === 200 && sales_allquery_response.status === 200) {
+        this.getOrderChartData(order_query_response.data, order_allquery_response.data.length)      
+        this.getSalesChartData(sales_query_response.data, sales_allquery_response.data)    
       } 
     }))
     .catch((error) => {
@@ -709,7 +713,7 @@ class Dashboard extends Component {
           <Button
             color="primary"
             className="float-center"
-            onClick={() => this.goToPage('/caterer/reports/dishes')}
+            onClick={() => this.goToPage('/caterer/ordersmenu/menusetup')}
           >
             Add Item
           </Button>

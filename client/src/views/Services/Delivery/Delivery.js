@@ -32,7 +32,7 @@ import apis from "../../../apis";
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
-const GOOGLE_API_KEY = process.env.GOOGLE_API_KEY;
+const GOOGLE_API_KEY = "AIzaSyCFHrZBb72wmg5LTiMjUgI_CLhsoMLmlBk";
 
 const AnyReactComponent = ({ text }) => (
   <div style={{
@@ -74,7 +74,7 @@ class Delivery extends Component {
   }
 
   componentDidMount() {
-  
+
     var headers = {
       'Content-Type': 'application/json',
     }
@@ -205,7 +205,7 @@ class Delivery extends Component {
     return (
       <div className="animated fadeIn">
         <Row className="justify-content-center">
-          <Col xs="12" md="6">
+          <Col xs="12" md="9">
             <Card >
               <CardHeader>
                 <strong>Delivery Option</strong>

@@ -128,7 +128,7 @@ class CatererDetail extends Component {
         catererAddress: "30, O'Connell St, Dublin, Ireland",
         rating: "4.7",
         numofreview: "150",
-        openinghours: "Mon-Fri: 10am-3pm",
+        deliveryhours: "Mon-Fri: 10am-3pm",
         deliveryfee: 3,
         minimumspend: 50*/
       },
@@ -224,7 +224,7 @@ class CatererDetail extends Component {
           restaurantInfo.numofreview = typeof response.data[0].numofreview !== 'undefined' ? response.data[0].numofreview : 0;
           restaurantInfo.deliveryfee = typeof response.data[0].deliveryfee !== 'undefined' ? response.data[0].deliveryfee : 0;
           restaurantInfo.minimumspend = typeof response.data[0].minimumspend !== 'undefined' ? response.data[0].minimumspend : 0;
-          restaurantInfo.openinghours = typeof response.data[0].openinghours !== 'undefined' ? response.data[0].openinghours : [];
+          restaurantInfo.deliveryhours = typeof response.data[0].deliveryhours !== 'undefined' ? response.data[0].deliveryhours : [];
           this.setState({
             restaurantInfo: restaurantInfo
           })
@@ -1540,22 +1540,22 @@ class CatererDetail extends Component {
   renderOpeningHours() {
     var itemsarray = [];
 
-    var openinghours = this.state.restaurantInfo.openinghours;
+    var deliveryhours = this.state.restaurantInfo.deliveryhours;
 
-    if (typeof this.state.restaurantInfo.openinghours !== 'undefined') {
-      if (openinghours.length > 0) {
-        for (let i = 0; i < openinghours.length; i++) {
+    if (typeof this.state.restaurantInfo.deliveryhours !== 'undefined') {
+      if (deliveryhours.length > 0) {
+        for (let i = 0; i < deliveryhours.length; i++) {
           itemsarray.push(
             <Col xs="6" sm="6" md="4" lg="4">
-              <span style={{fontWeight: this.state.todayDay === openinghours[i].day ? '700' : null}}>
+              <span style={{fontWeight: this.state.todayDay === deliveryhours[i].day ? '700' : null}}>
                 <p style={{margin: 0}}>
-                  {openinghours[i].day}
+                  {deliveryhours[i].day}
                 </p>
-                {openinghours[i].starttime === 0 && openinghours[i].closetime === 0 ? 
+                {deliveryhours[i].starttime === 0 && deliveryhours[i].closetime === 0 ? 
                  <p style={{margin: 0, marginBottom: 10}}>Off</p>
                  :
                 <p style={{margin: 0, marginBottom: 10}}>
-                  {this.reformatInput(openinghours[i].starttime.toString())}&nbsp;-&nbsp;{this.reformatInput(openinghours[i].closetime.toString())}
+                  {this.reformatInput(deliveryhours[i].starttime.toString())}&nbsp;-&nbsp;{this.reformatInput(deliveryhours[i].closetime.toString())}
                 </p>
                 }
               </span>

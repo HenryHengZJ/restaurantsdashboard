@@ -89,7 +89,7 @@ class ValidateEmail extends Component {
     return (
       <div className="animated fadeIn">
         <Row className="justify-content-center">
-          <Col xs="12" md="6">
+          <Col xs="12" md="9">
             <Card >
               <CardHeader>
                 <strong>Please Validate Email Address</strong>

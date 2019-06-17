@@ -30,10 +30,16 @@ var orderSchema = mongoose.Schema({
 	orderItem: [cartSchema],
 	catererID: ObjectId,
 	customerID: ObjectId,
+	deliveryfee: Number,
 	totalOrderPrice: Number,
 	orderType: String,
 	orderStatus: String,
 	paymentType: String,
+	deliveryaddress: String,
+	deliverydate: Date,
+	deliverytime: String,
+	paymentIntentID: String,
+	paymentStatus: String,
 }, {
     timestamps: true
 });

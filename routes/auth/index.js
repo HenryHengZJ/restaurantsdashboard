@@ -9,6 +9,13 @@ var ObjectId = require('mongodb').ObjectID;
 var bcrypt   = require('bcrypt-nodejs');
 require('dotenv').config();
 
+router.post('/generatepw', (req, res) => {
+    var newpw = bcrypt.hashSync(req.body.password, bcrypt.genSaltSync(8), null);
+    return res.status(200).json({
+        'newpw': newpw
+    });
+});
+
 router.post('/caterersignup', (req, res) => {
 	
     var email = req.body.catererEmail.toLowerCase();

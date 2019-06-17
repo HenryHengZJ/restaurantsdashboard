@@ -125,7 +125,7 @@ class Customer extends Component {
     };
   }
 
-  getLocalStorage = () => {
+  getSessionStorage = () => {
     
     var maxDate = moment().toDate();
 
@@ -157,7 +157,7 @@ class Customer extends Component {
   componentDidMount() {
 
     if (sessionStorage.getItem("currentCustomerDateString") !== null && sessionStorage.getItem("previousCustomerDateString") !== null) {
-      this.getLocalStorage()
+      this.getSessionStorage()
     }
     else {
       var currentDate = moment().toDate();
@@ -449,9 +449,10 @@ class Customer extends Component {
           <td>{typeof tableitems[i].customerDetails !== 'undefined' ? tableitems[i].customerDetails[0].customerFirstName : ""}</td>
           <td>{typeof tableitems[i].customerDetails !== 'undefined' ? tableitems[i].customerDetails[0].customerPhoneNumber : ""}</td>
           <td>{typeof tableitems[i].customerDetails !== 'undefined' ? tableitems[i].customerDetails[0].customerCity : ""}</td>
-          <td>{typeof tableitems[i].customerDetails !== 'undefined' ? this.capitalizeFirstLetter(tableitems[i].customerDetails[0].status) : "New"}</td>
-          <td>{tableitems[i]._id}</td>
+          <td>{typeof tableitems[i].customerDetails !== 'undefined' ? this.capitalizeFirstLetter(tableitems[i].customerDetails[0].status) : "new"}</td>
+          <td>{tableitems[i].orderID}</td>
           <td>{moment(tableitems[i].createdAt).format("DD MMM, YYYY")}</td>
+          <td>{moment(tableitems[i].createdAt).format("hh:mm A")}</td>
         </tr>
       );
     }
@@ -510,6 +511,7 @@ class Customer extends Component {
               </Row>
             </th>
             <th>Last Order ID</th>
+            <th>Last Order Date</th>
             <th>Last Order Time</th>
           </tr>
         </thead>

@@ -8,9 +8,11 @@ import InnerApp from './App';
 import * as serviceWorker from './serviceWorker';
 import { StripeProvider } from "react-stripe-elements";
 
+const STRIPE_CLIENT_KEY = process.env.REACT_APP_STRIPE_CLIENT_KEY;
+
 const App = () => {
     return (
-      <StripeProvider apiKey="pk_test_MQ87thwBK9MIVEqLB3jXQfHB00HFSE8cVS">
+      <StripeProvider apiKey={STRIPE_CLIENT_KEY}>
         <InnerApp />
       </StripeProvider>
     );

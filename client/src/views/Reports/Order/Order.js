@@ -34,6 +34,9 @@ import { DateRangePicker, DateRange } from 'react-date-range';
 import { format, addDays, subDays } from 'date-fns';
 import axios from 'axios';
 import apis from "../../../apis";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import Lottie from 'react-lottie';
 
 const options = {
   tooltips: {
@@ -61,6 +64,7 @@ class Order extends Component {
     this.selectDateRange = this.selectDateRange.bind(this)
 
     this.state = {
+      loadingModal: false,
       orderModal: false,
       selectedOrderItem: null,
       empty: false,
@@ -149,30 +153,34 @@ class Order extends Component {
       this.getLocalStorage()
     }
     else {
-      var currentDate = moment().toDate();
-      var previousDate = this.getPreviousDate(currentDate, 7);
-  
-      var currentDateString = moment(currentDate).format("DD MMM, YYYY")
-      var previousDateString = moment(previousDate).format("DD MMM, YYYY")
-      var finalSelectionDate = previousDateString + ' - ' + currentDateString
-      var finalDateArray = this.getIntervalDates(currentDate, previousDate).reverse();
-      var newline = this.state.line;
-      newline.labels = finalDateArray;
-      var newbar = this.state.bar;
-      newbar.labels = finalDateArray;
-  
-      this.setState({
-        maxDate: currentDate,
-        currentDate: currentDate,
-        previousDate: previousDate,
-        dateRange: finalSelectionDate,
-        line: newline,
-        bar: newbar,
-        dateArray: finalDateArray,
-      }, () => {
-        this.getOrder(currentDateString, previousDateString)
-      })
+      this.getTodayDate()
     }
+  }
+
+  getTodayDate = () => {
+    var currentDate = moment().toDate();
+    var previousDate = this.getPreviousDate(currentDate, 7);
+
+    var currentDateString = moment(currentDate).format("DD MMM, YYYY")
+    var previousDateString = moment(previousDate).format("DD MMM, YYYY")
+    var finalSelectionDate = previousDateString + ' - ' + currentDateString
+    var finalDateArray = this.getIntervalDates(currentDate, previousDate).reverse();
+    var newline = this.state.line;
+    newline.labels = finalDateArray;
+    var newbar = this.state.bar;
+    newbar.labels = finalDateArray;
+
+    this.setState({
+      maxDate: currentDate,
+      currentDate: currentDate,
+      previousDate: previousDate,
+      dateRange: finalSelectionDate,
+      line: newline,
+      bar: newbar,
+      dateArray: finalDateArray,
+    }, () => {
+      this.getOrder(currentDateString, previousDateString)
+    })
   }
 
   getOrder = (currentDateString, previousDateString) => {
@@ -245,6 +253,10 @@ class Order extends Component {
     this.setState({
       dropDownType: !this.state.dropDownType
     })
+  }
+
+  capitalizeFirstLetter = (string) => {
+    return string.charAt(0).toUpperCase() + string.slice(1);
   }
 
   getPreviousDate = (currentDate, days) => {
@@ -335,6 +347,99 @@ class Order extends Component {
       isLineChartPressed: false,
       isBarChartPressed: true,
     });
+  }
+
+  acceptOrder = (orderID) => {
+
+    this.setState({
+      loadingModal: true
+    })
+
+    var headers = {
+      'Content-Type': 'application/json',
+    }
+
+    var body ={
+      orderID: orderID
+    }
+
+    var url = apis.PUTacceptorder_order
+
+    axios.put(url, body, {withCredentials: true}, {headers: headers})
+      .then((response) => {
+        if (response.status === 201) {
+          toast(<OrderAccepted/>, {
+            position: toast.POSITION.BOTTOM_RIGHT
+          });
+          this.setState({
+            loadingModal: false,
+            orderModal: false
+          }, () => {
+            if (sessionStorage.getItem("currentOrderDateString") !== null && sessionStorage.getItem("previousOrderDateString") !== null) {
+              this.getLocalStorage()
+            }
+            else {
+              this.getTodayDate()
+            }
+          })
+        } 
+      })
+      .catch((error) => {
+        toast(<ErrorInfo/>, {
+          position: toast.POSITION.BOTTOM_RIGHT
+        });
+        this.setState({
+          loadingModal: false,
+          orderModal: false
+        })
+      });
+  }
+
+  
+  rejectOrder = (orderID) => {
+
+    this.setState({
+      loadingModal: true
+    })
+
+    var headers = {
+      'Content-Type': 'application/json',
+    }
+
+    var body ={
+      orderID: orderID
+    }
+
+    var url = apis.PUTreject_order
+
+    axios.put(url, body, {withCredentials: true}, {headers: headers})
+      .then((response) => {
+        if (response.status === 201) {
+          toast(<OrderRejected/>, {
+            position: toast.POSITION.BOTTOM_RIGHT
+          });
+          this.setState({
+            loadingModal: false,
+            orderModal: false
+          }, () => {
+            if (sessionStorage.getItem("currentOrderDateString") !== null && sessionStorage.getItem("previousOrderDateString") !== null) {
+              this.getLocalStorage()
+            }
+            else {
+              this.getTodayDate()
+            }
+          })
+        } 
+      })
+      .catch((error) => {
+        toast(<ErrorInfo/>, {
+          position: toast.POSITION.BOTTOM_RIGHT
+        });
+        this.setState({
+          loadingModal: false,
+          orderModal: false
+        })
+      });
   }
 
   renderLineChart() {
@@ -503,27 +608,58 @@ class Order extends Component {
                     color: "#20a8d8"
                   }}
                 >
-                  {selectedOrderItem.orderType}
+                  {this.capitalizeFirstLetter(selectedOrderItem.orderType)}
                 </h6>
               </CardBody>
             </Card>
           </Col>
         </Row>
 
-        <Collapse isOpen={selectedOrderItem.orderType === "Delivery"}>
-          <Table borderless>
-            <tbody>
+        <Table borderless>
+          <tbody>
+            {selectedOrderItem.orderType === "delivery" ? 
               <tr>
-                <td style={{ fontSize: 16, textAlign: "start" }}>
+                <td style={{ fontWeight: "600",  fontSize: 14, textAlign: "start" }}>
                   Delivery Fee
                 </td>
-                <td style={{ fontSize: 16, textAlign: "end" }}>
-                  €{Number(2).toFixed(2)}
+                <td style={{ fontSize: 15, textAlign: "end" }}>
+                  €{Number(selectedOrderItem.deliveryfee).toFixed(2)}
                 </td>
               </tr>
-            </tbody>
-          </Table>
-        </Collapse>
+              :
+              null
+            }
+            <tr>
+              <td style={{ fontWeight: "600",  fontSize: 14, textAlign: "start" }}>
+                Delivery Date
+              </td>
+              <td style={{ fontSize: 15, textAlign: "end" }}>
+                {moment(selectedOrderItem.deliverydate).format("DD MMM, YYYY")}
+              </td>
+            </tr>
+            <tr>
+              <td style={{ fontWeight: "600",  fontSize: 14, textAlign: "start" }}>
+                Delivery Time
+              </td>
+              <td style={{ fontSize: 15, textAlign: "end" }}>
+                {moment(selectedOrderItem.deliverytime, "HH:mm").format("hh:mm A")}
+              </td>
+            </tr>
+            {selectedOrderItem.orderType === "delivery" ? 
+            <tr>
+              <td
+                style={{ fontWeight: "600", fontSize: 14, textAlign: "start" }}
+              >
+                Deliver To
+              </td>
+              <td style={{ fontSize: 15, textAlign: "end" }}>
+                {selectedOrderItem.deliveryaddress} 
+              </td>
+            </tr>
+            :
+            null}
+          </tbody>
+        </Table>
 
         <div
           style={{
@@ -538,11 +674,11 @@ class Order extends Component {
           <tbody>
             <tr>
               <td
-                style={{ fontSize: 16, fontWeight: "600", textAlign: "start" }}
+                style={{ fontSize: 15, fontWeight: "600", textAlign: "start" }}
               >
                 TOTAL
               </td>
-              <td style={{ fontSize: 16, fontWeight: "600", textAlign: "end" }}>
+              <td style={{ fontSize: 17, color: 'black', fontWeight: "600", textAlign: "end" }}>
                 €{Number(selectedOrderItem.totalOrderPrice).toFixed(2)}
               </td>
             </tr>
@@ -563,14 +699,33 @@ class Order extends Component {
           Order #{selectedOrderItem._id}
         </ModalHeader>
         <ModalBody>{this.rendeSelectedOrderItems()}</ModalBody>
+      
+      {selectedOrderItem.orderStatus === "pending" ? 
         <ModalFooter>
-          <Button onClick={() => this.toggleOrderModal()} color="success">
+          <Button style={{ marginTop: 7, fontSize: 17, padding: 10, fontWeight: '600'}} block onClick={() => this.acceptOrder(selectedOrderItem._id)} color="success">
             Accept
           </Button>
-          <Button onClick={() => this.toggleOrderModal()} color="danger">
+          <Button style={{fontSize: 17, padding: 10, fontWeight: '600'}} block onClick={() => this.rejectOrder(selectedOrderItem._id)} color="danger">
             Reject
           </Button>
         </ModalFooter>
+        :
+        selectedOrderItem.orderStatus === "accepted" ? 
+        <ModalFooter>
+          <Button disabled style={{ opacity: 1, marginTop: 7, fontSize: 17, padding: 10, fontWeight: '600'}} block color="success">
+            Accepted
+          </Button>
+        </ModalFooter>
+        :
+        selectedOrderItem.orderStatus === "rejected" ? 
+        <ModalFooter>
+          <Button disabled style={{ opacity: 1, marginTop: 7, fontSize: 17, padding: 10, fontWeight: '600'}} block color="danger">
+            Rejected
+          </Button>
+        </ModalFooter>
+        :
+        null }
+        
       </Modal>
     );
   }
@@ -657,34 +812,29 @@ class Order extends Component {
         <tr style={{cursor: 'pointer'}} onClick={() => this.tableItemClicked(tableitems[i]._id)}>
           <td>{tableitems[i]._id}</td>
           <td>{moment(tableitems[i].createdAt).format("DD MMM, YYYY")}</td>
+          <td>{moment(tableitems[i].deliverytime, "HH:mm").format("hh:mm A")}</td>
+          <td>{moment(tableitems[i].deliverydate).format("DD MMM, YYYY")}</td>
+          <td>{this.capitalizeFirstLetter(tableitems[i].orderType)}</td>
+          <td>{tableitems[i].deliveryaddress}</td>
           {this.renderOrderItems(i)}
           <td>{Number(tableitems[i].totalOrderPrice).toFixed(2)}</td>
-          <td>{tableitems[i].orderType}</td>
           <td>
             <Badge
               color=
               {
-                  tableitems[i].orderStatus === "Pending"
+                  tableitems[i].orderStatus === "pending"
                   ? "warning"
-                  : tableitems[i].orderStatus === "Accepted"
+                  : tableitems[i].orderStatus === "accepted"
                   ? "success"
-                  : tableitems[i].orderStatus === "Rejected"
+                  : tableitems[i].orderStatus === "rejected"
                   ? "danger"
                   : "secondary"
               }
             >
-              {tableitems[i].orderStatus}
+              {this.capitalizeFirstLetter(tableitems[i].orderStatus)}
             </Badge>
           </td>
-          <td>
-            {tableitems[i].orderStatus === "Pending"
-              ? this.renderPendingAction()
-              : tableitems[i].orderStatus === "Accepted"
-              ? this.renderRejectAction()
-              : tableitems[i].orderStatus === "Rejected"
-              ? this.renderRejectAction()
-              : null}
-          </td>
+          
         </tr>
       );
     }
@@ -729,9 +879,9 @@ class Order extends Component {
           <thead>
             <tr>
               <th>Order ID</th>
-              <th>Time</th>
-              <th>Items</th>
-              <th>Price (€)</th>
+              <th>Ordered Date</th>
+              <th>Delivery Time</th>
+              <th>Delivery Date</th>
               <th>
                 <Row style={{marginLeft: 0}}> 
                   Type
@@ -744,6 +894,9 @@ class Order extends Component {
                   </Dropdown>
                 </Row>
               </th>
+              <th>Delivery Address</th>
+              <th>Items</th>
+              <th>Price (€)</th>
               <th>
                 <Row style={{marginLeft: 0}}> 
                   Status
@@ -757,7 +910,7 @@ class Order extends Component {
                   </Dropdown>
                 </Row>
               </th>
-              <th>Action</th>
+             
             </tr>
           </thead>
 
@@ -767,6 +920,41 @@ class Order extends Component {
       </div>
     );
   }
+
+  
+  renderLoadingModal() {
+
+    const defaultOptions = {
+      loop: true,
+      autoplay: true, 
+      animationData: require('../../../assets/animation/order_loading.json'),
+      rendererSettings: {
+        preserveAspectRatio: 'xMidYMid slice'
+      }
+    };
+
+    return (
+      <Modal    
+        aria-labelledby="contained-modal-title-vcenter"
+        centered
+        isOpen={this.state.loadingModal} >
+        <ModalBody>
+          <div>
+            <Lottie 
+              options={defaultOptions}
+              height={200}
+              width={200}/>
+
+            <p style={{textAlign: 'center', paddingLeft:20, paddingRight:20, fontSize: 16, fontWeight: '600'}}>
+              Processing...
+            </p>
+          </div>
+        </ModalBody>
+      </Modal>
+    )
+  }
+
+
 
   render() {
     const {
@@ -864,10 +1052,39 @@ class Order extends Component {
             </Card>
           </Col>
           {this.state.selectedOrderItem !== null ? this.renderOrderModal() : null}
+          {this.renderLoadingModal()}
+          <ToastContainer hideProgressBar/>
         </Row>
       </div>
     );
   }
 }
+
+const OrderAccepted = ({ closeToast }) => (
+  <div>
+    <img style={ { marginLeft:10, objectFit:'cover', width: 25, height: 25 }} src={require("../../../assets/img/checked.png")} />
+
+     <b style={{marginLeft:10, marginTop:5, color: 'green'}}>Order Accepted</b>
+   
+  </div>
+)
+
+const OrderRejected = ({ closeToast }) => (
+  <div>
+    <img style={ { marginLeft:10, objectFit:'cover', width: 25, height: 25 }} src={require("../../../assets/img/checked.png")} />
+
+     <b style={{marginLeft:10, marginTop:5, color: 'red'}}>Order Rejected</b>
+   
+  </div>
+)
+
+const ErrorInfo = ({ closeToast }) => (
+  <div>
+    <img style={ { marginLeft:10, objectFit:'cover', width: 25, height: 25 }} src={require("../../../assets/img/cancel.png")} />
+
+     <b style={{marginLeft:10, marginTop:5, color: 'red'}}>Unknown error</b>
+   
+  </div>
+)
 
 export default Order;

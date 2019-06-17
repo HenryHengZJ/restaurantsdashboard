@@ -21,7 +21,7 @@ import {
 import Dashboard from './Dashboard';
 import { Login, Page404, Page500, Register, LandingPage } from './Pages';
 import { NameAddress, Description, Website, Cuisine, Occasion, ValidateEmail} from './Basics';
-import { Pickup, Delivery, OpeningHours, OrderLater } from './Services';
+import { Pickup, Delivery, DeliveryHours, OrderLater } from './Services';
 import { ReceiveOrder, MenuSetup } from './OrdersMenu';
 import { Order, Sales, Customer, Review, Dishes } from './Order';
 import { TopPayment } from './Payment';
@@ -42,7 +42,7 @@ export {
   ValidateEmail,
   Pickup,
   Delivery,
-  OpeningHours,
+  DeliveryHours,
   OrderLater,
   ReceiveOrder,
   MenuSetup,

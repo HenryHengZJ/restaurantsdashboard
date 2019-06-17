@@ -2,7 +2,7 @@
 const express = require('express');
 const app = express();
 const path = require('path');
-const port = process.env.PORT || 5000;
+const port = process.env.PORT || 8080;
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const logger = require('morgan');
@@ -43,6 +43,7 @@ var orderRoutes   = require('./routes/order');
 var reviewRoutes   = require('./routes/review');
 var authRoutes   = require('./routes/auth');
 var paymentRoutes   = require('./routes/payment');
+var catererPublishedRoutes   = require('./routes/catererPublished');
 
 // routes ======================================================================
 app.use('/test', testRoutes);
@@ -53,6 +54,7 @@ app.use('/order', orderRoutes);
 app.use('/review', reviewRoutes);
 app.use('/auth', authRoutes);
 app.use('/payment', paymentRoutes);
+app.use('/catererPublished', catererPublishedRoutes);
 
 //Static file declaration
 app.use(express.static(path.join(__dirname, 'client/build')));

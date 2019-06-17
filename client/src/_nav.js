@@ -53,20 +53,16 @@ export default {
           icon: '',
         },
         {
+          name: 'Delivery Hours',
+          url: '/caterer/services/deliveryhours',
+          icon: '',
+        },
+        {
           name: 'Minimum Spending',
           url: '/caterer/services/minspending',
           icon: '',
         },
-        {
-          name: 'Opening Hours',
-          url: '/caterer/services/openinghours',
-          icon: '',
-        },
-        {
-          name: 'Order for Later',
-          url: '/caterer/services/orderlater',
-          icon: '',
-        },
+       
       ]
     },
     {
