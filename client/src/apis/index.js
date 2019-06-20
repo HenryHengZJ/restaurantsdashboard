@@ -18,6 +18,10 @@ export default {
     DELETEmenu: "/menu/deletemenu",
     BULKDELETEmenu: "/menu/bulkdeletemenu",
 
+    /*Menu Published API*/
+    GETmenuPublished: "/menuPublished/getmenuPublished",
+    UPDATEmenuPublished: "/menuPublished/update_menu_published",
+  
     /*Order API*/
     GETorder: "/order/getorder",
     GETorder_customer: "/order/getorder_customer",

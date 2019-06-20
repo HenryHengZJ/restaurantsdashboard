@@ -44,6 +44,7 @@ var reviewRoutes   = require('./routes/review');
 var authRoutes   = require('./routes/auth');
 var paymentRoutes   = require('./routes/payment');
 var catererPublishedRoutes   = require('./routes/catererPublished');
+var menuPublishedRoutes   = require('./routes/menuPublished');
 
 // routes ======================================================================
 app.use('/test', testRoutes);
@@ -55,6 +56,7 @@ app.use('/review', reviewRoutes);
 app.use('/auth', authRoutes);
 app.use('/payment', paymentRoutes);
 app.use('/catererPublished', catererPublishedRoutes);
+app.use('/menuPublished', menuPublishedRoutes);
 
 //Static file declaration
 app.use(express.static(path.join(__dirname, 'client/build')));

@@ -128,7 +128,8 @@ class NameAddress extends Component {
       //Valid Number
       this.setState({ 
         catererPhoneNumber: e.target.value,
-        isPhoneNumberEmpty: e.target.value == "" ? true : false
+        isPhoneNumberEmpty: false,
+        isPhoneNumberFormatWrong: false
       },() => {
         this.checkAllInput()
       })
@@ -222,9 +223,28 @@ class NameAddress extends Component {
     });
   }
 
+  validatePhoneNumber (restaurantPhoneNumber) {
+    var returnval
+    if (restaurantPhoneNumber.substring(0,3) === '353' || restaurantPhoneNumber.substring(0,1) !== '0') {
+      this.setState({
+        isPhoneNumberFormatWrong: true
+      });
+      returnval = false
+    } else if (restaurantPhoneNumber.length > 10 || restaurantPhoneNumber.length < 9 ) {
+      this.setState({
+        isPhoneNumberFormatWrong: true
+      });
+      returnval = false
+    } else {
+      returnval = true
+    }
+
+    return returnval
+  }
+
   checkAllInput = () => {
     const {catererName, catererPhoneNumber, catererStreet, catererCity, catererCounty, catererCountry} = this.state
-    if (catererName != "" && catererPhoneNumber != "" && catererStreet != "" && catererCity != "" && catererCounty != "" && catererCountry != "") {
+    if (catererName != "" && catererPhoneNumber != "" && catererStreet != "" && catererCity != "" && catererCounty != "" && catererCountry != "" && this.validatePhoneNumber(catererPhoneNumber)) {
       //Activate Next Button
       this.setState({ 
         isNextButtonActive: true, 

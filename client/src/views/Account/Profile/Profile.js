@@ -44,6 +44,7 @@ class Profile extends Component {
       confirmpassword: "",
       isChangePasswordClicked: false,
       invalidPassword: false,
+      isPasswordFormatWrong: false,
     };
   }
 
@@ -78,13 +79,14 @@ class Profile extends Component {
 
   handleOldPasswordChange(e) {
     this.setState({
-      oldpassword: e.target.value
+      oldpassword: e.target.value,
     });
   }
 
   handleNewPasswordChange(e) {
     this.setState({
-      newpassword: e.target.value
+      newpassword: e.target.value,
+      isPasswordFormatWrong: false
     });
   }
 
@@ -125,50 +127,62 @@ class Profile extends Component {
       });
   };
 
+  validatePassword (password) {
+    const regexp = /^(?=.{7,13}$)(?=\w{7,13})(?=.*\d)/;
+    return regexp.test(String(password).toLowerCase());
+  }
+
   updatePassword = () => {
 
     const {oldpassword, newpassword, confirmpassword} = this.state
 
-    if (newpassword === confirmpassword) {
+    if (!this.validatePassword(newpassword)) {
+      this.setState({
+        isPasswordFormatWrong: true
+      });
+    }
+    else {
+      if (newpassword === confirmpassword) {
 
-      var data = {
-        originalpassword: oldpassword,
-        newpassword: newpassword
-      }
+        var data = {
+          originalpassword: oldpassword,
+          newpassword: newpassword
+        }
 
-      var headers = {
-        'Content-Type': 'application/json',
-      }
+        var headers = {
+          'Content-Type': 'application/json',
+        }
 
-      var url = apis.UPDATEcatererpassword;
+        var url = apis.UPDATEcatererpassword;
 
-      axios.put(url, data, {withCredentials: true}, {headers: headers})
-        .then((response) => {
-          if (response.status === 201) {
-            toast(<SuccessInfo/>, {
+        axios.put(url, data, {withCredentials: true}, {headers: headers})
+          .then((response) => {
+            if (response.status === 201) {
+              toast(<SuccessInfo/>, {
+                position: toast.POSITION.BOTTOM_RIGHT
+              });
+              this.setState({
+                invalidPassword: false,
+                isChangePasswordClicked: false
+              }, () => {
+                this.getCatererDetail();
+              })
+            }
+          })
+          .catch((error) => {
+            toast(<ErrorInfo/>, {
               position: toast.POSITION.BOTTOM_RIGHT
             });
             this.setState({
-              invalidPassword: false,
-              isChangePasswordClicked: false
-            }, () => {
-              this.getCatererDetail();
+              invalidPassword: false
             })
-          }
-        })
-        .catch((error) => {
-          toast(<ErrorInfo/>, {
-            position: toast.POSITION.BOTTOM_RIGHT
           });
-          this.setState({
-            invalidPassword: false
-          })
-        });
-    }
-    else {
-      this.setState({
-        invalidPassword: true
-      })
+      }
+      else {
+        this.setState({
+          invalidPassword: true
+        })
+      }
     }
 
   };
@@ -224,6 +238,7 @@ class Profile extends Component {
                     this.handleNewPasswordChange(e);
                   }}
                 />
+               {this.state.isPasswordFormatWrong ? <Label style={{fontSize:13, color: 'red', marginBottom: 20}} >* Password should be alphanumerical and within length of 7 to 13</Label> : null}
               </Col>
             </FormGroup>
 

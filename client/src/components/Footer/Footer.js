@@ -12,10 +12,10 @@ const Footer = () => {
         <a style={{color:'white'}} target="_blank" rel="noopener noreferrer" href="https://foodiebee.eu/privacypolicy">Privacy Policy</a>
       </p>
       <Col style={{textAlign: 'center'}} xs="12">
-        <a style={{color: 'white', marginLeft: 10, marginRight: 5}} href="#" className="fa fa-facebook socialfa brandlogo"></a>
-        <a style={{color: 'white', marginLeft: 5, marginRight: 5}} href="#" className="fa fa-twitter socialfa brandlogo"></a>   
-        <a style={{color: 'white', marginLeft: 5, marginRight: 5}} href="#" className="fa fa-instagram socialfa brandlogo"></a>
-        <a style={{color: 'white', marginLeft: 5, marginRight: 10}} href="#" className="fa fa-linkedin socialfa brandlogo"></a>         
+        <a style={{textDecoration:'none', color: 'white', marginLeft: 10, marginRight: 5}} target="_blank" href="https://www.facebook.com/foodiebeeie" className="fa fa-facebook socialfa"></a>
+        <a style={{textDecoration:'none',color: 'white', marginLeft: 5, marginRight: 5}} target="_blank" href="https://twitter.com/FoodiebeeIE" className="fa fa-twitter socialfa"></a>   
+        <a style={{textDecoration:'none',color: 'white', marginLeft: 5, marginRight: 5}} target="_blank" href="https://www.instagram.com/foodiebeeireland" className="fa fa-instagram socialfa"></a>
+        <a style={{textDecoration:'none',color: 'white', marginLeft: 5, marginRight: 10}} target="_blank" href="http://linkedin.com/company/foodiebee-ireland" className="fa fa-linkedin socialfa"></a>         
       </Col>
    
     </Row>

@@ -37,6 +37,7 @@ import apis from "../../../apis";
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import Lottie from 'react-lottie';
+var _ = require('lodash');
 
 class Publish extends Component {
 
@@ -53,6 +54,7 @@ class Publish extends Component {
       loadingModal: false,
       catererDetails: {},
       catererMenu: [],
+      catererMenuPublished: [],
       nameAddressInvalid: false,
       nameAddressAction: "",
       descriptionInvalid: false,
@@ -143,6 +145,31 @@ class Publish extends Component {
         })
       });
   }
+
+  getCatererMenuPublished= () => {
+    var headers = {
+      'Content-Type': 'application/json',
+    }
+
+    var url = apis.GETmenuPublished;
+
+    axios.get(url, {withCredentials: true}, {headers: headers})
+      .then((response) => {
+        if (response.status === 200) {
+          this.setState({
+            catererMenuPublished: response.data,
+          }, () => {
+            this.comparePublishedMenuWithCatererMenu()
+          })
+        } 
+      })
+      .catch((error) => {
+        this.setState({
+          loading: false
+        })
+      });
+  }
+
 
   validateBasics = (catererDetails) => {
   
@@ -412,7 +439,7 @@ class Publish extends Component {
     var menusetupAction = this.state.menusetupAction
     var menusetupInvalid = this.state.menusetupInvalid
 
-    if (typeof catererMenu !== 'undefined' && catererMenu.length > 5) {
+    if (typeof catererMenu !== 'undefined' && catererMenu.length >= 5) {
       menusetupAction = "All Set"
       menusetupInvalid = false
     }
@@ -446,6 +473,73 @@ class Publish extends Component {
 
   rowClicked = (goToPage) => {
     this.props.history.push(goToPage)
+  }
+
+  comparePublishedMenuWithCatererMenu = () => {
+    const {catererMenuPublished, catererMenu} = this.state
+    var toBeUpdateID = [];
+    var toBeUpdateBody = [];
+    for (let i = 0; i < catererMenu.length; i++) {
+      var index = catererMenuPublished.findIndex(x => x._id === catererMenu[i]._id);
+      if (index >= 0) {
+        if (!_.isEqual(catererMenu[i], catererMenuPublished[index])) {
+          toBeUpdateID.push(catererMenu[i]._id)
+          var newbody = catererMenu[i]
+          delete newbody['_id'];
+          toBeUpdateBody.push(newbody)
+        }
+      }
+      else {
+        toBeUpdateID.push(catererMenu[i]._id)
+        var newbody = catererMenu[i]
+        delete newbody['_id'];
+        toBeUpdateBody.push(newbody)
+      }
+    }
+
+    if (toBeUpdateID.length > 0 && toBeUpdateBody.length > 0) {
+      var body = {
+        toBeUpdateID: JSON.stringify(toBeUpdateID),
+        toBeUpdateBody: JSON.stringify(toBeUpdateBody)
+      }
+  
+      var headers = {
+        'Content-Type': 'application/json',
+      }
+  
+      var url = apis.UPDATEmenuPublished
+  
+      axios.put(url, body, {withCredentials: true}, {headers: headers})
+        .then((response) => {
+          if (response.status === 201) {
+            this.setState({
+              loadingModal: false,
+            }, () => {
+              toast(<SuccessInfo/>, {
+                position: toast.POSITION.BOTTOM_RIGHT
+              });
+            })
+          }
+        })
+        .catch((error) => {
+          this.setState({
+            loadingModal: false,
+          }, () => {
+            toast(<ErrorInfo/>, {
+              position: toast.POSITION.BOTTOM_RIGHT
+            });
+          })
+        });
+    }
+    else {
+      this.setState({
+        loadingModal: false,
+      }, () => {
+        toast(<SuccessInfo/>, {
+          position: toast.POSITION.BOTTOM_RIGHT
+        });
+      })
+    }
   }
 
   publish = () => {
@@ -503,13 +597,7 @@ class Publish extends Component {
       axios.put(url, data, {withCredentials: true}, {headers: headers})
         .then((response) => {
           if (response.status === 201) {
-            this.setState({
-              loadingModal: false,
-            }, () => {
-              toast(<SuccessInfo/>, {
-                position: toast.POSITION.BOTTOM_RIGHT
-              });
-            })
+            this.getCatererMenuPublished()
           }
         })
         .catch((error) => {
@@ -819,7 +907,7 @@ const SuccessInfo = ({ closeToast }) => (
   <div>
     <img style={ { marginLeft:10, objectFit:'cover', width: 25, height: 25 }} src={require("../../../assets/img/checked.png")} />
 
-     <b style={{marginLeft:10, marginTop:5, color: 'red'}}>Store Published Successfully!</b>
+     <b style={{marginLeft:10, marginTop:5, color: 'green'}}>Store Published Successfully!</b>
    
   </div>
 )

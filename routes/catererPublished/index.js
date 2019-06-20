@@ -90,7 +90,7 @@ router.get('/getcatererprofile/:_id', (req, res) => {
     });
 }); 
 
-router.put('/update_caterer_published',  (req, res) => {
+router.put('/update_caterer_published', passport.authenticate('jwt', {session: false}), (req, res) => {
 
 	var matchquery;
     if (typeof req.query._id === 'undefined') {
