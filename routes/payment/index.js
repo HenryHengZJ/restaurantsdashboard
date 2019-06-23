@@ -74,8 +74,15 @@ router.get('/get_caterer_balance', (req, res) => {
 router.post('/create_caterer_external_bankaccount', (req, res) => { 
 
     stripe.accounts.createExternalAccount(req.body.catererPaymentAccoundID,{external_account: req.body.bankacctoken}, function(err, connectedacc) {
-      if (err) return res.status(500).send({ error: err });
-      res.status(200).json(connectedacc);
+      
+      if (err) {
+        console.log(err)
+        return res.status(500).send({ error: err });
+      }
+      else {
+        res.status(200).json(connectedacc);
+      }
+
     });
 	
 });

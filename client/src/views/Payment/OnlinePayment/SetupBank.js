@@ -761,6 +761,9 @@ class SetupBank extends Component {
           tax_id : companytaxid
         }
       }
+
+      console.log("setupbank url = ", url)
+      console.log("setupbank body = ", url)
  
       axios.post(url, body, {headers: headers})
       .then((response) => {
@@ -778,7 +781,7 @@ class SetupBank extends Component {
           } 
       })
       .catch((error) => {
-        alert(error)
+        alert( 'error 1 = ',error)
           if (error) {
             toast(<ErrorInfo/>, {
               position: toast.POSITION.BOTTOM_RIGHT
@@ -833,7 +836,7 @@ class SetupBank extends Component {
         } 
       }))
       .catch((error) => {
-          console.log('updateCatererPaymentAccount = ', error)
+          console.log('error2 = ', error)
           toast(<ErrorInfo/>, {
             position: toast.POSITION.BOTTOM_RIGHT
           });
@@ -855,7 +858,7 @@ class SetupBank extends Component {
         } 
       }))
       .catch((error) => {
-          console.log('updateCatererPaymentAccount = ', error)
+          console.log('error3 = ', error)
           toast(<ErrorInfo/>, {
             position: toast.POSITION.BOTTOM_RIGHT
           });
@@ -891,7 +894,7 @@ class SetupBank extends Component {
         } 
     })
     .catch((error) => {
-        console.log('updateCatererPaymentAccount = ', error)
+        console.log('error4 = ', error)
         toast(<ErrorInfo/>, {
           position: toast.POSITION.BOTTOM_RIGHT
         });
@@ -920,7 +923,7 @@ class SetupBank extends Component {
                 //  alert(JSON.stringify(err))
                   console.log(err)
                   if (err.error) {
-                    console.log(JSON.stringify(err))
+                    console.log("error5 = ",JSON.stringify(err))
                     toast(<ErrorInfo/>, {
                       position: toast.POSITION.BOTTOM_RIGHT
                     });
@@ -940,6 +943,7 @@ class SetupBank extends Component {
             });
     }
     else {
+      console.log("error 6 =")
       toast(<ErrorInfo/>, {
         position: toast.POSITION.BOTTOM_RIGHT
       });
@@ -968,6 +972,7 @@ class SetupBank extends Component {
         } 
     })
     .catch((error) => {
+      console.log("error 7 =", error)
         if (error) {
           toast(<ErrorInfo/>, {
             position: toast.POSITION.BOTTOM_RIGHT
@@ -1005,6 +1010,7 @@ class SetupBank extends Component {
         }
       })
       .catch((error) => {
+        console.log("error 8 =", error)
         toast(<ErrorInfo/>, {
           position: toast.POSITION.BOTTOM_RIGHT
         });
