@@ -62,7 +62,7 @@ class Delivery extends Component {
   
     this.state = {
       _id: "",
-      delivery: true,
+      delivery: false,
       latitude: null,
       longitude: null,
       radius: null,
@@ -214,7 +214,7 @@ class Delivery extends Component {
 
                 <FormGroup row className="my-0">
                   <Col xs="10">
-                    <Label htmlFor="Delivery">Do you offer food delivery?</Label>
+                    <Label htmlFor="Delivery">Do you have your own delivery drivers?</Label>
                   </Col>
                   <Col xs="2">
                     <AppSwitch onChange={this.toggle} className={'mx-1 float-right'} variant={'3d'} color={'success'} checked={this.state.delivery} label dataOn={'Yes'} dataOff={'No'}/>   

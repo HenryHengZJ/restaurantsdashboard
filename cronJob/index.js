@@ -9,7 +9,9 @@ var cron = require('node-cron');
 //30 11 * * Monday,Tuesday,Wednesday,Thursday,Friday,Saturday,Sunday
 
 exports.executeCronJob = function () {
-    cron.schedule('30 11 * * Monday,Tuesday,Wednesday,Thursday,Friday,Saturday,Sunday', () => {
+
+    //Send Caterer daily order
+    cron.schedule('15 11 * * Monday,Tuesday,Wednesday,Thursday,Friday,Saturday,Sunday', () => {
 
         var matchquery = {}
 
@@ -84,8 +86,6 @@ exports.executeCronJob = function () {
                         dataAry.push(updateData);
                     }
 
-                    console.log(totalresult[parentkey][0].catererDetails)
-
                     var finalUpdateData = {
                         catererDetails: totalresult[parentkey][0].catererDetails[0],
                         orderDetails: dataAry
@@ -96,7 +96,6 @@ exports.executeCronJob = function () {
                 
                 if (finaldataAry.length > 0) {
                     for (var i = 0; i <finaldataAry.length; i ++) {  
-                        console.log(finaldataAry[i])
                         var orderdetails = finaldataAry[i].orderDetails
                         var catererEmail = finaldataAry[i].catererDetails.catererEmail
                         mail.sendCatererLunchOrderEmail('/templates/caterer_lunchorder/email.html', orderdetails, catererEmail);
@@ -105,6 +104,27 @@ exports.executeCronJob = function () {
             }
         });
     });   
+
+    //Reject caterer daily pending order after 1131am
+    cron.schedule('35 11 * * Monday,Tuesday,Wednesday,Thursday,Friday,Saturday,Sunday', () => {
+
+        var matchquery = {}
+
+        //matchquery.orderStatus = "pending"
+
+        var updateData = {orderStatus: "rejected"}
+                
+        var bulkLunchOrder = LunchOrder.collection.initializeOrderedBulkOp();
+        bulkLunchOrder.find(matchquery).update({$set: updateData});
+        bulkLunchOrder.execute((err, doc) => {
+            if (err) {
+                console.log('err = ', err)
+             }
+             else {
+                console.log('doc = ', doc)
+             }
+        })
+    });  
 }
 
 var getOrder = function(orderID, callback) {

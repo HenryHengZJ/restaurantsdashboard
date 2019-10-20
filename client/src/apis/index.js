@@ -39,6 +39,7 @@ export default {
     GETorder_customer: "/order/getorder_customer",
     PUTacceptorder_order: "/order/acceptorder",
     PUTreject_order: "/order/rejectorder",
+    COUNTorder: "/order/countorder",
 
     /*Lunch Order API*/
     GETlunchorder: "/lunchOrder/getlunchorder",

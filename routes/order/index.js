@@ -9,6 +9,35 @@ var mail = require('../../nodeMailerWithTemp');
 require('dotenv').config();
 const stripe = require('stripe')(process.env.STRIPE_KEY);
 
+router.get('/countorder', passport.authenticate('jwt', {session: false}), (req, res) => {
+
+    const { user } = req;
+    var userID = user.catererID
+    var matchquery = {}
+	matchquery.catererID = new ObjectId(userID);
+
+    if (typeof req.query.lteDate !== 'undefined' && typeof req.query.gteDate !== 'undefined') {
+		var gteDate = moment(req.query.gteDate, 'DD MMM, YYYY').toDate()
+		var lteDate = moment(req.query.lteDate, 'DD MMM, YYYY').add(1, 'days').toDate()
+        matchquery.createdAt = {$gte: new Date(gteDate.toISOString()),$lte: new Date(lteDate.toISOString())}
+    }
+
+    if (typeof req.query.paymentStatus !== 'undefined') {
+        matchquery.paymentStatus = req.query.paymentStatus;
+    }
+	
+    Order.countDocuments(matchquery, function(err, c) {
+        if (err) {
+            return res.status(500).send({ error: err });
+        }
+        else {
+            console.log(c)
+            return res.status(200).json({totalcount: c});
+        }
+    });
+	
+});
+
 router.get('/getorder', passport.authenticate('jwt', {session: false}), (req, res) => {
 
     const { user } = req;
