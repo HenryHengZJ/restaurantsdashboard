@@ -49,12 +49,15 @@ class Publish extends Component {
     this.refObj[1] = React.createRef();
     this.refObj[2] = React.createRef();
     this.refObj[3] = React.createRef();
+    this.refObj[4] = React.createRef();
 
     this.state = {
       loadingModal: false,
       catererDetails: {},
       catererMenu: [],
       catererMenuPublished: [],
+      lunchMenu: [],
+      lunchMenuPublished: [],
       nameAddressInvalid: false,
       nameAddressAction: "",
       descriptionInvalid: false,
@@ -77,6 +80,9 @@ class Publish extends Component {
 
       menusetupInvalid: false,
       menusetupAction: "",
+
+      lunchmenusetupInvalid: false,
+      lunchmenusetupAction: "",
 
       paymentInvalid: false,
       paymentAction: "",
@@ -126,9 +132,38 @@ class Publish extends Component {
       'Content-Type': 'application/json',
     }
 
-    var url = apis.GETmenu;
+    var caterermenu_url = apis.GETmenu;
+    var lunchmenu_url = apis.GETlunchmenu;
+    axios.all([
+      axios.get(caterermenu_url),
+      axios.get(lunchmenu_url)
+    ])
+    .then(axios.spread((caterermenu,lunchmenu) => {
+      if (caterermenu.status === 200 && lunchmenu.status === 200) {
+        this.setState({
+          catererMenu: caterermenu.data,
+          lunchMenu: lunchmenu.data,
+        },() => {
+          if (this.state.catererMenu.length === 0 && this.state.lunchMenu.length > 0) {
+            this.validateLunchMenu(this.state.lunchMenu);
+          }
+          else if (this.state.catererMenu.length > 0 && this.state.lunchMenu.length === 0) {
+            this.validateMenu(this.state.lunchMenu);
+          }
+          else {
+            this.validateMenu(this.state.catererMenu);
+            this.validateLunchMenu(this.state.lunchMenu);
+          }
+        })
+      } 
+    }))
+    .catch((error) => {
+      this.setState({
+        loading: false
+      })
+    });
 
-    axios.get(url, {withCredentials: true}, {headers: headers})
+    /*axios.get(url, {withCredentials: true}, {headers: headers})
       .then((response) => {
         if (response.status === 200) {
           this.setState({
@@ -143,7 +178,7 @@ class Publish extends Component {
         this.setState({
           loading: false
         })
-      });
+      });*/
   }
 
   getCatererMenuPublished= () => {
@@ -170,6 +205,29 @@ class Publish extends Component {
       });
   }
 
+  getCatererLunchMenuPublished= () => {
+    var headers = {
+      'Content-Type': 'application/json',
+    }
+
+    var url = apis.GETlunchmenuPublished;
+
+    axios.get(url, {withCredentials: true}, {headers: headers})
+      .then((response) => {
+        if (response.status === 200) {
+          this.setState({
+            lunchMenuPublished: response.data,
+          }, () => {
+            this.comparePublishedLunchMenuWithLunchMenu()
+          })
+        } 
+      })
+      .catch((error) => {
+        this.setState({
+          loading: false
+        })
+      });
+  }
 
   validateBasics = (catererDetails) => {
   
@@ -471,8 +529,100 @@ class Publish extends Component {
     })
   }
 
+  validateLunchMenu = (lunchMenu) => {
+ 
+    var lunchmenusetupAction = this.state.lunchmenusetupAction
+    var lunchmenusetupInvalid = this.state.lunchmenusetupInvalid
+
+    if (typeof lunchMenu !== 'undefined' && lunchMenu.length >= 6) {
+      lunchmenusetupAction = "All Set"
+      lunchmenusetupInvalid = false
+    }
+    else {
+      lunchmenusetupAction = "Please setup your menu items. Minimum menu items are 6."
+      lunchmenusetupInvalid = true
+    }
+
+    this.setState({
+      lunchmenusetupAction,
+      lunchmenusetupInvalid,
+    }, () => {
+      this.calculateLunchOrderCompleteness()
+    })
+  }
+
+  calculateLunchOrderCompleteness = () => {
+    var completecount = 0
+
+    if (!this.state.lunchmenusetupInvalid) {
+      completecount = completecount + 1
+    }
+
+    var percentage = (completecount/1) * 100
+    var lunchorderCompleteness = percentage + "% Complete"
+
+    this.setState({
+      lunchorderCompleteness
+    })
+  }
+
   rowClicked = (goToPage) => {
     this.props.history.push(goToPage)
+  }
+
+  comparePublishedLunchMenuWithLunchMenu = () => {
+    const {lunchMenuPublished, lunchMenu} = this.state
+    var toBeUpdateID = [];
+    var toBeUpdateBody = [];
+    for (let i = 0; i < lunchMenu.length; i++) {
+      var index = lunchMenuPublished.findIndex(x => x._id === lunchMenu[i]._id);
+      if (index >= 0) {
+        if (!_.isEqual(lunchMenu[i], lunchMenuPublished[index])) {
+          toBeUpdateID.push(lunchMenu[i]._id)
+          var newbody = lunchMenu[i]
+          delete newbody['_id'];
+          toBeUpdateBody.push(newbody)
+        }
+      }
+      else {
+        toBeUpdateID.push(lunchMenu[i]._id)
+        var newbody = lunchMenu[i]
+        delete newbody['_id'];
+        toBeUpdateBody.push(newbody)
+      }
+    }
+
+    if (toBeUpdateID.length > 0 && toBeUpdateBody.length > 0) {
+      var body = {
+        toBeUpdateID: JSON.stringify(toBeUpdateID),
+        toBeUpdateBody: JSON.stringify(toBeUpdateBody)
+      }
+  
+      var headers = {
+        'Content-Type': 'application/json',
+      }
+  
+      var url = apis.UPDATElunchmenuPublished
+  
+      axios.put(url, body, {withCredentials: true}, {headers: headers})
+        .then((response) => {
+          if (response.status === 201) {
+            this.getCatererMenuPublished()
+          }
+        })
+        .catch((error) => {
+          this.setState({
+            loadingModal: false,
+          }, () => {
+            toast(<ErrorInfo/>, {
+              position: toast.POSITION.BOTTOM_RIGHT
+            });
+          })
+        });
+    }
+    else {
+      this.getCatererMenuPublished()
+    }
   }
 
   comparePublishedMenuWithCatererMenu = () => {
@@ -509,7 +659,7 @@ class Publish extends Component {
   
       var url = apis.UPDATEmenuPublished
   
-      axios.put(url, body, {withCredentials: true}, {headers: headers})
+      axios.put(url, catererMenu, {withCredentials: true}, {headers: headers})
         .then((response) => {
           if (response.status === 201) {
             this.setState({
@@ -545,7 +695,7 @@ class Publish extends Component {
   publish = () => {
     const { 
       nameAddressInvalid, descriptionInvalid, locationInvalid, cuisineInvalid, occasionInvalid,
-      pickupInvalid, deliveryInvalid, deliveryHoursInvalid,  minimumSpendingInvalid, menusetupInvalid, paymentInvalid,
+      pickupInvalid, deliveryInvalid, deliveryHoursInvalid,  minimumSpendingInvalid, menusetupInvalid, lunchmenusetupInvalid, paymentInvalid,
     } = this.state
     
     if (nameAddressInvalid || descriptionInvalid || locationInvalid || cuisineInvalid || occasionInvalid ) {
@@ -564,23 +714,31 @@ class Publish extends Component {
       })
     }
 
-    else if (menusetupInvalid) {
+    else if (lunchmenusetupInvalid) {
       this.setState({
-        orderSelected: true
+        lunchorderSelected: true
       },() => {
         this.refObj[2].current.scrollIntoView({behavior: 'smooth'});
       })
     }
 
-    else if (paymentInvalid ) {
+    else if (menusetupInvalid) {
       this.setState({
-        paymentSelected: true
+        orderSelected: true
       },() => {
         this.refObj[3].current.scrollIntoView({behavior: 'smooth'});
       })
     }
+  
+    else if (paymentInvalid ) {
+      this.setState({
+        paymentSelected: true
+      },() => {
+        this.refObj[4].current.scrollIntoView({behavior: 'smooth'});
+      })
+    }
 
-    if ( !nameAddressInvalid && !descriptionInvalid && !locationInvalid && !cuisineInvalid && !occasionInvalid && !pickupInvalid && !deliveryInvalid && !deliveryHoursInvalid && !minimumSpendingInvalid && !menusetupInvalid && !paymentInvalid) {
+    if ( !nameAddressInvalid && !descriptionInvalid && !locationInvalid && !cuisineInvalid && !occasionInvalid && !pickupInvalid && !deliveryInvalid && !deliveryHoursInvalid && !minimumSpendingInvalid && (!menusetupInvalid || !lunchmenusetupInvalid) && !paymentInvalid) {
       
       this.setState({
         loadingModal: true
@@ -597,7 +755,7 @@ class Publish extends Component {
       axios.put(url, data, {withCredentials: true}, {headers: headers})
         .then((response) => {
           if (response.status === 201) {
-            this.getCatererMenuPublished()
+            this.getCatererLunchMenuPublished()
           }
         })
         .catch((error) => {
@@ -637,6 +795,12 @@ class Publish extends Component {
   orderClicked = () => {
     this.setState({
       orderSelected: !this.state.orderSelected
+    })
+  }
+ 
+  lunchorderClicked = () => {
+    this.setState({
+      lunchorderSelected: !this.state.lunchorderSelected
     })
   }
 
@@ -713,7 +877,7 @@ class Publish extends Component {
                     <Card className="card-1" onClick={() => this.basicsClicked()} style={{padding:0, marginTop: 20, cursor: 'pointer'}}>
                       <CardBody style={{padding:0}}>
 
-                        <Widget collapse={this.state.basicSelected} header="Basics" mainText={this.state.basicCompleteness} icon="fa fa-home" color="primary" />
+                        <Widget collapse={this.state.basicSelected} header="Basics" mainText={this.state.basicCompleteness} icon="icon-home" color="primary" />
 
                         <Collapse isOpen={this.state.basicSelected}>
                           <Table hover style={{marginTop: 0, paddingTop: 0}} responsive>
@@ -771,7 +935,7 @@ class Publish extends Component {
                     <Card className="card-1" onClick={() => this.servicesClicked()} style={{padding:0, marginTop: 20, cursor: 'pointer'}}>
                       <CardBody style={{padding:0}}>
 
-                        <Widget collapse={this.state.serviceSelected} header="Services & Hours" mainText={this.state.serviceCompleteness} icon="fa fa-home" color="success" />
+                        <Widget collapse={this.state.serviceSelected} header="Operation" mainText={this.state.serviceCompleteness} icon="icon-clock" color="success" />
 
                         <Collapse isOpen={this.state.serviceSelected}>
                           <Table hover style={{marginTop: 0, paddingTop: 0}} responsive>
@@ -783,28 +947,28 @@ class Publish extends Component {
                               </tr>
                             </thead>
                             <tbody>
-                              <tr onClick={() => this.rowClicked("/caterer/services/pickup")}>
+                              <tr onClick={() => this.rowClicked("/caterer/operation/pickup")}>
                                 <td style={{ fontWeight: "500", width: '30%' }}>Pickup</td>
                                 <td style={{ fontWeight: "500", width: '20%' }}>
                                   <img style={{objectFit:'cover', width: 25, height: 25 }} src={this.state.pickupInvalid ? "https://foodiebeegeneralphoto.s3-eu-west-1.amazonaws.com/cancel.png" : "https://foodiebeegeneralphoto.s3-eu-west-1.amazonaws.com/checked.png"}  />
                                 </td>
                                 <td style={{ width: '50%' }}>{this.state.pickupAction}</td>
                               </tr>
-                              <tr onClick={() => this.rowClicked("/caterer/services/delivery")}>
+                              <tr onClick={() => this.rowClicked("/caterer/operation/delivery")}>
                                 <td style={{ fontWeight: "500", width: '30%' }}>Delivery</td>
                                 <td style={{ fontWeight: "500", width: '20%' }}>
                                   <img style={{objectFit:'cover', width: 25, height: 25 }} src={this.state.deliveryInvalid ? "https://foodiebeegeneralphoto.s3-eu-west-1.amazonaws.com/cancel.png" : "https://foodiebeegeneralphoto.s3-eu-west-1.amazonaws.com/checked.png"}  />
                                 </td>
                                 <td style={{ width: '50%' }}>{this.state.deliveryAction}</td>
                               </tr>
-                              <tr onClick={() => this.rowClicked("/caterer/services/deliveryhours")}>
+                              <tr onClick={() => this.rowClicked("/caterer/operation/deliveryhours")}>
                                 <td style={{ fontWeight: "500", width: '30%' }}>Delivery Hours</td>
                                 <td style={{ fontWeight: "500", width: '20%' }}>
                                   <img style={{objectFit:'cover', width: 25, height: 25 }} src={this.state.deliveryHoursInvalid ? "https://foodiebeegeneralphoto.s3-eu-west-1.amazonaws.com/cancel.png" : "https://foodiebeegeneralphoto.s3-eu-west-1.amazonaws.com/checked.png"}  />
                                 </td>
                                 <td style={{ width: '50%' }}>{this.state.deliveryHoursAction}</td>
                               </tr>
-                              <tr onClick={() => this.rowClicked("/caterer/services/minspending")}>
+                              <tr onClick={() => this.rowClicked("/caterer/operation/minspending")}>
                                 <td style={{ fontWeight: "500", width: '30%' }}>Minimum Spending</td>
                                 <td style={{ fontWeight: "500", width: '20%' }}>
                                   <img style={{objectFit:'cover', width: 25, height: 25 }} src={this.state.minimumSpendingInvalid ? "https://foodiebeegeneralphoto.s3-eu-west-1.amazonaws.com/cancel.png" : "https://foodiebeegeneralphoto.s3-eu-west-1.amazonaws.com/checked.png"}  />
@@ -819,10 +983,40 @@ class Publish extends Component {
                     </div>
 
                     <div ref={this.refObj[2]} >
+                    <Card className="card-1" onClick={() => this.lunchorderClicked()} style={{padding:0, marginTop: 20, cursor: 'pointer'}}>
+                      <CardBody style={{padding:0}}>
+
+                        <Widget collapse={this.state.lunchorderSelected} header="GoLunch" mainText={this.state.lunchorderCompleteness} icon="icon-fire" color="warning" />
+
+                        <Collapse isOpen={this.state.lunchorderSelected}>
+                          <Table hover style={{marginTop: 0, paddingTop: 0}} responsive>
+                            <thead style={{marginTop: 0, paddingTop: 0}} className="thead-light">
+                              <tr>
+                                <th>Details</th>
+                                <th>Complete</th>
+                                <th>Action</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              <tr onClick={() => this.rowClicked("/caterer/golunch/menusetup")}>
+                                <td style={{ fontWeight: "500", width: '30%' }}>Menu Setup</td>
+                                <td style={{ fontWeight: "500", width: '20%' }}>
+                                  <img style={{objectFit:'cover', width: 25, height: 25 }} src={this.state.lunchmenusetupInvalid ? "https://foodiebeegeneralphoto.s3-eu-west-1.amazonaws.com/cancel.png" : "https://foodiebeegeneralphoto.s3-eu-west-1.amazonaws.com/checked.png"}  />
+                                </td>
+                                <td style={{ width: '50%' }}>{this.state.lunchmenusetupAction}</td>
+                              </tr>
+                            </tbody>
+                          </Table>
+                        </Collapse>
+                      </CardBody>
+                    </Card>
+                    </div>
+
+                    <div ref={this.refObj[3]} >
                     <Card className="card-1" onClick={() => this.orderClicked()} style={{padding:0, marginTop: 20, cursor: 'pointer'}}>
                       <CardBody style={{padding:0}}>
 
-                        <Widget collapse={this.state.orderSelected} header="Orders & Menu" mainText={this.state.orderCompleteness} icon="fa fa-home" color="warning" />
+                        <Widget collapse={this.state.orderSelected} header="GoCatering" mainText={this.state.orderCompleteness} icon="icon-energy" color="danger" />
 
                         <Collapse isOpen={this.state.orderSelected}>
                           <Table hover style={{marginTop: 0, paddingTop: 0}} responsive>
@@ -834,7 +1028,7 @@ class Publish extends Component {
                               </tr>
                             </thead>
                             <tbody>
-                              <tr onClick={() => this.rowClicked("/caterer/ordersmenu/menusetup")}>
+                              <tr onClick={() => this.rowClicked("/caterer/gocatering/menusetup")}>
                                 <td style={{ fontWeight: "500", width: '30%' }}>Menu Setup</td>
                                 <td style={{ fontWeight: "500", width: '20%' }}>
                                   <img style={{objectFit:'cover', width: 25, height: 25 }} src={this.state.menusetupInvalid ? "https://foodiebeegeneralphoto.s3-eu-west-1.amazonaws.com/cancel.png" : "https://foodiebeegeneralphoto.s3-eu-west-1.amazonaws.com/checked.png"}  />
@@ -848,11 +1042,11 @@ class Publish extends Component {
                     </Card>
                     </div>
 
-                    <div ref={this.refObj[3]}>
+                    <div ref={this.refObj[4]}>
                     <Card  className="card-1" onClick={() => this.paymentClicked()} style={{padding:0, marginTop: 20, cursor: 'pointer'}}>
                       <CardBody style={{padding:0}}>
 
-                        <Widget collapse={this.state.paymentSelected} header="Payment" mainText={this.state.paymentCompleteness} icon="fa fa-credit-card" color="danger" />
+                        <Widget collapse={this.state.paymentSelected} header="Payment" mainText={this.state.paymentCompleteness} icon="icon-wallet" color="info" />
 
                         <Collapse isOpen={this.state.paymentSelected}>
                           <Table hover style={{marginTop: 0, paddingTop: 0}} responsive>

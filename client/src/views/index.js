@@ -21,9 +21,10 @@ import {
 import Dashboard from './Dashboard';
 import { Login, Page404, Page500, Register, LandingPage } from './Pages';
 import { NameAddress, Description, Website, Cuisine, Occasion, ValidateEmail} from './Basics';
-import { Pickup, Delivery, DeliveryHours, OrderLater } from './Services';
-import { ReceiveOrder, MenuSetup } from './OrdersMenu';
-import { Order, Sales, Customer, Review, Dishes } from './Order';
+import { Pickup, Delivery, DeliveryHours, OrderLater, ReceiveOrder } from './Operation';
+import { MenuSetup, Order, Sales, Customer, Dishes } from './GoCatering';
+import { MenuSetup, Order, Sales, Dishes } from './GoLunch';
+import { Review } from './Review';
 import { TopPayment } from './Payment';
 import { Publish } from './Publish';
 
@@ -53,5 +54,9 @@ export {
   Review,
   Dishes,
   Publish,
+  MenuSetup, 
+  Order, 
+  Sales, 
+  Dishes
 };
 

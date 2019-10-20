@@ -11,65 +11,34 @@ const Cuisine = React.lazy(() => import('./views/Basics/Cuisine'));
 const Occasion = React.lazy(() => import('./views/Basics/Occasion'));
 const ValidateEmail = React.lazy(() => import('./views/Basics/ValidateEmail'));
 
-const Pickup = React.lazy(() => import('./views/Services/Pickup'));
-const Delivery = React.lazy(() => import('./views/Services/Delivery'));
-const MinSpending = React.lazy(() => import('./views/Services/MinSpending'));
-const DeliveryHours = React.lazy(() => import('./views/Services/DeliveryHours'));
-const OrderLater = React.lazy(() => import('./views/Services/OrderLater'));
+const Pickup = React.lazy(() => import('./views/Operation/Pickup'));
+const Delivery = React.lazy(() => import('./views/Operation/Delivery'));
+const MinSpending = React.lazy(() => import('./views/Operation/MinSpending'));
+const DeliveryHours = React.lazy(() => import('./views/Operation/DeliveryHours'));
+const OrderLater = React.lazy(() => import('./views/Operation/OrderLater'));
+const ReceiveOrder = React.lazy(() => import('./views/Operation/ReceiveOrder'));
 
-const ReceiveOrder = React.lazy(() => import('./views/OrdersMenu/ReceiveOrder'));
-const MenuSetup = React.lazy(() => import('./views/OrdersMenu/MenuSetup'));
+const MenuSetup = React.lazy(() => import('./views/GoCatering/MenuSetup'));
+const Order = React.lazy(() => import('./views/GoCatering/Order'));
+const Sales = React.lazy(() => import('./views/GoCatering/Sales'));
+const Customer = React.lazy(() => import('./views/GoCatering/Customer'));
+const Dishes = React.lazy(() => import('./views/GoCatering/Dishes'));
+
+const MenuSetup_Lunch = React.lazy(() => import('./views/GoLunch/MenuSetup'));
+const Order_Lunch = React.lazy(() => import('./views/GoLunch/Order'));
+const Sales_Lunch = React.lazy(() => import('./views/GoLunch/Sales'));
+const Dishes_Lunch = React.lazy(() => import('./views/GoLunch/Dishes'));
 
 const TopPayment = React.lazy(() => import('./views/Payment/TopPayment'));
 
 const Publish = React.lazy(() => import('./views/Publish/Publish'));
 
-const Order = React.lazy(() => import('./views/Reports/Order'));
-const Sales = React.lazy(() => import('./views/Reports/Sales'));
-const Customer = React.lazy(() => import('./views/Reports/Customer'));
-const Review = React.lazy(() => import('./views/Reports/Review'));
-const Dishes = React.lazy(() => import('./views/Reports/Dishes'));
+const Review = React.lazy(() => import('./views/Review/Review'));
 
 const Profile = React.lazy(() => import('./views/Account/Profile'));
 const TermsCondition = React.lazy(() => import('./views/Account/TermsCondition'));
 const PrivacyPolicy = React.lazy(() => import('./views/Account/PrivacyPolicy'));
 
-/*const Breadcrumbs = React.lazy(() => import('./views/Base/Breadcrumbs'));
-const Cards = React.lazy(() => import('./views/Base/Cards'));
-const Carousels = React.lazy(() => import('./views/Base/Carousels'));
-const Collapses = React.lazy(() => import('./views/Base/Collapses'));
-const Dropdowns = React.lazy(() => import('./views/Base/Dropdowns'));
-const Forms = React.lazy(() => import('./views/Base/Forms'));
-const Jumbotrons = React.lazy(() => import('./views/Base/Jumbotrons'));
-const ListGroups = React.lazy(() => import('./views/Base/ListGroups'));
-const Navbars = React.lazy(() => import('./views/Base/Navbars'));
-const Navs = React.lazy(() => import('./views/Base/Navs'));
-const Paginations = React.lazy(() => import('./views/Base/Paginations'));
-const Popovers = React.lazy(() => import('./views/Base/Popovers'));
-const ProgressBar = React.lazy(() => import('./views/Base/ProgressBar'));
-const Switches = React.lazy(() => import('./views/Base/Switches'));
-const Tables = React.lazy(() => import('./views/Base/Tables'));
-const Tabs = React.lazy(() => import('./views/Base/Tabs'));
-const Tooltips = React.lazy(() => import('./views/Base/Tooltips'));
-const BrandButtons = React.lazy(() => import('./views/Buttons/BrandButtons'));
-const ButtonDropdowns = React.lazy(() => import('./views/Buttons/ButtonDropdowns'));
-const ButtonGroups = React.lazy(() => import('./views/Buttons/ButtonGroups'));
-const Buttons = React.lazy(() => import('./views/Buttons/Buttons'));
-const Charts = React.lazy(() => import('./views/Charts'));
-const CoreUIIcons = React.lazy(() => import('./views/Icons/CoreUIIcons'));
-const Flags = React.lazy(() => import('./views/Icons/Flags'));
-const FontAwesome = React.lazy(() => import('./views/Icons/FontAwesome'));
-const SimpleLineIcons = React.lazy(() => import('./views/Icons/SimpleLineIcons'));
-const Alerts = React.lazy(() => import('./views/Notifications/Alerts'));
-const Badges = React.lazy(() => import('./views/Notifications/Badges'));
-const Modals = React.lazy(() => import('./views/Notifications/Modals'));
-const Colors = React.lazy(() => import('./views/Theme/Colors'));
-const Typography = React.lazy(() => import('./views/Theme/Typography'));
-const Widgets = React.lazy(() => import('./views/Widgets/Widgets'));
-const Users = React.lazy(() => import('./views/Users/Users'));
-const User = React.lazy(() => import('./views/Users/User'));*/
-
-// https://github.com/ReactTraining/react-router/tree/master/packages/react-router-config
 const routes = [
   { path: '/caterer', exact: true, name: 'Caterer Dashboard', component: DefaultLayout },
   { path: '/caterer/dashboard', name: 'Dashboard', component: Dashboard },
@@ -81,65 +50,37 @@ const routes = [
   { path: '/caterer/basics/cuisine', name: 'Cuisine', component: Cuisine },
   { path: '/caterer/basics/occasion', name: 'Occasion', component: Occasion },
   { path: '/caterer/basics/validateemail', name: 'Account Confirmation', component: ValidateEmail },
-  { path: '/caterer/services', exact: true, name: 'Pickup', component: Pickup },
-  { path: '/caterer/services/pickup', name: 'Pickup', component: Pickup },
-  { path: '/caterer/services/delivery', name: 'Delivery', component: Delivery },
-  { path: '/caterer/services/minspending', name: 'Minimum Spending', component: MinSpending },
-  { path: '/caterer/services/deliveryhours', name: 'Delivery Hours', component: DeliveryHours },
-  { path: '/caterer/services/orderlater', name: 'Order for Later', component: OrderLater },
-  { path: '/caterer/ordersmenu', exact: true, name: 'Orders & Menu', component: ReceiveOrder },
-  { path: '/caterer/ordersmenu/receiveorder', name: 'Receive Order', component: ReceiveOrder },
-  { path: '/caterer/ordersmenu/menusetup', name: 'Menu Setup', component: MenuSetup },
+
+  { path: '/caterer/operation', exact: true, name: 'Operation', component: Pickup },
+  { path: '/caterer/operation/pickup', name: 'Pickup', component: Pickup },
+  { path: '/caterer/operation/delivery', name: 'Delivery', component: Delivery },
+  { path: '/caterer/operation/minspending', name: 'Minimum Spending', component: MinSpending },
+  { path: '/caterer/operation/deliveryhours', name: 'Delivery Hours', component: DeliveryHours },
+  { path: '/caterer/operation/receiveorder', name: 'Receive Order', component: ReceiveOrder },
+  { path: '/caterer/operation/orderlater', name: 'Order for Later', component: OrderLater },
+
+  { path: '/caterer/gocatering', exact: true, name: 'GoCatering', component: MenuSetup },
+  { path: '/caterer/gocatering/menusetup', name: 'Menu Setup', component: MenuSetup },
+  { path: '/caterer/gocatering/order', name: 'Order', component: Order },
+  { path: '/caterer/gocatering/sales', name: 'Sales', component: Sales },
+  { path: '/caterer/gocatering/customer', name: 'Customer', component: Customer },
+  { path: '/caterer/gocatering/dishes', name: 'Dishes', component: Dishes },
+
+  { path: '/caterer/golunch', exact: true, name: 'GoLunch', component: MenuSetup_Lunch },
+  { path: '/caterer/golunch/menusetup', name: 'Menu Setup', component: MenuSetup_Lunch },
+  { path: '/caterer/golunch/order', name: 'Order', component: Order_Lunch },
+  { path: '/caterer/golunch/sales', name: 'Sales', component: Sales_Lunch },
+  { path: '/caterer/golunch/dishes', name: 'Dishes', component: Dishes_Lunch },
+
   { path: '/caterer/payment', exact: true, name: 'Payment', component: TopPayment },
   { path: '/caterer/payment/onlinepayment', name: 'Online Payment', component: TopPayment },
-  { path: '/caterer/reports', exact: true, name: 'Reports', component: Order },
-  { path: '/caterer/reports/order', name: 'Order', component: Order },
-  { path: '/caterer/reports/sales', name: 'Sales', component: Sales },
-  { path: '/caterer/reports/customer', name: 'Customer', component: Customer },
-  { path: '/caterer/reports/review', name: 'Review', component: Review },
-  { path: '/caterer/reports/dishes', name: 'Dishes', component: Dishes },
+
+  { path: '/caterer/review', exact: true, name: 'Review', component: Review },
+  { path: '/caterer/review/review', name: 'Review', component: Review },
+
   { path: '/caterer/publish', exact: true, name: 'Publish', component: Publish },
   { path: '/caterer/publish/publish', name: 'Publish Store', component: Publish },
-  
- /* { path: '/caterer/theme', exact: true, name: 'Theme', component: Colors },
-  { path: '/caterer/theme/colors', name: 'Colors', component: Colors },
-  { path: '/caterer/theme/typography', name: 'Typography', component: Typography },
-  { path: '/caterer/base', exact: true, name: 'Base', component: Cards },
-  { path: '/caterer/base/cards', name: 'Cards', component: Cards },
-  { path: '/caterer/base/forms', name: 'Forms', component: Forms },
-  { path: '/caterer/base/switches', name: 'Switches', component: Switches },
-  { path: '/caterer/base/tables', name: 'Tables', component: Tables },
-  { path: '/caterer/base/tabs', name: 'Tabs', component: Tabs },
-  { path: '/caterer/base/breadcrumbs', name: 'Breadcrumbs', component: Breadcrumbs },
-  { path: '/caterer/base/carousels', name: 'Carousel', component: Carousels },
-  { path: '/caterer/base/collapses', name: 'Collapse', component: Collapses },
-  { path: '/caterer/base/dropdowns', name: 'Dropdowns', component: Dropdowns },
-  { path: '/caterer/base/jumbotrons', name: 'Jumbotrons', component: Jumbotrons },
-  { path: '/caterer/base/list-groups', name: 'List Groups', component: ListGroups },
-  { path: '/caterer/base/navbars', name: 'Navbars', component: Navbars },
-  { path: '/caterer/base/navs', name: 'Navs', component: Navs },
-  { path: '/caterer/base/paginations', name: 'Paginations', component: Paginations },
-  { path: '/caterer/base/popovers', name: 'Popovers', component: Popovers },
-  { path: '/caterer/base/progress-bar', name: 'Progress Bar', component: ProgressBar },
-  { path: '/caterer/base/tooltips', name: 'Tooltips', component: Tooltips },
-  { path: '/caterer/buttons', exact: true, name: 'Buttons', component: Buttons },
-  { path: '/caterer/buttons/buttons', name: 'Buttons', component: Buttons },
-  { path: '/caterer/buttons/button-dropdowns', name: 'Button Dropdowns', component: ButtonDropdowns },
-  { path: '/caterer/buttons/button-groups', name: 'Button Groups', component: ButtonGroups },
-  { path: '/caterer/buttons/brand-buttons', name: 'Brand Buttons', component: BrandButtons },
-  { path: '/caterer/icons', exact: true, name: 'Icons', component: CoreUIIcons },
-  { path: '/caterer/icons/coreui-icons', name: 'CoreUI Icons', component: CoreUIIcons },
-  { path: '/caterer/icons/flags', name: 'Flags', component: Flags },
-  { path: '/caterer/icons/font-awesome', name: 'Font Awesome', component: FontAwesome },
-  { path: '/caterer/icons/simple-line-icons', name: 'Simple Line Icons', component: SimpleLineIcons },
-  { path: '/caterer/notifications', exact: true, name: 'Notifications', component: Alerts },
-  { path: '/caterer/notifications/alerts', name: 'Alerts', component: Alerts },
-  { path: '/caterer/notifications/badges', name: 'Badges', component: Badges },
-  { path: '/caterer/notifications/modals', name: 'Modals', component: Modals },
-  { path: '/caterer/widgets', name: 'Widgets', component: Widgets },
-  { path: '/caterer/charts', name: 'Charts', component: Charts },
-  { path: '/caterer/users', exact: true,  name: 'Users', component: Users },
-  { path: '/caterer/users/:id', exact: true, name: 'User Details', component: User },*/
+
   { path: '/caterer/account/profile', exact: true, name: 'Profile', component: Profile },
   { path: '/caterer/account/termscondition', exact: true, name: 'Terms & Conditions', component: TermsCondition },
   { path: '/caterer/account/privacypolicy', exact: true, name: 'Privacy Policy', component: PrivacyPolicy },

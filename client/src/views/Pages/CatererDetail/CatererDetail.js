@@ -1315,25 +1315,15 @@ class CatererDetail extends Component {
                       {items[i].title}
                     </Label>
                   </Col>
-                  <Col style={{paddingRight: 20,}}>
-                    <Label
-                      style={{
-                        cursor: "pointer",
-                        textAlign: "end",
-                        marginLeft: 15
-                      }}
-                      className="h5 float-right"
-                    >
-                      €{Number(items[i].priceperunit).toFixed(2)}
-                    </Label>
-                  </Col>
+                  
                 </div>
                 <div class="row">
                   <Label
                     style={{
-                      opacity: 0.7,
+                      opacity: 0.5,
                       cursor: "pointer",
                       marginLeft: 15,
+                      fontWeight: "600",
                       fontfStyle: "italic"
                     }}
                   >
@@ -1342,13 +1332,14 @@ class CatererDetail extends Component {
                   {items[i].minimumquantity > 1 ? 
                     <Label
                       style={{
-                        opacity: 0.7,
+                        opacity: 0.5,
                         cursor: "pointer",
                         marginLeft: 5,
+                        fontWeight: "600",
                         fontfStyle: "italic"
                       }}
                     >
-                    | Minimum {items[i].minimumquantity}
+                    &#9679; Minimum {items[i].minimumquantity}
                     </Label>
                     :
                     null
@@ -1362,6 +1353,19 @@ class CatererDetail extends Component {
                     </p>
                   </Dotdotdot>
                 </div>
+
+                <div class="row" style={{ marginTop: 10, }}>
+                  <Label
+                    style={{
+                      cursor: "pointer",
+                      marginLeft: 15, 
+                    }}
+                    className="h5 float-left"
+                  >
+                    €{Number(items[i].priceperunit).toFixed(2)}
+                  </Label>
+                </div>
+
               </Col>
             </CardBody>
           </Card>

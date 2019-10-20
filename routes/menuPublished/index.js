@@ -4,7 +4,7 @@ var Menu = require('../../models/menuPublished');
 var ObjectId = require('mongodb').ObjectID;
 var passport = require('passport');
 
-router.get('/getmenuPublished/', passport.authenticate('jwt', {session: false}), (req, res) => {
+router.get('/get_menu_published/', passport.authenticate('jwt', {session: false}), (req, res) => {
     
     const { user } = req;
     var userID = user.catererID
@@ -21,6 +21,75 @@ router.get('/getmenuPublished/', passport.authenticate('jwt', {session: false}),
     });
 });
 
+
+router.put('/update_menu_published', passport.authenticate('jwt', {session: false}), (req, res) => {
+	
+	const { user } = req;
+    var userID = user.catererID
+
+    var matchquery = {catererID: new ObjectId(userID)}
+
+    var updatebody = req.body.updateMenu
+  
+    var bulkMenu = Menu.collection.initializeOrderedBulkOp();
+
+    Menu.find(matchquery).exec((err,founddoc) => {
+        if (err) {
+            return res.status(500).send({ error: err });
+        }
+        else {
+            if (founddoc && founddoc.length > 0) {
+
+                bulkMenu.find(matchquery).delete();
+
+                bulkMenu.execute((err, doc) => {
+                    if (err) {
+                        return res.status(500).send({ error: err })
+                    }
+                    else if (doc === null) {
+                        return res.status(404).send({ error: 'document not found' })
+                    }
+                    else {
+                        var bulkMenuToUpdate = Menu.collection.initializeOrderedBulkOp();
+            
+                        var toBeUpdateBody = JSON.parse(updatebody)
+            
+                        for (var i = 0; i < toBeUpdateBody.length; i++) {
+                            var newitem = new Menu(toBeUpdateBody[i])
+                            bulkMenuToUpdate.insert(newitem);  
+                        }
+            
+                        bulkMenuToUpdate.execute((err, updateddoc) => {
+                            if (err) return res.status(500).send({ error: err });
+                            if (doc === null) return res.status(404).send({ error: 'document not found' });
+                            return res.status(201).json(updateddoc);
+                        });
+            
+                    }
+                });
+            }
+            else {
+                var bulkMenuToUpdate = Menu.collection.initializeOrderedBulkOp();
+            
+                var toBeUpdateBody = JSON.parse(updatebody)
+
+                for (var i = 0; i < toBeUpdateBody.length; i++) {
+                    var newitem = new Menu(toBeUpdateBody[i])
+                    bulkMenuToUpdate.insert(newitem);  
+                }
+    
+                bulkMenuToUpdate.execute((err, updateddoc) => {
+                    if (err) return res.status(500).send({ error: err });
+                    if (updateddoc === null) return res.status(404).send({ error: 'document not found' });
+                    return res.status(201).json(updateddoc);
+                });
+            }
+        }
+    });
+
+});
+
+/*
 router.put('/update_menu_published', (req, res) => {
 
     var updateData = req.body
@@ -44,7 +113,23 @@ router.put('/update_menu_published', (req, res) => {
 		return res.status(500).send({ error: err });
 	})
 
-}); 
+}); */
+
+router.delete('/delete_menu_published', passport.authenticate('jwt', {session: false}), (req, res) => {
+	
+	const { user } = req;
+    var userID = user.catererID
+
+    var matchquery = {};
+    if (typeof req.query._id !== 'undefined') {
+        matchquery= {_id: new ObjectId(req.query._id), catererID: new ObjectId(userID)}
+    }
+
+    Menu.remove(matchquery, (err, doc) => {
+        if (err) return res.status(500).send({ error: err });
+        return res.status(200).json(doc);
+    });
+});
 
 
 function runUpdate(_id, body) {

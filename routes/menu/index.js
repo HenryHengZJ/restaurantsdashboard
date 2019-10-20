@@ -102,7 +102,7 @@ router.put('/updatemenu', passport.authenticate('jwt', {session: false}), upload
     Menu.findOneAndUpdate(matchquery, {$set: updateData}, {runValidators: true}, (err, doc) => {
         if (err) return res.status(500).send({ error: err });
 		if (doc === null) return res.status(404).send({ error: 'document not found' });
-        return res.status(200).json(doc);
+        return res.status(201).json(doc);
     });
 });
 
@@ -126,7 +126,7 @@ router.delete('/deletemenu', passport.authenticate('jwt', {session: false}), (re
 
 ///////////////////BULK OPERATION///////////////////////////////////////////
 
-/*router.put('/bulkupdatemenu', passport.authenticate('jwt', {session: false}), (req, res) => {
+router.put('/bulkupdatemenu', passport.authenticate('jwt', {session: false}), (req, res) => {
 	
 	const { user } = req;
     var userID = user.catererID
@@ -145,11 +145,11 @@ router.delete('/deletemenu', passport.authenticate('jwt', {session: false}), (re
 		if (doc === null) return res.status(404).send({ error: 'document not found' });
         return res.status(200).json(doc);
     });
-});*/
+});
 
-router.put('/bulkupdatemenu', (req, res) => {
+/*router.put('/bulkupdatemenu', (req, res) => {
 
-    var arrayOfMenuID = [new ObjectId("5cc81203cdded1249f96d277"), new ObjectId("5cc81269cdded1249f96d27c")]
+    var arrayOfMenuID = []
 	
     var matchquery = {_id: { $in: arrayOfMenuID}}
    
@@ -158,9 +158,9 @@ router.put('/bulkupdatemenu', (req, res) => {
     bulkMenu.execute((err, doc) => {
         if (err) return res.status(500).send({ error: err });
 		if (doc === null) return res.status(404).send({ error: 'document not found' });
-        return res.status(200).json(doc);
+        return res.status(201).json(doc);
     });
-});
+});*/
 
 router.delete('/bulkdeletemenu', passport.authenticate('jwt', {session: false}), (req, res) => {
 	

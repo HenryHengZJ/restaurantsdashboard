@@ -38,55 +38,100 @@ export default {
       ]
     },
     {
-      name: 'Services & Hours',
-      url: '/caterer/services',
+      name: 'Operation',
+      url: '/caterer/operation',
       icon: 'icon-clock',
       children: [
         {
           name: 'Pickup',
-          url: '/caterer/services/pickup',
+          url: '/caterer/operation/pickup',
           icon: '',
         },
         {
           name: 'Delivery',
-          url: '/caterer/services/delivery',
+          url: '/caterer/operation/delivery',
           icon: '',
         },
         {
           name: 'Delivery Hours',
-          url: '/caterer/services/deliveryhours',
+          url: '/caterer/operation/deliveryhours',
           icon: '',
         },
         {
           name: 'Minimum Spending',
-          url: '/caterer/services/minspending',
+          url: '/caterer/operation/minspending',
           icon: '',
         },
-       
+        {
+          name: 'Receive Order',
+          url: '/caterer/operation/receiveorder',
+          icon: '',
+        },
       ]
     },
     {
-      name: 'Orders & Menu',
-      url: '/caterer/ordersmenu',
-      icon: 'icon-book-open',
+      name: 'GoLunch',
+      url: '/caterer/golunch',
+      icon: 'icon-fire',
       children: [
         {
-          name: 'Receive Order',
-          url: '/caterer/ordersmenu/receiveorder',
+          name: 'Menu Setup',
+          url: '/caterer/golunch/menusetup',
           icon: '',
         },
         {
-          name: 'Menu Setup',
-          url: '/caterer/ordersmenu/menusetup',
+          name: 'Order',
+          url: '/caterer/golunch/order',
           icon: '',
         },
-        
+        {
+          name: 'Sales',
+          url: '/caterer/golunch/sales',
+          icon: '',
+        },
+        {
+          name: 'Dishes',
+          url: '/caterer/golunch/dishes',
+          icon: '',
+        },
+      ]
+    },
+    {
+      name: 'GoCatering',
+      url: '/caterer/gocatering',
+      icon: 'icon-energy',
+      children: [
+        {
+          name: 'Menu Setup',
+          url: '/caterer/gocatering/menusetup',
+          icon: '',
+        },
+        {
+          name: 'Order',
+          url: '/caterer/gocatering/order',
+          icon: '',
+        },
+        {
+          name: 'Sales',
+          url: '/caterer/gocatering/sales',
+          icon: '',
+        },
+        {
+          name: 'Customer',
+          url: '/caterer/gocatering/customer',
+          icon: '',
+        },
+        {
+          name: 'Dishes',
+          url: '/caterer/gocatering/dishes',
+          icon: '',
+        },
       ]
     },
     {
       name: 'Payment',
       url: '/caterer/payment',
-      icon: 'icon-credit-card',
+      icon: 'icon-wallet',
       children: [
         {
           name: 'Online Payment',
@@ -96,33 +141,13 @@ export default {
       ]
     },
     {
-      name: 'Reports',
-      url: '/caterer/reports',
-      icon: 'icon-chart',
+      name: 'Review',
+      url: '/caterer/review',
+      icon: 'icon-star',
       children: [
         {
-          name: 'Order',
-          url: '/caterer/reports/order',
-          icon: '',
-        },
-        {
-          name: 'Sales',
-          url: '/caterer/reports/sales',
-          icon: '',
-        },
-        {
-          name: 'Customer',
-          url: '/caterer/reports/customer',
-          icon: '',
-        },
-        {
           name: 'Review',
-          url: '/caterer/reports/review',
-          icon: '',
-        },
-        {
-          name: 'Dishes',
-          url: '/caterer/reports/dishes',
+          url: '/caterer/review/review',
           icon: '',
         },
       ]

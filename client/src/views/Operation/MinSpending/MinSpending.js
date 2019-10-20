@@ -124,13 +124,13 @@ class MinSpending extends Component {
           <Col xs="12" md="9">
             <Card >
               <CardHeader>
-                <strong>Minimum Spending</strong>
+                <strong>Minimum Catering Spending</strong>
               </CardHeader>
               <CardBody>
 
                 <FormGroup row className="my-0">
                   <Col xs="12">
-                    <Label>How much is the minimum spending that is required for customers in order to place an order?</Label>
+                    <Label>How much is the minimum spending that is required for customers in order to place a catering order?</Label>
                   </Col>
                 </FormGroup>
 

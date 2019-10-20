@@ -727,7 +727,7 @@ class MenuSetup extends Component {
 
     axios.put(url, updateData, {withCredentials: true}, {headers: headers})
       .then((response) => {
-        if (response.status === 200) {
+        if (response.status === 201) {
           this.setState({
             categoryModal: false,
             isSaving: false
@@ -960,7 +960,7 @@ class MenuSetup extends Component {
 
         axios.put(url, formData, {withCredentials: true}, {headers: headers})
           .then((response) => {
-            if (response.status === 200) {
+            if (response.status === 201) {
               this.setState({
                 menuModalOpen: !this.state.menuModalOpen,
                 isSaving: false,
@@ -1040,7 +1040,11 @@ class MenuSetup extends Component {
       }
     }
   };
-
+  
+  gotoPublish = () => {
+    this.props.history.push("/caterer/publish/publish")
+  }
+  
   checkSelection = () => {
     const { selectedItemSelection } = this.state;
     var selectedSelectionArray = selectedItemSelection.slice();
@@ -1298,14 +1302,25 @@ class MenuSetup extends Component {
 
               <Button
                 block = {this.state.isMobile? true :false}
-                style={{ fontSize: 17, fontWeight: "600" }}
+                style={{ fontSize: 17, fontWeight: "600", marginRight: 20 }}
                 onClick={this.toggleNewCategoryModal}
                 color="primary"
+                className="float-right"
                 
               >
                 {" "}
                 <i className="fa fa-plus fa-1x" aria-hidden="true" />
                 &nbsp; Add New Category
+              </Button>
+
+               <Button
+                block = {this.state.isMobile? true :false}
+                style={{ fontSize: 17, fontWeight: "600", marginBottom:20, backgroundColor: "#FF5722", color: 'white' }}
+                className="float-left"
+                onClick={() => this.gotoPublish()}
+              >
+                <i className="fa fa-rocket fa-1x" aria-hidden="true" />
+                &nbsp; Publish
               </Button>
               
             </Col>
@@ -1443,24 +1458,14 @@ class MenuSetup extends Component {
                         </h5>
                       </Dotdotdot>
                     </div>
-                    <Col style={{ paddingRight: 20 }}>
-                      <Label
-                        style={{
-                          cursor: "pointer",
-                          textAlign: "end"
-                        }}
-                        className="h5 float-right"
-                      >
-                        €{Number(items[i].priceperunit).toFixed(2)}
-                      </Label>
-                    </Col>
                   </div>
                   <div class="row">
                     <Label
                       style={{
-                        opacity: 0.7,
+                        opacity: 0.5,
                         cursor: "pointer",
                         marginLeft: 15,
+                        fontWeight:'600',
                         fontfStyle: "italic"
                       }}
                     >
@@ -1470,19 +1475,21 @@ class MenuSetup extends Component {
                     {items[i].minimumquantity > 1 ? (
                       <Label
                         style={{
-                          opacity: 0.7,
+                          opacity: 0.5,
                           cursor: "pointer",
                           marginLeft: 5,
+                          fontWeight:'600',
                           fontfStyle: "italic"
                         }}
                       >
-                        | Minimum {items[i].minimumquantity}
+                        &#9679; Minimum {items[i].minimumquantity}
                       </Label>
                     ) : null}
                     {typeof items[i].markitem === "undefined"
                       ? null
                       : this.renderMarkAsIcon(items[i].markitem)}
                   </div>
+     
                   <div style={{ marginTop: 10 }}>
                     <Dotdotdot clamp={2}>
                       <p style={{ cursor: "pointer", overflow: "hidden" }}>
@@ -1490,6 +1497,18 @@ class MenuSetup extends Component {
                       </p>
                     </Dotdotdot>
                   </div>
+                  <div class="row" style={{ marginTop: 10, }}>
+                    <Label
+                      style={{
+                        cursor: "pointer",
+                        marginLeft: 15, 
+                      }}
+                      className="h5 float-left"
+                    >
+                      €{Number(items[i].priceperunit).toFixed(2)}
+                    </Label>
+                  </div>
+
                 </Col>
               </CardBody>
             </Card>
@@ -2015,6 +2034,7 @@ class MenuSetup extends Component {
         isOpen={this.state.previewModalOpen}
         toggle={this.togglePreviewModal}
         size="lg"
+        centered
       >
         <ModalHeader toggle={this.togglePreviewModal}>
           Preview Menu

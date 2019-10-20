@@ -19,14 +19,32 @@ export default {
     BULKDELETEmenu: "/menu/bulkdeletemenu",
 
     /*Menu Published API*/
-    GETmenuPublished: "/menuPublished/getmenuPublished",
+    GETmenuPublished: "/menuPublished/get_menu_published",
     UPDATEmenuPublished: "/menuPublished/update_menu_published",
+    DELETEmenuPublished: "/menuPublished/delete_menu_published",
+
+    /*Lunch Menu API*/
+    UPDATElunchmenu: "/lunchMenu/updateLunchMenu",
+    GETlunchmenu: "/lunchMenu/getLunchMenu",
+    ADDlunchmenu: "/lunchMenu/addLunchMenu",
+    DELETElunchmenu: "/lunchMenu/deleteLunchMenu",
+
+    /*Lunch Menu Published API*/
+    GETlunchmenuPublished: "/lunchMenuPublished/get_lunchmenu_published",
+    UPDATElunchmenuPublished: "/lunchMenuPublished/update_lunchmenu_published",
+    DELETElunchmenuPublished: "/lunchMenuPublished/delete_lunchmenu_published",
   
     /*Order API*/
     GETorder: "/order/getorder",
     GETorder_customer: "/order/getorder_customer",
     PUTacceptorder_order: "/order/acceptorder",
     PUTreject_order: "/order/rejectorder",
+
+    /*Lunch Order API*/
+    GETlunchorder: "/lunchOrder/getlunchorder",
+    GETlunchorder_customer: "/lunchOrder/getlunchorder_customer",
+    PUTaccept_lunchorder: "/lunchOrder/acceptlunchorder",
+    PUTreject_lunchorder: "/lunchOrder/rejectlunchorder",
 
     /*Payment API*/
     GETcaterer_paymentaccount: "/payment/get_caterer_paymentaccount",

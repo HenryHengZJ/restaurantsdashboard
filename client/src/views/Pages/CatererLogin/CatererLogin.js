@@ -101,7 +101,7 @@ class CatererLogin extends Component {
   }
 
   signUp = () => {
-    window.open('https://foodiebee.herokuapp.com/caterersignup', '_blank');
+    window.open('https://foodiebee.eu/caterersignup', '_blank');
   }
 
   render() {
@@ -160,7 +160,7 @@ class CatererLogin extends Component {
                         className="text-muted text-center"
                       >
                         Don't have an account?&nbsp;
-                        <Button color="link" onClick={() => this.signUp()} style={{ fontWeight: '500',color: "#20a8d8" }} >
+                        <Button href="https://foodiebee.eu/caterersignup" color="link" onClick={() => this.signUp()} style={{ fontWeight: '500',color: "#20a8d8" }} >
                           <p style={{padding: 0, marginTop: 10}}>Sign Up</p>
                         </Button>
                       </p>
@@ -221,6 +221,7 @@ class CatererLogin extends Component {
                             color="link"
                             onClick={() => this.forgotPasswordClick()}
                             className="px-4"
+                            href="/#/forgotpassword"
                           >
                             Forgot password?
                           </Button>
