@@ -53,11 +53,11 @@
     "react-stripe-elements": "^3.0.0",
     "react-test-renderer": "^16.8.2",
     "react-toastify": "^5.0.1",
-    "reactstrap": "^7.1.0",
     "simple-line-icons": "^2.4.1"
   },
   "devDependencies": {
-    "react-scripts": "2.1.5"
+    "react-scripts": "2.1.5",
+    "reactstrap": "^8.1.1"
   },
   "scripts": {
     "start": "react-scripts start",
