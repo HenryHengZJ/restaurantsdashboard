@@ -1,7 +1,8 @@
 var express = require('express');
 var router = express.Router();
 var LunchOrder = require('../../models/lunchOrder');
-var Menu = require('../../models/menu');
+var CatererPublished = require('../../models/catererPublished');
+var Menu = require('../../models/lunchMenu');
 var ObjectId = require('mongodb').ObjectID;
 var passport = require('passport');
 var moment = require('moment');
@@ -126,197 +127,19 @@ router.get('/getlunchorder_customer', passport.authenticate('jwt', {session: fal
       
 });
 
-router.get('/getnewlunchorder', (req, res) => {
-	var matchquery = {};
-
-    if (typeof req.query.lteDate !== 'undefined' && typeof req.query.gteDate !== 'undefined') {
-		var gteDate = moment(req.query.gteDate, 'DD MMM, YYYY').toDate()
-		var lteDate = moment(req.query.lteDate, 'DD MMM, YYYY').add(1, 'days').toDate()
-        matchquery = {"orderDate":{$gte: gteDate.toISOString(),$lte: lteDate.toISOString()}}
-    }
-	
-	LunchOrder.aggregate([ 
-       {$match: matchquery},
-	   {$lookup: {
-            from: "company", 
-            localField: "customerCompanyID", 
-            foreignField: "_id", 
-            as: "customerCompanyDetails" }
-        },
-        {$lookup: {
-            from: "caterer", 
-            localField: "catererID", 
-            foreignField: "_id", 
-            as: "catererDetails" }
-        }
-     ], (err,doc) => {
-		if (err) {
-			return res.status(500).send({ error: err });
-		}
-		else{
-			var result = doc.reduce(function(r, a) {
-			  r[a.customerCompanyID] = r[a.customerCompanyID] || [];
-			  r[a.customerCompanyID].push(a);
-			  return r;
-			}, Object.create(null));
-
-			var finaldataAry = [];
-
-			for (var key in result) {
-				
-				var itemAry = [];
-			  
-				var itemresult = result[key].reduce(function(x, y) {
-				  x[y.orderItemID] = x[y.orderItemID] || [];
-				  x[y.orderItemID].push(y);
-				  return x;
-				}, Object.create(null));
-
-				for (var itemkey in itemresult) {
-				  var updateItemData = {
-					orderItemID: itemresult[itemkey][0].orderItemID,
-					orderItemTitle: itemresult[itemkey][0].orderItem[0].title,
-					orderItemQuantity: itemresult[itemkey].length
-				  };
-				  itemAry.push(updateItemData);
-				}
-			  
-				var updateData = {
-					customerCompanyDetails: result[key][0].customerCompanyDetails[0],
-					orderDetails: itemAry
-				};
-			  
-				finaldataAry.push(updateData);
-			}
-			
-            if (finaldataAry.length > 0) {
-                var orderdetails = finaldataAry
-                var catererEmail = doc[0].catererDetails[0].catererEmail
-                mail.sendCatererLunchOrderEmail('/templates/caterer_lunchorder/email.html', orderdetails, catererEmail);
-                return res.status(201).json(finaldataAry);
-            }
-            else {
-                return res.status(500).send({ error: "doc not found" });
-            } 
-		}
-	 });
-});
-
 router.put('/acceptlunchorder', passport.authenticate('jwt', {session: false}), (req, res) => {
+
     var matchquery = {};
-    var updateData = {
-        orderStatus: "accepted",
-	    paymentStatus: "succeeded"
+    var arrayOfLunchOrderIDString = JSON.parse(req.body.arrayOfLunchOrderID)
+
+    var arrayOfLunchOrderID = []
+    for(var i = 0; i < arrayOfLunchOrderIDString.length; i++){
+        arrayOfLunchOrderID.push(new ObjectId(arrayOfLunchOrderIDString[i]))
     }
 
-    if (typeof req.body.orderID !== 'undefined') {
-        matchquery._id = new ObjectId(req.body.orderID)
-    }
+    matchquery._id = { $in: arrayOfLunchOrderID }
 
-    LunchOrder.findOneAndUpdate(matchquery, {$set: updateData}, {returnOriginal: false, runValidators: true}, (err, doc) => {
-        if (err) {
-            return res.status(500).send({ error: err });
-         }
-         else {
-            var paymentIntentID = doc.paymentIntentID
-            stripe.paymentIntents.confirm(paymentIntentID, function(err, intent) {
-                if (err) {
-                    return res.status(500).send({ error: err });
-                 }
-                 else {
-                    var arrayOfMenuID = []
-                    var orderitems = doc.orderItem
-                    for(var i = 0; i < orderitems.length; i++){
-                        arrayOfMenuID.push(orderitems[i].menuID)
-                    }
-
-                    //var arrayOfMenuID = [new ObjectId("5cc81203cdded1249f96d277"), new ObjectId("5cc81269cdded1249f96d27c")]
-	
-                    var menumatchquery = {_id: { $in: arrayOfMenuID}}
-                
-                    var bulkMenu = Menu.collection.initializeOrderedBulkOp();
-                    bulkMenu.find(menumatchquery).update({$inc: {soldamount:1}});
-                    bulkMenu.execute((err, menudoc) => {
-                        if (err) {
-                            return res.status(500).send({ error: err });
-                         }
-                         else {
-                            getOrder(req.body.orderID, function(err, orderdoc) {
-                                if (err) {
-                                    return res.status(500).send({ error: err });
-                                }
-                                else {
-                                    if (orderdoc.length > 0) {
-                                        var orderdetails = orderdoc[0]
-                                        var customerEmail = orderdoc[0].customerDetails[0].customerEmail
-                                        var catererEmail = orderdoc[0].catererDetails[0].catererEmail
-                                        var catererName = orderdoc[0].catererDetails[0].catererName
-                                        mail.sendCustomerOrderEmail('/templates/customer_order/email.html', orderdetails, catererName, customerEmail);
-                                        mail.sendCatererOrderEmail('/templates/caterer_order/email.html', orderdetails, catererEmail);
-                                        return res.status(201).json(orderdoc);
-                                    }
-                                    else {
-                                        return res.status(500).send({ error: "doc not found" });
-                                    } 
-                                }
-                            })
-                         }
-                    });
-                 }
-            });
-         }
-    });
-});
-
-
-router.put('/rejectlunchorder', (req, res) => {
-    var matchquery = {};
-    var updateData = {
-        orderStatus: "rejected",
-	    paymentStatus: "incomplete"
-    }
-
-    if (typeof req.body.orderID !== 'undefined') {
-        matchquery._id = new ObjectId(req.body.orderID)
-    }
-
-    LunchOrder.findOneAndUpdate(matchquery, {$set: updateData}, {returnOriginal: false, runValidators: true}, (err, doc) => {
-        if (err) {
-            return res.status(500).send({ error: err });
-         }
-         else {
-            getOrder(req.body.orderID, function(err, orderdoc) {
-                if (err) {
-                    return res.status(500).send({ error: err });
-                }
-                else {
-                    if (orderdoc.length > 0) {
-                        var orderdetails = orderdoc[0]
-                        var customerEmail = orderdoc[0].customerDetails[0].customerEmail
-                        var catererEmail = orderdoc[0].catererDetails[0].catererEmail
-                        var catererName = orderdoc[0].catererDetails[0].catererName
-                        
-                        mail.sendCustomerOrderEmail('/templates/customer_order/email.html', orderdetails, catererName, customerEmail);
-                        mail.sendCatererOrderEmail('/templates/caterer_order/email.html', orderdetails, catererEmail);
-                        return res.status(201).json(orderdoc);
-                    }
-                    else {
-                        return res.status(500).send({ error: "doc not found" });
-                    } 
-                }
-            })
-         }
-    });
-});
-
-var getOrder = function(orderID, callback) {
-    var matchquery = {};
-
-    if (typeof orderID !== 'undefined') {
-        matchquery._id = new ObjectId(orderID)
-    }
-
-	LunchOrder.aggregate([ 
+    LunchOrder.aggregate([
         {$match: matchquery},
         {$lookup: {
             from: "customer", 
@@ -336,15 +159,256 @@ var getOrder = function(orderID, callback) {
             foreignField: "_id", 
             as: "customerCompanyDetails" }
         },
-        { $sort : { createdAt : -1 } }
-      ], (err,doc) => {
-         if (err) {
-            callback (err)
-         }
-         else {
-            callback (null, doc)
-         }
-      });
-};
+        {$lookup: {
+            from: "lunchMenu", 
+            localField: "orderItemID", 
+            foreignField: "_id", 
+            as: "orderItemDetails" }
+        },
+    ], (err,doc) => {
+        if (err) {
+            return res.status(500).send({ error: err });
+        }
+        else {
+            if (doc.length > 0) {
+                let promiseArr = [];
+                for(var i = 0; i < doc.length; i++){
+                    console.log(doc[i])
+                    var lunchorderdoc = doc[i]
+                    var paymentIntentID = doc[i].paymentIntentID
+                    var lunchOrderID = doc[i]._id
+                    var lunchOrderItemID = doc[i].orderItemID
+                    var catererName = doc[i].catererDetails[0].catererName
+                    var customerEmail = doc[i].customerDetails[0].customerEmail
+                    var orderStatus = "accepted"
+                    mail.sendCustomerLunchOrderEmail('/templates/customer_lunchorder/email.html', lunchorderdoc, catererName, customerEmail, orderStatus);
+
+                    promiseArr.push(acceptAction(lunchorderdoc, paymentIntentID, lunchOrderID, lunchOrderItemID ))
+
+                }
+
+                Promise.all(promiseArr)
+                .then((result) => {
+                    console.log('result = ', result)
+                    return res.status(201).json("updated");
+                })
+                .catch((err) => {
+                    console.log(err)
+                    return res.status(500).send({ error: err });
+                })
+            }
+            else {
+                return res.status(500).send({ error: "doc not found" }); 
+            }
+        }
+     });
+});
+
+function acceptAction(lunchorderdoc, paymentIntentID, lunchOrderID, lunchOrderItemID) {
+    return new Promise((resolve, reject) => {
+      //you update code here
+      var updateData = {}
+      stripe.paymentIntents.confirm(paymentIntentID, function(stripe_err, intent) {
+        if (stripe_err) {
+            updateData = {
+                orderStatus: "accepted",
+                paymentStatus: "incomplete"
+            }
+        }
+        else {
+            updateData = {
+                orderStatus: "accepted",
+                paymentStatus: "succeeded"
+            }
+        }
+        LunchOrder.findOneAndUpdate({_id: lunchOrderID}, {$set: updateData}, {returnOriginal: false, runValidators: true}, (updated_err, updateddoc) => {
+            if (updated_err) {
+                reject(updated_err)
+            }
+            else {
+                Menu.findOneAndUpdate({_id: lunchOrderItemID}, {$inc: {soldamount:1}}, (menu_updated_err, menu_updateddoc) => {
+                    resolve(lunchorderdoc)
+                })
+            }
+        })   
+      })
+ 
+   });
+ }
+
+ 
+router.put('/deliveredlunchorder', passport.authenticate('jwt', {session: false}), (req, res) => {
+
+	const { user } = req;
+    var userID = user.catererID
+    
+    var matchquery = {};
+    var arrayOfLunchOrderIDString = JSON.parse(req.body.arrayOfLunchOrderID)
+
+    var arrayOfLunchOrderID = []
+    for(var i = 0; i < arrayOfLunchOrderIDString.length; i++){
+        arrayOfLunchOrderID.push(new ObjectId(arrayOfLunchOrderIDString[i]))
+    }
+
+    matchquery._id = { $in: arrayOfLunchOrderID }
+
+    LunchOrder.aggregate([
+        {$match: matchquery},
+        {$lookup: {
+            from: "customer", 
+            localField: "customerID", 
+            foreignField: "_id", 
+            as: "customerDetails" }
+        },
+        {$lookup: {
+            from: "caterer", 
+            localField: "catererID", 
+            foreignField: "_id", 
+            as: "catererDetails" }
+        },
+        {$lookup: {
+            from: "company", 
+            localField: "customerCompanyID", 
+            foreignField: "_id", 
+            as: "customerCompanyDetails" }
+        },
+        {$lookup: {
+            from: "lunchMenu", 
+            localField: "orderItemID", 
+            foreignField: "_id", 
+            as: "orderItemDetails" }
+        },
+    ], (err,doc) => {
+        if (err) {
+            return res.status(500).send({ error: err });
+        }
+        else {
+            if (doc.length > 0) {
+                let promiseArr = [];
+                for(var i = 0; i < doc.length; i++){
+                    console.log(doc[i])
+                    var lunchorderdoc = doc[i]
+                    var lunchOrderID = doc[i]._id
+                    var catererName = doc[i].catererDetails[0].catererName
+                    var customerEmail = doc[i].customerDetails[0].customerEmail
+                    var orderStatus = "delivered"
+                    mail.sendCustomerLunchOrderEmail('/templates/customer_lunchorder/email.html', lunchorderdoc, catererName, customerEmail, orderStatus);
+
+                    promiseArr.push(deliveredAction(lunchorderdoc, lunchOrderID ))
+
+                }
+
+                Promise.all(promiseArr)
+                .then((result) => {
+                    console.log('result = ', result)
+                    return res.status(201).json("updated");
+                })
+                .catch((err) => {
+                    console.log(err)
+                    return res.status(500).send({ error: err });
+                })
+            }
+            else {
+                return res.status(500).send({ error: "doc not found" }); 
+            }
+        }
+     });
+});
+
+function deliveredAction(lunchorderdoc, lunchOrderID) {
+    return new Promise((resolve, reject) => {
+
+        var updateData = {}
+        updateData = {orderStatus: "delivered"}
+      
+        LunchOrder.findOneAndUpdate({_id: lunchOrderID}, {$set: updateData}, {returnOriginal: false, runValidators: true}, (updated_err, updateddoc) => {
+            if (updated_err) {
+                reject(updated_err)
+            }
+            else {
+                resolve(lunchorderdoc)
+            }
+        })   
+      
+    });
+ }
+ 
+ 
+router.put('/dispatchlunchorder', passport.authenticate('jwt', {session: false}), (req, res) => {
+    
+    const { user } = req;
+    var userID = user.catererID
+
+    var matchquery = {};
+    var arrayOfLunchOrderIDString = JSON.parse(req.body.arrayOfLunchOrderID)
+
+    var arrayOfLunchOrderID = []
+    for(var i = 0; i < arrayOfLunchOrderIDString.length; i++){
+        arrayOfLunchOrderID.push(new ObjectId(arrayOfLunchOrderIDString[i]))
+    }
+
+    matchquery._id = { $in: arrayOfLunchOrderID }
+
+    var customerCompanyDetails = req.body.customerCompanyDetails
+
+    var bulkLunchOrder = LunchOrder.collection.initializeOrderedBulkOp();
+    bulkLunchOrder.find(matchquery).update({$set: {orderStatus: "dispatched"}});
+    bulkLunchOrder.execute((err, updated_doc) => {
+        if (err) {
+            return res.status(500).send({ error: err });
+        }
+        else {
+            CatererPublished.findOne({_id: new ObjectId(userID)}, (caterer_err, caterer_doc) => {
+                if (caterer_err) {
+                    return res.status(500).send({ error: caterer_err });
+                }
+                else {
+                    var catererDelivery = caterer_doc.catererDelivery
+                    if (typeof catererDelivery === 'undefined' || !catererDelivery) {
+                        LunchOrder.aggregate([
+                            {$match: matchquery},
+                            {$lookup: {
+                                from: "customer", 
+                                localField: "customerID", 
+                                foreignField: "_id", 
+                                as: "customerDetails" }
+                            },
+                            {$lookup: {
+                                from: "caterer", 
+                                localField: "catererID", 
+                                foreignField: "_id", 
+                                as: "catererDetails" }
+                            },
+                            {$lookup: {
+                                from: "company", 
+                                localField: "customerCompanyID", 
+                                foreignField: "_id", 
+                                as: "customerCompanyDetails" }
+                            },
+                            {$lookup: {
+                                from: "lunchMenu", 
+                                localField: "orderItemID", 
+                                foreignField: "_id", 
+                                as: "orderItemDetails" }
+                            },
+                        ], (err,doc) => {
+                            if (err) {
+                                return res.status(500).send({ error: err });
+                            }
+                            else {
+                                if (doc.length > 0) {
+                                    var catererName = doc[0].catererDetails[0].catererName
+                                    mail.sendAdminLunchOrderEmail('/templates/admin_lunchorder/email.html', doc, customerCompanyDetails, catererName);
+                                    return res.status(201).json(doc);
+                                }     
+                            }
+                         });
+                    }
+                }
+            })
+        }
+    })
+   
+});
 
 module.exports = router;

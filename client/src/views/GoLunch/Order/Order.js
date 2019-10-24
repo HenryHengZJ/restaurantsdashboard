@@ -228,6 +228,17 @@ class Order extends Component {
       this.getOrder(currentDateString)
     })
   }
+
+  buttonClicked = () => {
+    
+    var arrayOfLunchOrderID = []
+    for(var i = 0; i < this.state.activeOrderItem.length; i++){
+      for(var x = 0; x < this.state.activeOrderItem[i].orderItems.length; x++){
+        arrayOfLunchOrderID.push(this.state.activeOrderItem[i].orderItems[x]._id)
+      }
+    }
+    console.log("arrayOfLunchOrderID = ", JSON.stringify(arrayOfLunchOrderID))
+  }
   
   companyClicked = index => {
     var activeOrderItem = this.state.data[index];
@@ -326,6 +337,10 @@ class Order extends Component {
       returnStatus.label = "Delivered";
       returnStatus.value = 100;
       returnStatus.buttonText = "Delivered";
+    } else if (orderStatus === "rejected") {
+      returnStatus.label = "Rejected";
+      returnStatus.value = 0;
+      returnStatus.buttonText = "Rejected";
     }
 
     return returnStatus;
@@ -639,7 +654,7 @@ class Order extends Component {
               </Col>
               <Col style={{ marginTop: 30, textAlign: "center" }} xs="12">
                 <Button
-                  onClick={e => this.searchAddress(e, this.state.address)}
+                  onClick={() => this.buttonClicked()}
                   style={{
                     height: "100%",
                     fontWeight: "600",
@@ -648,7 +663,7 @@ class Order extends Component {
                   }}
                   color={
                     this.state.activeOrderStatus.buttonText ===
-                    "Failed to Accept"
+                    "Rejected"
                       ? "secondary"
                       : this.state.activeOrderStatus.buttonText === "Accept"
                       ? "success"
@@ -665,7 +680,7 @@ class Order extends Component {
                   }
                   disabled={
                     this.state.activeOrderStatus.buttonText ===
-                    "Failed to Accept"
+                    "Rejected"
                       ? true
                       : this.state.activeOrderStatus.buttonText === "Accept"
                       ? false

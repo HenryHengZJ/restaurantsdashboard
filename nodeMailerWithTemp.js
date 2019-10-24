@@ -208,9 +208,9 @@ exports.sendResetPasswordEmail = function (path, sendtoemail, resetlink) {
 
 ////////////////////////////////LUNCH//////////////////////////////////////////////////////////////////
 
-exports.sendCustomerLunchOrderEmail = function (path,  orderdetails,  catererName, customerEmail) {
+exports.sendCustomerLunchOrderEmail = function (path,  orderdetails,  catererName, customerEmail, orderStatus) {
   
-    getCustomerLunchOrderVariables(orderdetails, function(err, totalRow, str_orderDescrip, str_orderStatus, str_orderID, str_orderDate, str_companyName, str_companyAddress, str_subtotal, str_deliveryfee, str_ordertotal, str_footer1) {
+    getCustomerLunchOrderVariables(orderdetails, orderStatus, function(err, totalRow, str_orderDescrip, str_orderStatus, str_orderID, str_orderDate, str_updatedAt, str_companyName, str_companyAddress, str_subtotal, str_deliveryfee, str_ordertotal, str_footer1) {
 
         readHTMLFile(__dirname + path, function(err, html) {
             var template = handlebars.compile(html);
@@ -221,6 +221,7 @@ exports.sendCustomerLunchOrderEmail = function (path,  orderdetails,  catererNam
                 str_orderStatus: str_orderStatus,
                 str_orderID: str_orderID,
                 str_orderDate: str_orderDate,
+                str_updatedAt: str_updatedAt,
                 str_companyName: str_companyName,
                 str_companyAddress: str_companyAddress,
                 str_subtotal: str_subtotal,
@@ -232,7 +233,7 @@ exports.sendCustomerLunchOrderEmail = function (path,  orderdetails,  catererNam
             var mailOptions = {
                 from: 'FoodieBee <support@foodiebee.eu>',
                 to : customerEmail,
-                subject : orderdetails.orderStatus === "delivered" ? 'Order Delivered' : orderdetails.orderStatus === "accepted" ? 'Order Accepted Details' : orderdetails.orderStatus === "rejected" ? 'Order Rejected Details' : "Order Details",
+                subject : orderStatus === "delivered" ? 'Order Delivered' : orderStatus === "accepted" ? 'Order Accepted' : orderStatus === "rejected" ? 'Order Rejected' : "Order Details",
                 html : htmlToSend
              };
             smtpTransport.sendMail(mailOptions, function (error, response) {
@@ -284,6 +285,62 @@ exports.sendCatererLunchOrderEmail = function (path,  orderdetails,  catererEmai
         });
 
     });
+
+}
+
+
+exports.sendAdminLunchOrderEmail = function (path, orderdetails, customerCompanyDetails, catererName) {
+
+    Admin.find( (err,admin) => {
+        if (err) {
+            return res.send(err);
+        }
+        else {
+            var emailArray = [];
+            
+            for(var i = 0; i < admin.length;i++){
+                emailArray.push(admin[i].adminEmail)
+            }
+
+            var finalEmailArray = JSON.stringify(emailArray).replace("[", "").replace("]", "")
+
+            getAdminLunchOrderVariables(orderdetails, customerCompanyDetails, function(err, totalRow, str_orderDescrip, str_orderStatus, str_orderDate, str_orderTime, str_companyName, str_companyAddress, str_ordertotal) {
+
+                readHTMLFile(__dirname + path, function(err, html) {
+                    var template = handlebars.compile(html);
+                    var replacements = {
+                        catererName: catererName,
+                        newrow: totalRow,
+                        str_orderDescrip: str_orderDescrip,
+                        str_orderStatus: str_orderStatus,
+                        str_orderDate: str_orderDate,
+                        str_orderTime: str_orderTime,
+                        str_companyName: str_companyName,
+                        str_companyAddress: str_companyAddress,
+                        str_ordertotal: str_ordertotal,
+                    };
+                    var htmlToSend = template(replacements);
+                    var mailOptions = {
+                        from: 'FoodieBee <support@foodiebee.eu>',
+                        to : finalEmailArray,
+                        subject : "New Orders Ready to Dispatch",
+                        html : htmlToSend
+                     };
+                    smtpTransport.sendMail(mailOptions, function (error, response) {
+                        if (error) {
+                            console.log(error);
+                        }
+                        else {
+                            console.log(response);
+                        }
+                    });
+            
+                });
+        
+            });
+        }
+
+      });
 
 }
 
@@ -407,29 +464,31 @@ function capitalizeAllLetter(string) {
 }
 
 
-var getCustomerLunchOrderVariables = function(orderdetails, callback) {
+var getCustomerLunchOrderVariables = function(orderdetails, orderStatus, callback) {
 
     var order = orderdetails
 
     var str_orderDescrip = ""
     var str_orderStatus = ""
     
-    if (order.orderStatus === 'accepted') {
-      str_orderDescrip = `<p style="Margin:0;-webkit-text-size-adjust:none;-ms-text-size-adjust:none;mso-line-height-rule:exactly;font-size:14px;font-family:arial, 'helvetica neue', helvetica, sans-serif;line-height:21px;color:#333333;">Your order status is accepted. <br></p><p style="Margin:0;-webkit-text-size-adjust:none;-ms-text-size-adjust:none;mso-line-height-rule:exactly;font-size:14px;font-family:arial, 'helvetica neue', helvetica, sans-serif;line-height:21px;color:#333333;">You will receive your invoice in 2-3 business days.&nbsp;</p> `;
+    if (orderStatus === 'accepted') {
+      str_orderDescrip = `<p style="Margin:0;-webkit-text-size-adjust:none;-ms-text-size-adjust:none;mso-line-height-rule:exactly;font-size:14px;font-family:arial, 'helvetica neue', helvetica, sans-serif;line-height:21px;color:#333333;">Your order status is accepted. <br></p><p style="Margin:0;-webkit-text-size-adjust:none;-ms-text-size-adjust:none;mso-line-height-rule:exactly;font-size:14px;font-family:arial, 'helvetica neue', helvetica, sans-serif;line-height:21px;color:#333333;">We will notify you again when your meal is arrived.&nbsp;</p> `;
       str_orderStatus = `<span class="es-button-border es-button-border-2" style="border-style:solid;border-color:#32CD32;background:#32CD32;border-width:0px;display:inline-block;border-radius:15px;width:auto;"> <a href="https://foodiebee.eu" class="es-button es-button-1" target="_blank" style="mso-style-priority:100 !important;text-decoration:underline;-webkit-text-size-adjust:none;-ms-text-size-adjust:none;mso-line-height-rule:exactly;font-family:arial, 'helvetica neue', helvetica, sans-serif;font-size:16px;color:#FFFFFF;border-style:solid;border-color:#32CD32;border-width:10px 20px 10px 20px;display:inline-block;background:#32CD32;border-radius:15px;font-weight:600;font-style:normal;line-height:19px;width:auto;text-align:center;">ACCEPTED</a> </span>`
     }
-    else if (order.orderStatus === 'rejected') {
+    else if (orderStatus === 'rejected') {
       str_orderDescrip = `<p style="Margin:0;-webkit-text-size-adjust:none;-ms-text-size-adjust:none;mso-line-height-rule:exactly;font-size:14px;font-family:arial, 'helvetica neue', helvetica, sans-serif;line-height:21px;color:#333333;">Your order status is rejected. <br></p><p style="Margin:0;-webkit-text-size-adjust:none;-ms-text-size-adjust:none;mso-line-height-rule:exactly;font-size:14px;font-family:arial, 'helvetica neue', helvetica, sans-serif;line-height:21px;color:#333333;">If you have any queries, contact us at <a target="_blank" href="mailto:support@foodiebee.eu" style="-webkit-text-size-adjust:none;-ms-text-size-adjust:none;mso-line-height-rule:exactly;font-family:arial, 'helvetica neue', helvetica, sans-serif;font-size:14px;text-decoration:underline;color:#47AADA;">support@foodiebee.eu</a></p> `;
       str_orderStatus = `<span class="es-button-border es-button-border-2" style="border-style:solid;border-color:#ff0000;background:#ff0000;border-width:0px;display:inline-block;border-radius:15px;width:auto;"> <a href="https://foodiebee.eu" class="es-button es-button-1" target="_blank" style="mso-style-priority:100 !important;text-decoration:underline;-webkit-text-size-adjust:none;-ms-text-size-adjust:none;mso-line-height-rule:exactly;font-family:arial, 'helvetica neue', helvetica, sans-serif;font-size:16px;color:#FFFFFF;border-style:solid;border-color:#ff0000;border-width:10px 20px 10px 20px;display:inline-block;background:#ff0000;border-radius:15px;font-weight:600;font-style:normal;line-height:19px;width:auto;text-align:center;">REJECTED</a> </span>`
     }
-    else if (order.orderStatus === 'delivered') {
-        str_orderDescrip = `<p style="Margin:0;-webkit-text-size-adjust:none;-ms-text-size-adjust:none;mso-line-height-rule:exactly;font-size:14px;font-family:arial, 'helvetica neue', helvetica, sans-serif;line-height:21px;color:#333333;">Your lunch has been delivered to your office. <br></p><p style="Margin:0;-webkit-text-size-adjust:none;-ms-text-size-adjust:none;mso-line-height-rule:exactly;font-size:14px;font-family:arial, 'helvetica neue', helvetica, sans-serif;line-height:21px;color:#333333;">Please collect your meal at reception..&nbsp;</p> `;
-        str_orderStatus = `<span class="es-button-border es-button-border-2" style="border-style:solid;border-color:#ff0000;background:#ff0000;border-width:0px;display:inline-block;border-radius:15px;width:auto;"> <a href="https://foodiebee.eu" class="es-button es-button-1" target="_blank" style="mso-style-priority:100 !important;text-decoration:underline;-webkit-text-size-adjust:none;-ms-text-size-adjust:none;mso-line-height-rule:exactly;font-family:arial, 'helvetica neue', helvetica, sans-serif;font-size:16px;color:#FFFFFF;border-style:solid;border-color:#ff0000;border-width:10px 20px 10px 20px;display:inline-block;background:#ff0000;border-radius:15px;font-weight:600;font-style:normal;line-height:19px;width:auto;text-align:center;">DELIVERED</a> </span>`
-      }
+    else if (orderStatus === 'delivered') {
+        str_orderDescrip = `<p style="Margin:0;-webkit-text-size-adjust:none;-ms-text-size-adjust:none;mso-line-height-rule:exactly;font-size:14px;font-family:arial, 'helvetica neue', helvetica, sans-serif;line-height:21px;color:#333333;">Your lunch has been delivered to your office. <br></p><p style="Margin:0;-webkit-text-size-adjust:none;-ms-text-size-adjust:none;mso-line-height-rule:exactly;font-size:14px;font-family:arial, 'helvetica neue', helvetica, sans-serif;line-height:21px;color:#333333;">Please collect your meal at reception.&nbsp;</p> `;
+        str_orderStatus = `<span class="es-button-border es-button-border-2" style="border-style:solid;border-color:#32CD32;background:#32CD32;border-width:0px;display:inline-block;border-radius:15px;width:auto;"> <a href="https://foodiebee.eu" class="es-button es-button-1" target="_blank" style="mso-style-priority:100 !important;text-decoration:underline;-webkit-text-size-adjust:none;-ms-text-size-adjust:none;mso-line-height-rule:exactly;font-family:arial, 'helvetica neue', helvetica, sans-serif;font-size:16px;color:#FFFFFF;border-style:solid;border-color:#32CD32;border-width:10px 20px 10px 20px;display:inline-block;background:#32CD32;border-radius:15px;font-weight:600;font-style:normal;line-height:19px;width:auto;text-align:center;">DELIVERED</a> </span>`
+    }
 
     var str_orderID = order._id;
     
     var str_orderDate = moment(order.orderDate).format("MMM DD, YYYY");
+
+    var str_updatedAt =  moment(order.updatedAt).format("hh:mm A");
 
     var str_companyName = order.customerCompanyDetails[0].companyName
      
@@ -446,19 +505,20 @@ var getCustomerLunchOrderVariables = function(orderdetails, callback) {
     
     var totalRow = ""
 
+    var orderItem = order.orderItem
+
     for(var x=0; x<orderItem.length; x++) {
-      
+
         var newRow = "";
  
         newRow = `<tr style="border-collapse:collapse;"> <td align="left" style="Margin:0;padding-top:5px;padding-bottom:10px;padding-right:20px;padding-left:40px;"> <table cellspacing="0" cellpadding="0" width="100%" style="mso-table-lspace:0pt;mso-table-rspace:0pt;border-collapse:collapse;border-spacing:0px;"> <tr style="border-collapse:collapse;"> <td width="540" align="left" style="padding:0;Margin:0;"> <table width="100%" cellspacing="0" cellpadding="0" style="mso-table-lspace:0pt;mso-table-rspace:0pt;border-collapse:collapse;border-spacing:0px;"> <tr style="border-collapse:collapse;"> <td align="left" style="padding:0;Margin:0;"> <p style="Margin:0;-webkit-text-size-adjust:none;-ms-text-size-adjust:none;mso-line-height-rule:exactly;font-size:14px;font-family:arial, 'helvetica neue', helvetica, sans-serif;line-height:21px;color:#333333;"><br></p> <table style="mso-table-lspace:0pt;mso-table-rspace:0pt;border-collapse:collapse;border-spacing:0px;width:100%;" class="cke_show_border" cellspacing="1" cellpadding="1" border="0"> <tr style="border-collapse:collapse;"> <td style="padding:0;Margin:0;"><a target="_blank" style="-webkit-text-size-adjust:none;-ms-text-size-adjust:none;mso-line-height-rule:exactly;font-family:arial, 'helvetica neue', helvetica, sans-serif;font-size:15px;text-decoration:underline;color:#0C9CE2;" href="https://foodiebee.eu">${orderItem[x].title}</a></td> <td style="padding:0;Margin:0;text-align:center;" width="60">${1}</td> <td style="padding:0;Margin:0;text-align:center;" width="100">€${Number(orderItem[x].totalprice).toFixed(2)}</td> </tr> </table> <p style="Margin:0;-webkit-text-size-adjust:none;-ms-text-size-adjust:none;mso-line-height-rule:exactly;font-size:14px;font-family:arial, 'helvetica neue', helvetica, sans-serif;line-height:21px;color:#333333;"><br></p> </td> </tr> </table> </td> </tr> </table> </td></tr>`;
 
         totalRow = totalRow + newRow
-      }
+    }
 
-      callback(null, totalRow, str_orderDescrip, str_orderStatus, str_orderID, str_orderDate, str_companyName, str_companyAddress, str_subtotal, str_deliveryfee, str_ordertotal, str_footer1)
+    callback(null, totalRow, str_orderDescrip, str_orderStatus, str_orderID, str_orderDate, str_updatedAt, str_companyName, str_companyAddress, str_subtotal, str_deliveryfee, str_ordertotal, str_footer1)
 
 }
-
 
 var getCatererLunchOrderVariables = function(orderdetails, catererEmail, callback) {
 
@@ -493,6 +553,50 @@ var getCatererLunchOrderVariables = function(orderdetails, catererEmail, callbac
       }
 
       callback(null, totalRow, str_orderTitle, str_orderDescrip, str_orderStatus, str_orderDate, str_footer1)
+
+}
+
+var getAdminLunchOrderVariables = function(orderdetails, customerCompanyDetails, callback) {
+
+    var order = orderdetails
+
+    var str_orderDescrip = `<p style="Margin:0;-webkit-text-size-adjust:none;-ms-text-size-adjust:none;mso-line-height-rule:exactly;font-size:14px;font-family:arial, 'helvetica neue', helvetica, sans-serif;line-height:21px;color:#333333;">New lunch orders are ready to be dispatched. <br></p><p style="Margin:0;-webkit-text-size-adjust:none;-ms-text-size-adjust:none;mso-line-height-rule:exactly;font-size:14px;font-family:arial, 'helvetica neue', helvetica, sans-serif;line-height:21px;color:#333333;">Please go to the restaurant to collect the meal prepared.&nbsp;</p> `;
+    var str_orderStatus = `<span class="es-button-border es-button-border-2" style="border-style:solid;border-color:#32CD32;background:#32CD32;border-width:0px;display:inline-block;border-radius:15px;width:auto;"> <a href="https://foodiebee.eu" class="es-button es-button-1" target="_blank" style="mso-style-priority:100 !important;text-decoration:underline;-webkit-text-size-adjust:none;-ms-text-size-adjust:none;mso-line-height-rule:exactly;font-family:arial, 'helvetica neue', helvetica, sans-serif;font-size:16px;color:#FFFFFF;border-style:solid;border-color:#32CD32;border-width:10px 20px 10px 20px;display:inline-block;background:#32CD32;border-radius:15px;font-weight:600;font-style:normal;line-height:19px;width:auto;text-align:center;">READY TO DISPATCH</a> </span>`
+
+    var str_orderDate = moment(order.updatedAt).format("MMM DD, YYYY");
+
+    var str_orderTime =  moment(order.updatedAt).format("hh:mm A");
+
+    var str_companyName = customerCompanyDetails.companyName
+     
+    var str_companyAddress = customerCompanyDetails.companyAddress
+ 
+    var totalRow = ""
+
+    var ordertotal = 0
+
+    for(var x=0; x < order.length; x++) {
+
+        var customerName = order[x].customerDetails[0].customerFirstName + " " + order[x].customerDetails[0].customerLastName
+
+        var orderItem = order[x].orderItem[0]
+
+        var orderItemTitle = orderItem.title
+
+        var orderItemPrice = orderItem.totalprice
+
+        ordertotal = ordertotal + orderItem.totalprice
+
+        var newRow = "";
+ 
+        newRow = `<tr style="border-collapse:collapse;"> <td align="left" style="Margin:0;padding-top:5px;padding-bottom:10px;padding-right:20px;padding-left:40px;"> <table cellspacing="0" cellpadding="0" width="100%" style="mso-table-lspace:0pt;mso-table-rspace:0pt;border-collapse:collapse;border-spacing:0px;"> <tr style="border-collapse:collapse;"> <td width="540" align="left" style="padding:0;Margin:0;"> <table width="100%" cellspacing="0" cellpadding="0" style="mso-table-lspace:0pt;mso-table-rspace:0pt;border-collapse:collapse;border-spacing:0px;"> <tr style="border-collapse:collapse;"> <td align="left" style="padding:0;Margin:0;"> <p style="Margin:0;-webkit-text-size-adjust:none;-ms-text-size-adjust:none;mso-line-height-rule:exactly;font-size:14px;font-family:arial, 'helvetica neue', helvetica, sans-serif;line-height:21px;color:#333333;"><br></p> <table style="mso-table-lspace:0pt;mso-table-rspace:0pt;border-collapse:collapse;border-spacing:0px;width:100%;" class="cke_show_border" cellspacing="1" cellpadding="1" border="0"> <tr style="border-collapse:collapse;"> <td style="padding:0;Margin:0;text-align:center;" width="60">${customerName}</td> <td style="padding:0;Margin:0;"><a target="_blank" style="-webkit-text-size-adjust:none;-ms-text-size-adjust:none;mso-line-height-rule:exactly;font-family:arial, 'helvetica neue', helvetica, sans-serif;font-size:15px;text-decoration:underline;color:#0C9CE2;" href="https://foodiebee.eu">${orderItemTitle}</a></td> <td style="padding:0;Margin:0;text-align:center;" width="60">${1}</td> <td style="padding:0;Margin:0;text-align:center;" width="100">€${Number(orderItemPrice).toFixed(2)}</td> </tr> </table> <p style="Margin:0;-webkit-text-size-adjust:none;-ms-text-size-adjust:none;mso-line-height-rule:exactly;font-size:14px;font-family:arial, 'helvetica neue', helvetica, sans-serif;line-height:21px;color:#333333;"><br></p> </td> </tr> </table> </td> </tr> </table> </td></tr>`;
+
+        totalRow = totalRow + newRow
+    }
+
+    var str_ordertotal = '€' + Number(ordertotal).toFixed(2);
+
+    callback(null, totalRow, str_orderDescrip, str_orderStatus, str_orderDate, str_orderTime, str_companyName, str_companyAddress, str_ordertotal)
 
 }
 

@@ -65,7 +65,7 @@ app.use('/menuPublished', menuPublishedRoutes);
 app.use('/lunchMenuPublished', lunchMenuPublishedRoutes);
 app.use('/lunchOrder', lunchOrderRoutes);
 
-cronJob.executeCronJob()
+//cronJob.executeCronJob()
 
 //Static file declaration
 app.use(express.static(path.join(__dirname, 'client/build')));
