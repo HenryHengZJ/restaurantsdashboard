@@ -6,29 +6,29 @@ var mail = require('../nodeMailerWithTemp');
 require('dotenv').config();
 const stripe = require('stripe')(process.env.STRIPE_KEY);
 var cron = require('node-cron');
-//30 11 * * Monday,Tuesday,Wednesday,Thursday,Friday,Saturday,Sunday
 
 exports.executeCronJob = function () {
 
-    //Send Caterer daily order
-    cron.schedule('15 11 * * Monday,Tuesday,Wednesday,Thursday,Friday,Saturday,Sunday', () => {
+    //Send Caterer daily order 15 10 * * Monday,Tuesday,Wednesday,Thursday,Friday,Saturday,Sunday
+    cron.schedule('20 12 * * Monday,Tuesday,Wednesday,Thursday,Friday,Saturday,Sunday', () => {
 
         var matchquery = {}
 
-      /*  var gteDate = moment().toDate()
+    /*  var gteDate = moment().toDate()
         var lteDate = moment().add(1, 'days').toDate()
-        matchquery.orderDate = {$gte: gteDate.toISOString(),$lte: lteDate.toISOString()}
+        matchquery.createdAt = {$gte: new Date(gteDate.toISOString()),$lte:  new Date(lteDate.toISOString())}
         matchquery.orderStatus = "pending"
 
-        console.log('matchquery = ', JSON.stringify(matchquery))*/
+        console.log('matchquery = ', JSON.stringify(matchquery))
+    */
 
         LunchOrder.aggregate([ 
             {$match: matchquery},
             {$lookup: {
-                from: "company", 
-                localField: "customerCompanyID", 
+                from: "customer", 
+                localField: "customerID", 
                 foreignField: "_id", 
-                as: "customerCompanyDetails" }
+                as: "customerDetails" }
             },
             {$lookup: {
                 from: "caterer", 
@@ -41,63 +41,28 @@ exports.executeCronJob = function () {
                 console.log('err = ', err)
             }
             else{
-                var totalresult = doc.reduce(function(v, b) {
-                    v[b.catererID] = v[b.catererID] || [];
-                    v[b.catererID].push(b);
-                    return v;
-                }, Object.create(null));
+                if (doc.length > 0) {
 
-                var finaldataAry = [];
-
-                for (var parentkey in totalresult) {
-                
-                    var result = totalresult[parentkey].reduce(function(r, a) {
-                        r[a.customerCompanyID] = r[a.customerCompanyID] || [];
-                        r[a.customerCompanyID].push(a);
-                        return r;
+                    var totalresult = doc.reduce(function(v, b) {
+                        v[b.catererID] = v[b.catererID] || [];
+                        v[b.catererID].push(b);
+                        return v;
                     }, Object.create(null));
-
-                    var dataAry = [];
-
-                    for (var key in result) {
-                        
-                        var itemAry = [];
-                    
-                        var itemresult = result[key].reduce(function(x, y) {
-                            x[y.orderItemID] = x[y.orderItemID] || [];
-                            x[y.orderItemID].push(y);
-                            return x;
-                        }, Object.create(null));
-
-                        for (var itemkey in itemresult) {
-                            var updateItemData = {
-                                orderItemID: itemresult[itemkey][0].orderItemID,
-                                orderItemTitle: itemresult[itemkey][0].orderItem[0].title,
-                                orderItemQuantity: itemresult[itemkey].length
-                            };
-                            itemAry.push(updateItemData);
-                        }
-                    
-                        var updateData = {
-                            customerCompanyDetails: result[key][0].customerCompanyDetails[0],
-                            orderItemDetails: itemAry
+    
+                    var finaldataAry = [];
+    
+                    for (var key in totalresult) {
+                        var finalUpdateData = {
+                            catererDetails: totalresult[key][0].catererDetails[0],
+                            orderDetails: totalresult[key]
                         };
-                    
-                        dataAry.push(updateData);
+                        
+                        finaldataAry.push(finalUpdateData);
                     }
-
-                    var finalUpdateData = {
-                        catererDetails: totalresult[parentkey][0].catererDetails[0],
-                        orderDetails: dataAry
-                    };
-                    
-                    finaldataAry.push(finalUpdateData);
-                }
-                
-                if (finaldataAry.length > 0) {
-                    for (var i = 0; i <finaldataAry.length; i ++) {  
-                        var orderdetails = finaldataAry[i].orderDetails
+                    console.log(finaldataAry)
+                    for (var i = 0; i < finaldataAry.length; i ++) {  
                         var catererEmail = finaldataAry[i].catererDetails.catererEmail
+                        var orderdetails = finaldataAry[i].orderDetails
                         mail.sendCatererLunchOrderEmail('/templates/caterer_lunchorder/email.html', orderdetails, catererEmail);
                     }
                 }
@@ -105,62 +70,7 @@ exports.executeCronJob = function () {
         });
     });   
 
-    //Reject caterer daily pending order after 1131am
-    cron.schedule('35 11 * * Monday,Tuesday,Wednesday,Thursday,Friday,Saturday,Sunday', () => {
 
-        var matchquery = {}
-
-        //matchquery.orderStatus = "pending"
-
-        var updateData = {orderStatus: "rejected"}
-                
-        var bulkLunchOrder = LunchOrder.collection.initializeOrderedBulkOp();
-        bulkLunchOrder.find(matchquery).update({$set: updateData});
-        bulkLunchOrder.execute((err, doc) => {
-            if (err) {
-                console.log('err = ', err)
-             }
-             else {
-                console.log('doc = ', doc)
-             }
-        })
-    });  
 }
 
-var getOrder = function(orderID, callback) {
-    var matchquery = {};
-
-    if (typeof orderID !== 'undefined') {
-        matchquery._id = new ObjectId(orderID)
-    }
-
-    LunchOrder.aggregate([ 
-        {$match: matchquery},
-        {$lookup: {
-            from: "customer", 
-            localField: "customerID", 
-            foreignField: "_id", 
-            as: "customerDetails" }
-        },
-        {$lookup: {
-            from: "caterer", 
-            localField: "catererID", 
-            foreignField: "_id", 
-            as: "catererDetails" }
-        },
-        {$lookup: {
-            from: "company", 
-            localField: "customerCompanyID", 
-            foreignField: "_id", 
-            as: "customerCompanyDetails" }
-        },
-        { $sort : { createdAt : -1 } }
-    ], (err,doc) => {
-        if (err) {
-            callback (err)
-        }
-        else {
-            callback (null, doc)
-        }
-    });
-};
+ 

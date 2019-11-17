@@ -11,6 +11,10 @@ class AutoCompleteAddress extends React.Component {
     this.autocompleteInput = React.createRef();
     this.autocomplete = null;
     this.handlePlaceChanged = this.handlePlaceChanged.bind(this);
+
+    this.setState({
+      inputVal: "",
+    })
   }
 
   componentDidMount() {
@@ -24,6 +28,11 @@ class AutoCompleteAddress extends React.Component {
   handlePlaceChanged() {
     const place = this.autocomplete.getPlace();
     this.props.onPlaceChanged(place);
+  }
+
+  handleChange = (event) => {
+    console.log(event.target.value)
+    this.props.onInputChanged(event.target.value);
   }
 
   render() {
@@ -42,6 +51,7 @@ class AutoCompleteAddress extends React.Component {
       color,
       height,
       placeholder,
+      value
     } = this.props;
 
     const borderRadiusVal = borderRadius || 0;
@@ -58,9 +68,12 @@ class AutoCompleteAddress extends React.Component {
     const fontSizeVal = fontSize || 15;
     const heightVal = height || null;
     const placeholderVal = placeholder || "Enter delivery address"
+    const valueVal = value || ""
   
     return (
       <input
+        value={valueVal}
+        onChange={this.handleChange}
         ref={this.autocompleteInput}
         id="autocomplete"
         placeholder={placeholderVal}
@@ -86,6 +99,7 @@ AutoCompleteAddress.propTypes = {
   fontSize: PropTypes.number,
   color: PropTypes.string,
   placeholder: PropTypes.string,
+  value: PropTypes.string,
 };
 
 

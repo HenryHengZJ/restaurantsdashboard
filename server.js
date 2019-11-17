@@ -36,33 +36,21 @@ app.use(passport.initialize());
 
 
 // router files ===============================================================
-var testRoutes   = require('./routes/test');
 var catererRoutes   = require('./routes/caterer');
 var customerRoutes   = require('./routes/customer');
-var menuRoutes   = require('./routes/menu');
 var lunchMenuRoutes   = require('./routes/lunchMenu');
-var orderRoutes   = require('./routes/order');
 var reviewRoutes   = require('./routes/review');
 var authRoutes   = require('./routes/auth');
 var paymentRoutes   = require('./routes/payment');
-var catererPublishedRoutes   = require('./routes/catererPublished');
-var menuPublishedRoutes   = require('./routes/menuPublished');
-var lunchMenuPublishedRoutes   = require('./routes/lunchMenuPublished');
 var lunchOrderRoutes   = require('./routes/lunchOrder');
 
 // routes ======================================================================
-app.use('/test', testRoutes);
 app.use('/caterer', catererRoutes);
 app.use('/customer', customerRoutes);
-app.use('/menu', menuRoutes);
 app.use('/lunchMenu', lunchMenuRoutes);
-app.use('/order', orderRoutes);
 app.use('/review', reviewRoutes);
 app.use('/auth', authRoutes);
 app.use('/payment', paymentRoutes);
-app.use('/catererPublished', catererPublishedRoutes);
-app.use('/menuPublished', menuPublishedRoutes);
-app.use('/lunchMenuPublished', lunchMenuPublishedRoutes);
 app.use('/lunchOrder', lunchOrderRoutes);
 
 //cronJob.executeCronJob()

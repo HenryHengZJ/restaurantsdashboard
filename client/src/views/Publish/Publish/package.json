@@ -1,6 +1,0 @@
-{
-  "name": "Publish",
-  "version": "0.0.0",
-  "private": true,
-  "main": "./Publish.js"
-}

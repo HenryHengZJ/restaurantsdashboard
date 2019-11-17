@@ -13,8 +13,8 @@ router.get('/getreview', passport.authenticate('jwt', {session: false}), (req, r
 	var matchquery = {};
 
     if (typeof req.query.lteDate !== 'undefined' && typeof req.query.gteDate !== 'undefined') {
-		var gteDate = moment(req.query.gteDate, 'DD MMM, YYYY').toDate()
-		var lteDate = moment(req.query.lteDate, 'DD MMM, YYYY').add(1, 'days').toDate()
+		var gteDate = moment(req.query.gteDate, 'ddd, DD MMM YYYY').toDate()
+		var lteDate = moment(req.query.lteDate, 'ddd, DD MMM YYYY').add(1, 'days').toDate()
         matchquery = {"createdAt":{$gte: new Date(gteDate.toISOString()),$lte: new Date(lteDate.toISOString())}}
     }
 

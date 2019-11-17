@@ -1,0 +1,6 @@
+{
+  "name": "BusinessProfile",
+  "version": "0.0.0",
+  "private": true,
+  "main": "./BusinessProfile.js"
+}

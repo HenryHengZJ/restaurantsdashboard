@@ -75,14 +75,13 @@ class Dashboard extends Component {
       orderEdit: false, 
       salesEdit: false,
       customerEdit: false,
-      menuitemEdit: false,
       lunchmenuitemEdit: false,
       reviewEdit: false,
       orderline: {
         labels: [],
         datasets: [
           {
-            label: "GoLunch",
+            label: "Total Orders",
             fill: true,
             backgroundColor: "rgba(75,192,192,0.4)",
             borderColor: "rgba(75,192,192,1)",
@@ -92,24 +91,13 @@ class Dashboard extends Component {
             orderlast7days: 0,
             orderalltime: 0
           },
-          {
-            label: "GoCatering",
-            fill: true,
-            backgroundColor: "rgba(147,112,219,0.4)",
-            borderColor: "rgba(147,112,219,1)",
-            borderWidth: 2,
-            pointHoverBackgroundColor: "rgba(147,112,219,1)",
-            data: [],
-            orderlast7days: 0,
-            orderalltime: 0
-          }
         ]
       },
       salesbar: {
         labels: [],
         datasets: [
           {
-            label: "GoLunch",
+            label: "Total Sales",
             backgroundColor: "rgba(255,69,0,0.2)",
             borderColor: "rgba(255,69,0,1)",
             borderWidth: 1,
@@ -119,17 +107,6 @@ class Dashboard extends Component {
             saleslast7days: 0,
             salesalltime: 0
           },
-          {
-            label: "GoCatering",
-            backgroundColor: "rgba(255,99,132,0.2)",
-            borderColor: "rgba(255,99,132,1)",
-            borderWidth: 1,
-            hoverBackgroundColor: "rgba(255,99,132,0.4)",
-            hoverBorderColor: "rgba(255,99,132,1)",
-            data: [],
-            saleslast7days: 0,
-            salesalltime: 0
-          }
         ]
       },
       customerpie: {
@@ -150,11 +127,9 @@ class Dashboard extends Component {
             ],
             newcustomerlast7days: 0,
             recurringcustomerlast7days: 0,
-            totalcustomers: 0,
           }
         ],
       },
-      topsellingitems: [],
       topsellinglunchitems: [],
       dateArray: [],
       review: [],
@@ -169,10 +144,11 @@ class Dashboard extends Component {
 
   componentDidMount() {
     var currentDate = new Date();
+   // var currentDate = moment("2019-10-07", 'YYYY-MM-DD')
     var previousDate = subDays(currentDate, 7);
 
-    var currentDateString = moment(currentDate).format("DD MMM, YYYY")
-    var previousDateString = moment(previousDate).format("DD MMM, YYYY")
+    var currentDateString = moment(currentDate).format("ddd, DD MMM YYYY")
+    var previousDateString = moment(previousDate).format("ddd, DD MMM YYYY")
     var finalSelectionDate = previousDateString + ' - ' + currentDateString
     var finalDateArray = this.getIntervalDates(currentDate, previousDate).reverse();
    
@@ -209,7 +185,6 @@ class Dashboard extends Component {
           }, () => {
           //  this.putInitialData(this.state.catererName)
             this.getOrderSales(currentDateString, previousDateString)
-           // this.getCustomer(currentDateString, previousDateString)
             this.getMenuItems()
             this.getReview(currentDateString, previousDateString)
           })
@@ -240,33 +215,6 @@ class Dashboard extends Component {
       newpie.datasets[0].recurringcustomerlast7days = 200
       newpie.datasets[0].totalcustomers = 350
   
-      var topsellingitems = [
-        {
-          title: 'Sandwich Combo',
-          soldamount: 108,
-        },
-        {
-          title: 'Bagel Tray',
-          soldamount: 87,
-        },
-        {
-          title: 'Traditional Irish Breakfast',
-          soldamount: 76,
-        },
-        {
-          title: 'Chicken Parmigiano',
-          soldamount: 65,
-        },
-        {
-          title: 'Lasagna',
-          soldamount: 54,
-        },
-        {
-          title: 'Meatball & Cheese Sub',
-          soldamount: 27,
-        },
-      ]
-
       var topsellinglunchitems = [
         {
           title: 'Chicken Sandwich',
@@ -339,7 +287,6 @@ class Dashboard extends Component {
         orderline: newline,
         salesbar: newbar,
         customerpie: newpie,
-        topsellingitems,
         topsellinglunchitems,
         review,
         rating,
@@ -354,23 +301,19 @@ class Dashboard extends Component {
       'Content-Type': 'application/json',
     }
 
-    var orderqueryurl = apis.GETorder + "?lteDate=" + currentDateString + "&gteDate=" + previousDateString;
-    var salesqueryurl = apis.GETorder + "?paymentStatus=succeeded" + "&lteDate=" + currentDateString + "&gteDate=" + previousDateString;
-
     var lunchorderqueryurl = apis.GETlunchorder + "?lteDate=" + currentDateString + "&gteDate=" + previousDateString;
     var lunchsalesqueryurl = apis.GETlunchorder + "?paymentStatus=succeeded" + "&lteDate=" + currentDateString + "&gteDate=" + previousDateString;
 
     var axiosarray = [
-      axios.get(orderqueryurl, {withCredentials: true}, {headers: headers}),
-      axios.get(salesqueryurl, {withCredentials: true}, {headers: headers}),
       axios.get(lunchorderqueryurl, {withCredentials: true}, {headers: headers}),
       axios.get(lunchsalesqueryurl, {withCredentials: true}, {headers: headers}),
     ]
     axios.all(axiosarray)
-    .then(axios.spread((order_query_response, sales_query_response, lunchorder_response, lunchsales_response) => {
-      if (order_query_response.status === 200 && sales_query_response.status === 200 && lunchorder_response.status === 200 && lunchsales_response.status === 200) {
-        this.getOrderChartData(order_query_response.data, lunchorder_response.data)      
-        this.getSalesChartData(sales_query_response.data, lunchsales_response.data)    
+    .then(axios.spread((lunchorder_response, lunchsales_response) => {
+      if (lunchorder_response.status === 200 && lunchsales_response.status === 200) {
+        this.getOrderChartData(lunchorder_response.data)      
+        this.getSalesChartData(lunchsales_response.data)  
+        this.getCustomersChartData(lunchorder_response.data)      
       } 
     }))
     .catch((error) => {
@@ -382,18 +325,16 @@ class Dashboard extends Component {
       'Content-Type': 'application/json',
     }
 
-    var url = apis.GETmenu + "?dashboard=true";
     var lunchurl = apis.GETlunchmenu + "?dashboard=true";
 
     var axiosarray = [
-      axios.get(url, {withCredentials: true}, {headers: headers}),
       axios.get(lunchurl, {withCredentials: true}, {headers: headers}),
     ]
     axios.all(axiosarray)
-    .then(axios.spread((response, lunch_response) => {
-        if (response.status === 200) {
+    .then(axios.spread((lunch_response) => {
+        console.log(lunch_response.data)
+        if (lunch_response.status === 200) {
           this.setState({
-            topsellingitems: response.data,
             topsellinglunchitems: lunch_response.data,
           })
         } 
@@ -402,29 +343,6 @@ class Dashboard extends Component {
     });
   }
   
-  getCustomer = (currentDateString, previousDateString) => {
-  
-    var headers = {
-      'Content-Type': 'application/json',
-    }
-
-    var queryurl = apis.GETorder_customer + "?lteDate=" + currentDateString + "&gteDate=" + previousDateString;
-    var allqueryrurl = apis.GETorder_customer;
-
-    var axiosarray = [
-      axios.get(queryurl, {withCredentials: true}, {headers: headers}),
-      axios.get(allqueryrurl, {withCredentials: true}, {headers: headers})
-    ]
-    axios.all(axiosarray)
-    .then(axios.spread((query_response, allquery_response) => {
-      if (query_response.status === 200 && allquery_response.status === 200) {
-        
-        this.getCustomersChartData(query_response.data, allquery_response.data.length)         
-      } 
-    }))
-    .catch((error) => {
-    });
-  }
 
   getReview = (currentDateString, previousDateString) => {
   
@@ -449,24 +367,17 @@ class Dashboard extends Component {
       });
   }
 
-  getOrderChartData = (orderdata, lunchorderdata) => {
-    var linedata = [];
+  getOrderChartData = (lunchorderdata) => {
+
     var linelunchdata = [];
     var dateArray = this.state.dateArray
 
     for (let i = 0; i < dateArray.length; i++) {
-      var count = 0
+
       var lunchcount = 0
 
-      for (let x = 0; x < orderdata.length; x++) {
-        if (moment(orderdata[x].createdAt).format("DD MMM, YYYY") === dateArray[i]) {
-          count = count + 1
-        }
-      }
-      linedata.push(count)
-
       for (let x = 0; x < lunchorderdata.length; x++) {
-        if (moment(lunchorderdata[x].orderDate).format("DD MMM, YYYY") === dateArray[i]) {
+        if (moment(lunchorderdata[x].createdAt).format("ddd, DD MMM YYYY") === dateArray[i]) {
           lunchcount = lunchcount + 1
         }
       }
@@ -475,39 +386,29 @@ class Dashboard extends Component {
 
     var newline = this.state.orderline;
     newline.datasets[0].data = linelunchdata;
-    newline.datasets[0].data = linedata;
 
     newline.datasets[0].orderlast7days = lunchorderdata.length
-    newline.datasets[0].orderlast7days = orderdata.length
 
     this.setState({
       orderline: newline,
     })
   }
 
-  getSalesChartData = (orderdata, lunchorderdata) => {
-    var bardata = [];
+  getSalesChartData = (lunchsalesdata) => {
+
     var barlunchdata = [];
 
     var dateArray = this.state.dateArray
 
-    var last7sales = 0;
     var last7lunchsales = 0;
 
     for (let i = 0; i < dateArray.length; i++) {
-      var sales = 0
+    
       var lunchsales = 0
-      for (let x = 0; x < orderdata.length; x++) {
-        if (moment(orderdata[x].createdAt).format("DD MMM, YYYY") === dateArray[i]) {
-          sales = sales + orderdata[x].totalOrderPrice
-        }
-      }
-      bardata.push(sales)
-      last7sales = last7sales + sales
 
-      for (let x = 0; x < lunchorderdata.length; x++) {
-        if (moment(lunchorderdata[x].orderDate).format("DD MMM, YYYY") === dateArray[i]) {
-          lunchsales = lunchsales + lunchorderdata[x].totalOrderPrice
+      for (let x = 0; x < lunchsalesdata.length; x++) {
+        if (moment(lunchsalesdata[x].createdAt).format("ddd, DD MMM YYYY") === dateArray[i]) {
+          lunchsales = lunchsales + lunchsalesdata[x].netOrderPrice
         }
       }
       barlunchdata.push(lunchsales)
@@ -516,25 +417,23 @@ class Dashboard extends Component {
 
     var newbar = this.state.salesbar;
     newbar.datasets[0].data = barlunchdata;
-    newbar.datasets[0].data = bardata;
-
+  
     newbar.datasets[0].saleslast7days = Number(last7lunchsales).toFixed(2)
-    newbar.datasets[0].saleslast7days = Number(last7sales).toFixed(2)
-
+  
     this.setState({
       salesbar: newbar,
     })
   }
 
-  getCustomersChartData = (customerdata, allcustomerscount) => {
+  getCustomersChartData = (lunchorderdata) => {
     var newcustomer_val = 0;
     var recurringcustomer_val = 0;
 
-    for (let x = 0; x < customerdata.length; x++) {
-      if (customerdata[x].customerDetails[0].status === "new") {
+    for (let x = 0; x < lunchorderdata.length; x++) {
+      if (lunchorderdata[x].customerType === "new") {
         newcustomer_val = newcustomer_val + 1
       }
-      else if (customerdata[x].customerDetails[0].status === "recurring") {
+      else if (lunchorderdata[x].customerType === "recurring") {
         recurringcustomer_val = recurringcustomer_val + 1
       }
     }
@@ -550,8 +449,7 @@ class Dashboard extends Component {
     newpie.datasets[0].data = piedata
     newpie.datasets[0].newcustomerlast7days = newcustomer_val
     newpie.datasets[0].recurringcustomerlast7days = recurringcustomer_val
-    newpie.datasets[0].totalcustomers = allcustomerscount
-
+ 
     this.setState({
       customerpie: newpie,
     })
@@ -562,7 +460,7 @@ class Dashboard extends Component {
     var currentDate = startDate;
     var endDate = stopDate;
     while (currentDate >= endDate) {
-      dateArray.push(moment(currentDate).format("DD MMM, YYYY"));
+      dateArray.push(moment(currentDate).format("ddd, DD MMM YYYY"));
       currentDate = moment(currentDate).subtract(1, "days");
     }
     return dateArray;
@@ -590,43 +488,6 @@ class Dashboard extends Component {
 
   renderPieChart() {
     return <Pie data={this.state.customerpie} />
-  }
-
-  renderMenuBarChart(topsellingitems) {
-
-    var itemarray = [];
-    var barColor;
-
-    for(let i = 0; i < topsellingitems.length; i++){
-      if (topsellingitems[i].soldamount > 70) {
-        barColor = "success"
-      }
-      else if (topsellingitems[i].soldamount <= 70 && topsellingitems[i].soldamount > 30) {
-        barColor = "warning"
-      }
-      else if (topsellingitems[i].soldamount <= 30 && topsellingitems[i].soldamount > 0) {
-        barColor = "danger"
-      }
-      itemarray.push(
-        <div className="progress-group mb-4">
-          <div className="progress-group-header">
-            <span className="progress-group-text">
-              {topsellingitems[i].title}
-            </span>
-            <span className="ml-auto font-weight-bold">{topsellingitems[i].soldamount}</span>
-          </div>
-          <div className="progress-group-bars">
-            <Progress className="progress-xs" color={barColor} value={topsellingitems[i].soldamount} />
-          </div>
-        </div>
-      )
-    } 
-
-    return(
-      <div>
-        {itemarray.length > 0 ? itemarray : this.renderEmptySellingItems()}
-      </div>
-    )
   }
 
   renderLunchMenuBarChart(topsellinglunchitems) {
@@ -675,33 +536,18 @@ class Dashboard extends Component {
     }
     else if (title == 'Sales') {
       stateToChange = this.state.salesEdit
-      pathToPage = 'sales'
+      pathToPage = 'analysis/sales'
     }
     return(
       <CardHeader style={{backgroundColor: 'white'}}>
         <Row>
-          <Col xs="6">
-            <Label style={ { marginLeft: 10, marginBottom: 10 }} className="h6">GoLunch {title}</Label>
+          <Col xs="12">
+            <Label style={ { marginLeft: 10, marginBottom: 10 }} className="h6">{title}</Label>
             {stateToChange ?
               <a
                 style={{marginLeft: 10, cursor: 'pointer', opacity: 0.6}} 
                 className="card-header-action float-right"
-                onClick={() => this.goToPage("/caterer/golunch/" +pathToPage)}
-              >
-                <i className="fa fa-external-link" />
-              </a> : null}
-            <div>
-              <Label style={ { marginLeft: 10 }} className="h4">{last7dayscount}</Label>
-              <Label style={ { marginLeft: 10 , opacity: 0.6}}>Last 7 days</Label>
-            </div>
-          </Col>
-          <Col xs="6">
-            <Label style={ { marginLeft: 10, marginBottom: 10 }} className="h6">GoCatering {title}</Label>
-            {stateToChange ?
-              <a
-                style={{marginLeft: 10, cursor: 'pointer', opacity: 0.6}} 
-                className="card-header-action float-right"
-                onClick={() => this.goToPage("/caterer/gocatering/" + pathToPage)}
+                onClick={() => this.goToPage("/caterer/" +pathToPage)}
               >
                 <i className="fa fa-external-link" />
               </a> : null}
@@ -715,7 +561,7 @@ class Dashboard extends Component {
     )
   }
 
-  renderPieChartTitle(title, newcustomer, recurring_customer, totalcustomers) {
+  renderPieChartTitle(title, newcustomer, recurring_customer) {
     return(
       <CardHeader style={{backgroundColor: 'white'}}>
         <Label style={ { marginLeft: 10, marginBottom: 10 }} className="h6">{title}</Label>
@@ -723,17 +569,16 @@ class Dashboard extends Component {
           <a
             style={{marginLeft: 10, cursor: 'pointer', opacity: 0.6}} 
             className="card-header-action float-right"
-            onClick={() => this.goToPage('/caterer/reports/customer')}
+            onClick={() => this.goToPage('/caterer/analysis/customer')}
           >
             <i className="fa fa-external-link" />
           </a> : null}
         <div>
           <Label style={ { marginLeft: 10 }} className="h4">{newcustomer}</Label>
-          <Label style={ { marginLeft: 10 , opacity: 0.6}}>New Customer</Label>
+          <Label style={ { marginLeft: 10 , opacity: 0.6}}>New</Label>
           <Label style={ { marginLeft: 30 }} className="h4">{recurring_customer}</Label>
-          <Label style={ { marginLeft: 10 , opacity: 0.6}}>Recurring Customer</Label>
-          <Label style={ { marginLeft: 30 }} className="h4">{totalcustomers}</Label>
-          <Label style={ { marginLeft: 10 , opacity: 0.6}}>Total Customer</Label>
+          <Label style={ { marginLeft: 10 , opacity: 0.6}}>Recurring</Label>
+          <Label style={ { marginLeft: 20 , opacity: 0.6}}>(Last 7 days)</Label>
         </div>
       </CardHeader>
     )
@@ -747,7 +592,7 @@ class Dashboard extends Component {
           <a
             style={{marginLeft: 10, cursor: 'pointer', opacity: 0.6}} 
             className="card-header-action float-right"
-            onClick={() => this.goToPage('/caterer/reports/review')}
+            onClick={() => this.goToPage('/caterer/analysis/review')}
           >
             <i className="fa fa-external-link" />
           </a> : null}
@@ -779,8 +624,7 @@ class Dashboard extends Component {
     for (let i = 0; i < tableitems.length; i++) {
       itemarray.push(
         <tr>
-          <td style={{width: '10%'}}>{tableitems[i].customerFirstName}</td>
-          <td style={{width: '15%'}}>{tableitems[i].customerCity}</td>
+          <td style={{width: '10%'}}>{tableitems[i].customerFirstName} {tableitems[i].customerLastName.charAt(0)} .</td>
           <td style={{width: '15%'}}>
             <StarRatingComponent
               name="rating"
@@ -806,7 +650,6 @@ class Dashboard extends Component {
         <thead className="thead-light">
           <tr>
             <th>Name</th>
-            <th>Location</th>
             <th>Rating</th>
             <th>Comment</th>
             <th>Time</th>
@@ -939,7 +782,7 @@ class Dashboard extends Component {
                 <a
                   style={{position: 'absolute', right: 20, top:20, cursor: 'pointer', opacity: 0.6}} 
                   className="card-header-action float-right"
-                  onClick={() => this.goToPage('/caterer/basics/nameaddress')}
+                  onClick={() => this.goToPage('/caterer/basics/businessprofile')}
                 >
                   <i className="fa fa-external-link" />
                 </a> : null}
@@ -951,7 +794,7 @@ class Dashboard extends Component {
                     editing={false}
                     value={this.state.rating}
                   />
-                  {this.state.rating === 0 ? null : <b style={{ marginLeft: 5, color: "darkorange" }}>4.7</b> }
+                  {this.state.rating === 0 ? null : <b style={{ marginLeft: 5, color: "darkorange" }}>{this.state.rating}</b> }
                   {this.state.numofreview === 0 ? 
                     <Label style={{ fontWeight: '500', marginLeft: 5, color: "darkorange" }}>
                       No Ratings Yet
@@ -997,12 +840,12 @@ class Dashboard extends Component {
           <Col xs="12" md="6">
             <Card onMouseEnter={() => this.toggle('lunchmenuitemEdit')} onMouseLeave={() => this.toggle('lunchmenuitemEdit')}>
               <CardHeader style={{backgroundColor: 'white'}}>
-                <Label style={ { marginTop:10, marginLeft: 10}} className="h6">GoLunch Menus</Label>
+                <Label style={ { marginTop:10, marginLeft: 10}} className="h6">Menu</Label>
                 { this.state.lunchmenuitemEdit ?
                   <a
                     style={{marginLeft: 10, cursor: 'pointer', opacity: 0.6}} 
                     className="card-header-action float-right"
-                    onClick={() => this.goToPage('/caterer/golunch/dishes')}
+                    onClick={() => this.goToPage('/caterer/menusetup')}
                   >
                     <i className="fa fa-external-link" />
                   </a> : null}
@@ -1014,20 +857,10 @@ class Dashboard extends Component {
           </Col>
 
           <Col xs="12" md="6">
-            <Card onMouseEnter={() => this.toggle('menuitemEdit')} onMouseLeave={() => this.toggle('menuitemEdit')}>
-              <CardHeader style={{backgroundColor: 'white'}}>
-                <Label style={ { marginTop:10, marginLeft: 10}} className="h6">GoCatering Menus</Label>
-                { this.state.menuitemEdit ?
-                  <a
-                    style={{marginLeft: 10, cursor: 'pointer', opacity: 0.6}} 
-                    className="card-header-action float-right"
-                    onClick={() => this.goToPage('/caterer/gocatering/dishes')}
-                  >
-                    <i className="fa fa-external-link" />
-                  </a> : null}
-              </CardHeader>
+            <Card onMouseEnter={() => this.toggle('customerEdit')} onMouseLeave={() => this.toggle('customerEdit')}>
+              {this.renderPieChartTitle('Customers',this.state.customerpie.datasets[0].newcustomerlast7days, this.state.customerpie.datasets[0].recurringcustomerlast7days)}
               <CardBody>
-                {this.renderMenuBarChart(this.state.topsellingitems)}
+                {this.state.customerpie.datasets[0].data.length > 0 ? this.renderPieChart() : this.renderEmptyCustomer() }
               </CardBody>
             </Card>
           </Col>

@@ -66,7 +66,7 @@ router.post('/addLunchMenu', passport.authenticate('jwt', {session: false}), upl
 		newData.src  = 'https://s3-eu-west-1.amazonaws.com/foodiebeemenuitem/' + req.files[0].key
 	}
 	
-	console.log(JSON.stringify(newData))
+	console.log(newData)
 	// create the new menu
 	var newMenu 	= new LunchMenu(newData);
 	newMenu.save().then(() => res.json(newMenu));
@@ -104,6 +104,42 @@ router.put('/updateLunchMenu', passport.authenticate('jwt', {session: false}), u
     });
 });
  
+router.put('/makeDefault_LunchMenu', passport.authenticate('jwt', {session: false}), (req, res) => {
+	
+	const { user } = req;
+    var userID = user.catererID
+    var arrayOfLunchMenuID = []
+    var matchquery = {catererID: new ObjectId(userID)};
+
+    console.log(req.body)
+
+    var updateData = req.body
+    if (typeof updateData.defaultID !== 'undefined') {
+        matchquery._id = updateData.defaultID
+    }
+    if (typeof updateData.arrayofID !== 'undefined') {
+        var arrayofIDString = JSON.parse(updateData.arrayofID)
+        for(var i = 0; i < arrayofIDString.length; i++){
+            arrayOfLunchMenuID.push(new ObjectId(arrayofIDString[i]))
+        }
+    }
+   
+    LunchMenu.findOneAndUpdate(matchquery, {$set: {selected: true}}, {runValidators: true}, (err, doc) => {
+        if (err) {
+            return res.status(500).send({ error: err });
+        }
+        else {
+            var bulk_matchquery = {_id: { $in: arrayOfLunchMenuID}}
+            var bulkLunchMenu = LunchMenu.collection.initializeOrderedBulkOp();
+            bulkLunchMenu.find(bulk_matchquery).update({$set: {selected: false}});
+            bulkLunchMenu.execute((err, doc) => {
+                if (err) return res.status(500).send({ error: err });
+                if (doc === null) return res.status(404).send({ error: 'document not found' });
+                return res.status(201).json(doc);
+            });
+        }
+    });
+});
 
 router.delete('/deleteLunchMenu', passport.authenticate('jwt', {session: false}), (req, res) => {
 	

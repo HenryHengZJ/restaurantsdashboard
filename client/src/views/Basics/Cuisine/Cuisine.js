@@ -226,7 +226,7 @@ class Cuisine extends Component {
 
   
   handleProceed = () => {
-    this.props.history.push('/caterer/basics/occasion')
+    this.props.history.push('/caterer/basics/onlinepayment')
   }
 
   handleNext() {
@@ -444,9 +444,9 @@ class Cuisine extends Component {
 
                 <div className="form-actions">
                   {this.state.isProceedButtonVisible ? 
-                    <Button style={{marginTop: 20, marginLeft:10}} onClick={() => this.handleProceed()} className="float-right" color="success">Proceed</Button>
+                    <Button style={{marginTop: 20, marginLeft:10, fontSize:17}} onClick={() => this.handleProceed()} className="float-right" color="success">Proceed</Button>
                   : null}
-                  <Button style={{marginTop: 20}} onClick={this.handleNext} className="float-right" type="submit" color="primary">{this.state.isSaving ? "Saving..." : "Save" }</Button>
+                  <Button style={{marginTop: 20, fontSize:17}} onClick={this.handleNext} className="float-right" type="submit" color="primary">{this.state.isSaving ? "Updating..." : "Update" }</Button>
                 </div>
                
               </CardBody>

@@ -7,39 +7,12 @@ export default {
     UPDATEcaterernameaddress: "/caterer/updatecaterernameaddress",
     GETcaterer: "/caterer/getcaterer",
 
-    /*Published API*/
-    UPDATE_catererPublished: "/catererPublished/update_caterer_published",
-
-    /*Menu API*/
-    UPDATEmenu: "/menu/updatemenu",
-    BULKUPDATEmenu: "/menu/bulkupdatemenu",
-    GETmenu: "/menu/getmenu",
-    ADDmenu: "/menu/addmenu",
-    DELETEmenu: "/menu/deletemenu",
-    BULKDELETEmenu: "/menu/bulkdeletemenu",
-
-    /*Menu Published API*/
-    GETmenuPublished: "/menuPublished/get_menu_published",
-    UPDATEmenuPublished: "/menuPublished/update_menu_published",
-    DELETEmenuPublished: "/menuPublished/delete_menu_published",
-
     /*Lunch Menu API*/
     UPDATElunchmenu: "/lunchMenu/updateLunchMenu",
+    UPDATE_default_lunchmenu: "/lunchMenu/makeDefault_LunchMenu",
     GETlunchmenu: "/lunchMenu/getLunchMenu",
     ADDlunchmenu: "/lunchMenu/addLunchMenu",
     DELETElunchmenu: "/lunchMenu/deleteLunchMenu",
-
-    /*Lunch Menu Published API*/
-    GETlunchmenuPublished: "/lunchMenuPublished/get_lunchmenu_published",
-    UPDATElunchmenuPublished: "/lunchMenuPublished/update_lunchmenu_published",
-    DELETElunchmenuPublished: "/lunchMenuPublished/delete_lunchmenu_published",
-  
-    /*Order API*/
-    GETorder: "/order/getorder",
-    GETorder_customer: "/order/getorder_customer",
-    PUTacceptorder_order: "/order/acceptorder",
-    PUTreject_order: "/order/rejectorder",
-    COUNTorder: "/order/countorder",
 
     /*Lunch Order API*/
     GETlunchorder: "/lunchOrder/getlunchorder",

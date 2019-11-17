@@ -31,8 +31,9 @@ import axios from 'axios';
 import apis from "../../../apis";
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import Geocode from "react-geocode";
 
-const GOOGLE_API_KEY = process.env.GOOGLE_API_KEY;
+const GOOGLE_API_KEY = "AIzaSyCFHrZBb72wmg5LTiMjUgI_CLhsoMLmlBk";
 
 class Location extends Component {
 
@@ -43,18 +44,23 @@ class Location extends Component {
 
     this.state = {
       _id: "",
-      latitude: null,
-      longitude: null,
       center: null,
-      form: null,
+      catererFullAddress: "",
+      catererAddress: "",
+      catererCity: "",
+      catererCounty: "",
+      catererCountry: "",
       isProceedButtonVisible: false,
       isSaving: false,
     };
 
     this.marker = null;
+   
   }
 
   componentDidMount() {
+
+    Geocode.setApiKey(GOOGLE_API_KEY);
   
     var headers = {
       'Content-Type': 'application/json',
@@ -66,31 +72,16 @@ class Location extends Component {
       .then((response) => {
         if (response.status === 200) {
 
-          var latitude;
-          var longitude;
           var center;
-          var form;
 
           if (response.data[0].location.coordinates.length > 0) {
-            latitude = response.data[0].location.coordinates[0];
-            longitude = response.data[0].location.coordinates[1];
             center =  {
-              lat: response.data[0].location.coordinates[0],
-              lng: response.data[0].location.coordinates[1]
-            };
-            form = {
               lat: response.data[0].location.coordinates[0],
               lng: response.data[0].location.coordinates[1]
             };
           }
           else {
-            latitude = 53.350140;
-            longitude = -6.266155;
             center =  {
-              lat: 53.350140,
-              lng: -6.266155
-            };
-            form = {
               lat: 53.350140,
               lng: -6.266155
             };
@@ -98,9 +89,7 @@ class Location extends Component {
 
           this.setState({
             center,
-            form,
-            latitude,
-            longitude,
+            catererFullAddress: response.data[0].catererFullAddress,
           })
         } 
       })
@@ -109,7 +98,7 @@ class Location extends Component {
   }
 
   handleProceed = () => {
-    this.props.history.push('/caterer/services/cuisine')
+    this.props.history.push('/caterer/basics/cuisine')
   }
 
   handleNext() {
@@ -118,14 +107,21 @@ class Location extends Component {
       isSaving: true,
     })
 
-    const {latitude, longitude, form, _id} = this.state
+    const {center, catererAddress, catererFullAddress, catererCity, catererCountry, catererCounty} = this.state
   
     var data = {
       location: {
         type: "Point",
-        coordinates: [latitude, longitude]
+        coordinates: [center.lat, center.lng]
       },
+      catererAddress: catererAddress,
+      catererFullAddress: catererFullAddress,
+      catererCity: catererCity,
+      catererCountry: catererCountry,
+      catererCounty: catererCounty,
     }
+
+    console.log(data)
 
     var headers = {
       'Content-Type': 'application/json',
@@ -157,75 +153,106 @@ class Location extends Component {
 
   }
 
-  searchAddress = (e) => {
-    e.preventDefault()
-    const {form} = this.state
-  
-    this.setState({
-      latitude: form.lat,
-      longitude: form.lng,
-      center: this.state.form
-    })
-    if (this.marker !== null) {
-      this.marker.setPosition(this.state.form);
-    }
-  }
-
   showPlaceDetails(address) {
-    this.setState({
-      form: {
-        lat: Number(address.geometry.location.lat()),
-        lng: Number(address.geometry.location.lng()),
+    var lat = Number(address.geometry.location.lat())
+    var lng = Number(address.geometry.location.lng())
+    
+    Geocode.fromLatLng(lat, lng).then(
+      response => {
+
+        //Get rid of postal code
+        for(var i = 0 ; i < response.results[0].address_components.length ; i++){
+          if (response.results[0].address_components[i].types[0] === "postal_code") {
+            response.results[0].address_components.splice(i, 1)
+          }
+        }
+
+        var address_components = response.results[0].address_components
+ 
+        var catererAddress = ""
+        for(var i = address_components.length - 4 ; i >= 0; i--){
+          catererAddress = address_components[i].long_name + ( i === address_components.length - 4 ? "" : ", " ) + catererAddress 
+        }
+        
+        this.setState({
+          center: {
+            lat: lat,
+            lng: lng,
+          },
+          catererFullAddress: response.results[0].formatted_address,
+          catererAddress: catererAddress,
+          catererCity: address_components[address_components.length - 3].long_name,
+          catererCounty: address_components[address_components.length - 2].long_name,
+          catererCountry: address_components[address_components.length - 1].long_name,
+        })
       },
+      error => {
+        console.log(error);
+      }
+    );
+  }
+
+  onInputChanged(value) {
+    this.setState({
+      catererFullAddress: value
     })
   }
 
-  renderMarkers(map, maps, center) {
-    this.marker = new maps.Marker({
-      position: center,
-      draggable: true,
-      map
-    });
-    this.marker.setMap(map);
-    // Add an event listener on the rectangle.
-    this.marker.addListener("dragend", () => {
-      const lat = this.marker.getPosition().lat();
-      const lng = this.marker.getPosition().lng();
-      this.setState({
-        latitude: lat,
-        longitude: lng,
-        form: {
-          lat: Number(lat),
-          lng: Number(lng)
-        },
-        center: {
-          lat: Number(lat),
-          lng: Number(lng)
-        },
-      });
-    });
-  }
+  onMapChange = ({center}) => {
+   
+    var lat = center.lat;
+    var lng = center.lng;
+
+    Geocode.fromLatLng(lat, lng).then(
+      response => {
+
+        //Get rid of postal code
+        for(var i = 0 ; i < response.results[0].address_components.length ; i++){
+          if (response.results[0].address_components[i].types[0] === "postal_code") {
+            response.results[0].address_components.splice(i, 1)
+          }
+        }
+
+        var address_components = response.results[0].address_components
+
+        var catererAddress = ""
+        for(var i =address_components.length - 4 ; i >= 0; i--){
+          catererAddress = address_components[i].long_name + ( i === address_components.length - 4 ? "" : ", " ) + catererAddress 
+        }
+        this.setState({
+          center: {
+            lat: lat,
+            lng: lng,
+          },
+          catererFullAddress: response.results[0].formatted_address,
+          catererAddress: catererAddress,
+          catererCity: address_components[address_components.length - 3].long_name,
+          catererCounty: address_components[address_components.length - 2].long_name,
+          catererCountry: address_components[address_components.length - 1].long_name,
+        })
+      },
+      error => {
+        console.log(error);
+      }
+    );
+  };
 
   render() {
  
     return (
       <div style={{ height: '100%', width: '100%' }} className="animated fadeIn">
         <Row className="justify-content-center">
-          <Col xs="12">
+          <Col xs="12" md="9">
             <Card >
               <CardHeader>
-                <strong >Pin point location</strong>
-                {this.state.isProceedButtonVisible ? 
-                  <Button style={{marginLeft:10}} onClick={() => this.handleProceed()} className="float-right" color="success">Proceed</Button>
-                : null}
-                <Button onClick={this.handleNext} className="float-right" type="submit" color="primary">{this.state.isSaving ? "Saving..." : "Save" }</Button>
+                <strong >Business Location</strong>
               </CardHeader>
               <CardBody>
                 <FormGroup row className="my-0">
                   <Col xs="12">
-                    <Label htmlFor="Location">Let your customer know the exact location of your business by searching the address below and move the marker to pin point the exact location.</Label>
+                    <Label style={{fontWeight: '600'}} htmlFor="Location">Drag the map to pin your restaurant's location.</Label>
                   </Col>
-                  <Col style={{marginTop:20}} xs="12">
+                  <Col style={{marginTop:20}} xs="9">
                     <InputGroup >
                       <AutoCompleteAddress 
                         borderTopRightRadius={0}
@@ -240,27 +267,36 @@ class Location extends Component {
                         fontSize = {14}
                         color = 'black'
                         placeholder = "Enter business address"
+                        onInputChanged={this.onInputChanged.bind(this)}
+                        value={this.state.catererFullAddress}
                         onPlaceChanged={this.showPlaceDetails.bind(this)} />    
-                      <InputGroupAddon addonType="prepend">
-                        <Button onClick={(e) => this.searchAddress(e)} block style={{height: '100%', fontWeight: '600', borderTopRightRadius: 5, borderBottomRightRadius: 5,}} className="bg-primary" color="primary">SEARCH</Button>
-                      </InputGroupAddon>
                     </InputGroup>
                   </Col>
+                  <Col style={{marginTop:20}} xs="3">
+                  {this.state.isProceedButtonVisible ? 
+                    <Button style={{marginLeft:10, fontSize: 17}} onClick={() => this.handleProceed()} className="float-right" color="success">Proceed</Button>
+                  : null}
+                  <Button style={{ fontSize: 17}} onClick={this.handleNext} className="float-right" type="submit" color="primary">{this.state.isSaving ? "Updating..." : "Update" }</Button>
+                  </Col>
                 </FormGroup>
+                <div style={{ marginTop:25, height: '60vh', width: '100%' }}>
+                  <GoogleMapReact
+                    bootstrapURLKeys={{ key: [GOOGLE_API_KEY] }}
+                    center={this.state.center}
+                    zoom={14}
+                    onChange={this.onMapChange}
+                  >
+                  </GoogleMapReact>
+                  <div style={{position: 'absolute',top: '60%', left: '50%', zIndex: 1, height: 30, width: 30 }}>
+                    <img style={{ objectFit:'cover', width: 30, height: 30 }} src={require("../../../assets/img/mapmarker.png")} />
+                  </div>
+
+                </div>
               </CardBody>
             </Card>
           </Col>
         </Row>
-        <div style={{ marginTop:-25, marginBottom: 25, height: 500, width: '100%' }}>
-          <GoogleMapReact
-            bootstrapURLKeys={{ key: [GOOGLE_API_KEY] }}
-            center={this.state.center}
-            zoom={14}
-            yesIWantToUseGoogleMapApiInternals={true}
-            onGoogleApiLoaded={({ map, maps }) => this.renderMarkers(map, maps, this.state.center)}
-          >
-          </GoogleMapReact>
-        </div>
+        
         <ToastContainer hideProgressBar/>
       </div>
     );

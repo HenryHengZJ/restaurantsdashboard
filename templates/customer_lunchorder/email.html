@@ -144,30 +144,30 @@ td .es-button-border-2:hover {
                         <tr style="border-collapse:collapse;"> 
                             <td align="left" style="padding:0;Margin:0;padding-bottom:20px;padding-left:20px;padding-right:20px;"> 
                              <table style="mso-table-lspace:0pt;mso-table-rspace:0pt;border-collapse:collapse;border-spacing:0px;width:100%;" class="cke_show_border" cellspacing="1" cellpadding="1" border="0" align="left"> 
-                              <tr style="border-collapse:collapse;"> 
+                               <tr style="border-collapse:collapse;"> 
                                 <td style="padding:0;Margin:0;font-size:14px;line-height:21px;">Order ID:</td> 
                                 <td id="deliveryDate" style="padding:0;Margin:0;font-size:14px;line-height:21px;">{{str_orderID}}</td> 
                                </tr> 
                                <tr style="border-collapse:collapse;"> 
-                                <td style="padding:0;Margin:0;font-size:14px;line-height:21px;">Caterer:</td> 
+                                <td style="padding:0;Margin:0;font-size:14px;line-height:21px;">Order Number:</td> 
+                                <td id="deliveryDate" style="padding:0;Margin:0;font-size:14px;line-height:21px;">#{{str_orderNumber}}</td> 
+                               </tr> 
+                               <tr style="border-collapse:collapse;"> 
+                                <td style="padding:0;Margin:0;font-size:14px;line-height:21px;">Date:</td> 
+                                <td id="deliveryDate" style="padding:0;Margin:0;font-size:14px;line-height:21px;">{{str_updatedAt}}</td> 
+                               </tr>
+                               <tr style="border-collapse:collapse;"> 
+                                <td style="padding:0;Margin:0;font-size:14px;line-height:21px;">Restaurant:</td> 
                                 <td id="deliveryDate" style="padding:0;Margin:0;font-size:14px;line-height:21px;">{{catererName}}</td> 
                                </tr> 
-                              <tr style="border-collapse:collapse;"> 
-                                <td style="padding:0;Margin:0;font-size:14px;line-height:21px;">Date:</td> 
-                                <td id="deliveryDate" style="padding:0;Margin:0;font-size:14px;line-height:21px;">{{str_orderDate}}</td> 
-                               </tr> 
                                <tr style="border-collapse:collapse;"> 
-                                <td style="padding:0;Margin:0;font-size:14px;line-height:21px;">Time:</td> 
-                                <td id="deliveryTime" style="padding:0;Margin:0;font-size:14px;line-height:21px;">{{str_updatedAt}}</td> 
-                               </tr> 
-                               <tr style="border-collapse:collapse;"> 
-                                <td style="padding:0;Margin:0;font-size:14px;line-height:21px;">Company Name:</td> 
-                                <td id="deliveryTime" style="padding:0;Margin:0;font-size:14px;line-height:21px;">{{str_companyName}}</td> 
+                                <td style="padding:0;Margin:0;font-size:14px;line-height:21px;">Restaurant Address:</td> 
+                                <td id="deliveryTime" style="padding:0;Margin:0;font-size:14px;line-height:21px;"><a href={{mapLink}} target="_blank">{{catererFullAddress}}</a></td> 
                                </tr>
                                <tr style="border-collapse:collapse;"> 
-                                <td style="padding:0;Margin:0;font-size:14px;line-height:21px;">Company Address:</td> 
-                                <td id="deliveryTime" style="padding:0;Margin:0;font-size:14px;line-height:21px;">{{str_companyAddress}}</td> 
-                               </tr>
+                                <td style="padding:0;Margin:0;font-size:14px;line-height:21px;">PickUp Time:</td> 
+                                <td id="deliveryTime" style="padding:0;Margin:0;font-size:14px;line-height:21px;">{{str_pickupTime}}</td> 
+                               </tr> 
                              </table><p style="Margin:0;-webkit-text-size-adjust:none;-ms-text-size-adjust:none;mso-line-height-rule:exactly;font-size:14px;font-family:arial, 'helvetica neue', helvetica, sans-serif;line-height:21px;color:#333333;"><br></p> </td> 
                            </tr> 
                       </table> </td> 

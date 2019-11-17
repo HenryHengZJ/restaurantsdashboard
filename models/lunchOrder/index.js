@@ -13,16 +13,20 @@ var cartSchema = mongoose.Schema({
 
 var orderSchema = mongoose.Schema({
 	orderItemID: ObjectId,
+	orderNumber: String,
 	orderItem: [cartSchema],
-	orderDate: Date,
 	catererID: ObjectId,
 	customerID: ObjectId,
 	customerCompanyID: ObjectId,
+	customerType: String,
 	totalOrderPrice: Number,
+	commission: Number,
+	netOrderPrice: Number,
 	orderStatus: String,
 	paymentIntentID: String,
 	paymentType: String,
 	paymentStatus: String,
+	pickupTime: Date,
 }, {
     timestamps: true
 });
