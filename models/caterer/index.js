@@ -61,7 +61,7 @@ var catererSchema = mongoose.Schema({
     },
     resetPasswordToken: String,
     resetPasswordExpires: Date,
-    catererPaymentAccoundID: String
+    catererPaymentAccountID: String
 }, {
     timestamps: true
 });

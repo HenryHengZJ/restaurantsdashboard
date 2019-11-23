@@ -55,12 +55,6 @@ router.get('/getlunchorder', passport.authenticate('jwt', {session: false}), (re
             foreignField: "_id", 
             as: "customerDetails" }
         },
-        {$lookup: {
-            from: "company", 
-            localField: "customerCompanyID", 
-            foreignField: "_id", 
-            as: "customerCompanyDetails" }
-        },
         { $sort : { createdAt : -1 } }
       ], (err,doc) => {
         if (err) {
@@ -132,6 +126,8 @@ router.put('/acceptlunchorder', passport.authenticate('jwt', {session: false}), 
         arrayOfLunchOrderID.push(new ObjectId(arrayOfLunchOrderIDString[i]))
     }
 
+    console.log(arrayOfLunchOrderID)
+
     matchquery._id = { $in: arrayOfLunchOrderID }
 
     LunchOrder.aggregate([
@@ -147,15 +143,10 @@ router.put('/acceptlunchorder', passport.authenticate('jwt', {session: false}), 
             localField: "catererID", 
             foreignField: "_id", 
             as: "catererDetails" }
-        },
-        {$lookup: {
-            from: "company", 
-            localField: "customerCompanyID", 
-            foreignField: "_id", 
-            as: "customerCompanyDetails" }
         }
     ], (err,doc) => {
         if (err) {
+            console.log(err)
             return res.status(500).send({ error: err });
         }
         else {
@@ -252,12 +243,6 @@ function acceptAction(lunchorderdoc, paymentIntentID, lunchOrderID, lunchOrderIt
             foreignField: "_id", 
             as: "catererDetails" }
         },
-        {$lookup: {
-            from: "company", 
-            localField: "customerCompanyID", 
-            foreignField: "_id", 
-            as: "customerCompanyDetails" }
-        }
     ], (err,doc) => {
         if (err) {
             return res.status(500).send({ error: err });
@@ -268,11 +253,13 @@ function acceptAction(lunchorderdoc, paymentIntentID, lunchOrderID, lunchOrderIt
                 for(var i = 0; i < doc.length; i++){
                     var lunchorderdoc = doc[i]
                     var lunchOrderID = doc[i]._id
-                    var catererName = doc[i].catererDetails[0].catererName
+                    var catererDetails = doc[i].catererDetails[0]
                     var customerEmail = doc[i].customerDetails[0].customerEmail
                     var orderStatus = "rejected"
-                    mail.sendCustomerLunchOrderEmail('/templates/customer_lunchorder/email.html', lunchorderdoc, catererName, customerEmail, orderStatus);
+                    mail.sendCustomerLunchOrderEmail('/templates/customer_lunchorder/email.html', lunchorderdoc, catererDetails, customerEmail, orderStatus);
+                
                     promiseArr.push(updateRejectAction(lunchOrderID ))
+
                 }
                 Promise.all(promiseArr)
                 .then((result) => {

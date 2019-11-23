@@ -2,6 +2,8 @@
 var mongoose = require('mongoose');
 var bcrypt   = require('bcrypt-nodejs');
 const jwt = require('jsonwebtoken');
+const Schema = mongoose.Schema
+const ObjectId = Schema.Types.ObjectId
 require('dotenv').config();
 
 // define the schema for our customerSchema model
@@ -11,21 +13,23 @@ var customerSchema = mongoose.Schema({
     customerEmail: String,
 	customerPassword: String,
     customerPhoneNumber: String,
-    customerAddress: String,
     customerCity: String,
     customerCounty: String,
     customerCountry: String,
-    customerOrderID: [String],
-    status: {
-        type: String,
-        default: "new"
+    customerCountryCode: String,
+    customerCompanyID: ObjectId,
+    customerOrderCount: {
+        type: Number,
+        default: 0
     },
-    statusUpdated: {
-        type : Date, 
-        default: Date.now
+    customerIsPrime: {
+        type: Boolean,
+        default: false
     },
     resetPasswordToken: String,
-    resetPasswordExpires: Date
+    resetPasswordExpires: Date,
+    customerPaymentAccountID: String,
+    subscriptionID: String,
 }, {
     timestamps: true
 });

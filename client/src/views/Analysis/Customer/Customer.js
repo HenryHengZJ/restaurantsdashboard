@@ -542,6 +542,23 @@ class Customer extends Component {
           <td>{moment(tableitems[i].createdAt).format("DD MMM, YYYY")}</td>
           <td>1x {tableitems[i].orderItem[0].title}</td>
           <td>{Number(tableitems[i].totalOrderPrice).toFixed(2)}</td>
+          <td>
+            <Badge
+              color={
+                    tableitems[i].orderStatus === "accepted"
+                  ? "success"
+                  : tableitems[i].orderStatus === "rejected"
+                  ? "danger"
+                  : tableitems[i].orderStatus === "pickedup"
+                  ? "primary"
+                  : tableitems[i].orderStatus === "pending"
+                  ? "warning"
+                  : "secondary"
+              }
+            >
+              {this.capitalizeFirstLetter(tableitems[i].orderStatus)}
+            </Badge>
+          </td>
         </tr>
       );
     }
@@ -629,6 +646,7 @@ class Customer extends Component {
             <th style={{ cursor: "pointer" }} className={!this.state.sortDate ? "headerSortUp" : "headerSortDown"} onClick={() => this.sortDateClicked()}>Last Order Date</th>
             <th>Last Order Item</th>
             <th>Last Order Price (€)</th>
+            <th>Last Order Status</th>
           </tr>
         </thead>
 

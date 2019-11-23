@@ -20,10 +20,25 @@ router.get('/getreview', passport.authenticate('jwt', {session: false}), (req, r
 
     matchquery.catererID = new ObjectId(userID)
 
-    Review.find(matchquery).sort({createdAt: -1}).exec((err,doc) => {
-        if (err) return res.status(500).send({ error: err });
-        return res.status(200).json(doc);
-    });
+    Review.aggregate([ 
+        {$match: matchquery},
+        {$lookup: {
+            from: "caterer", 
+            localField: "catererID", 
+            foreignField: "_id", 
+            as: "catererDetails" }
+        },
+        {$lookup: {
+            from: "customer", 
+            localField: "customerID", 
+            foreignField: "_id", 
+            as: "customerDetails" }
+        },
+        { $sort : { createdAt : -1 } }
+      ], (err,doc) => {
+         if (err) return res.status(500).send({ error: err });
+         return res.status(200).json(doc);
+      });
 });
 
 module.exports = router;

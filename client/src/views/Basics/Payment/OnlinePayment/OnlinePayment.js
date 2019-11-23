@@ -65,7 +65,7 @@ class OnlinePayment extends Component {
     this.state = {
       loading: true,
       catererEmail: "",
-      catererPaymentAccoundID: "",
+      catererPaymentAccountID: "",
       addBank: false,
       setupBank: false,
       collapse: true,
@@ -97,10 +97,10 @@ class OnlinePayment extends Component {
       .then((response) => {
         if (response.status === 200) {
           this.setState({
-            catererPaymentAccoundID: typeof response.data[0].catererPaymentAccoundID !== 'undefined' ? response.data[0].catererPaymentAccoundID : "",
+            catererPaymentAccountID: typeof response.data[0].catererPaymentAccountID !== 'undefined' ? response.data[0].catererPaymentAccountID : "",
             catererEmail: typeof response.data[0].catererEmail !== 'undefined' ? response.data[0].catererEmail : "",
           }, () => {
-            this.getCatererPaymentAccount(this.state.catererPaymentAccoundID)
+            this.getCatererPaymentAccount(this.state.catererPaymentAccountID)
           })
         } 
       })
@@ -111,13 +111,13 @@ class OnlinePayment extends Component {
       });
   }
 
-  getCatererPaymentAccount = (catererPaymentAccoundID) => {
+  getCatererPaymentAccount = (catererPaymentAccountID) => {
 
     var headers = {
       'Content-Type': 'application/json',
     }
 
-    var url = apis.GETcaterer_paymentaccount + "?catererPaymentAccoundID=" + catererPaymentAccoundID;
+    var url = apis.GETcaterer_paymentaccount + "?catererPaymentAccountID=" + catererPaymentAccountID;
 
     axios.get(url, {headers: headers})
       .then((response) => {
@@ -238,7 +238,7 @@ class OnlinePayment extends Component {
           const response = await fetch(apis.POSTconfirm_payment, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ payment_method_id: paymentMethod.id, catererPaymentAccoundID: "acct_1EfY1KLxUavDIOFF", customerPaymentAccoundID: "cus_FA9wbWP1GOicRC" })
+            body: JSON.stringify({ payment_method_id: paymentMethod.id, catererPaymentAccountID: "acct_1EfY1KLxUavDIOFF", customerPaymentAccoundID: "cus_FA9wbWP1GOicRC" })
           });
 
           const json = await response.json();
@@ -431,15 +431,15 @@ class OnlinePayment extends Component {
   }
 
   renderSetupBank() {
-    return <SetupBank catererEmail={this.state.catererEmail} catererPaymentAccoundID={this.state.catererPaymentAccoundID} stripe={this.props.stripe} goBack={()=>this.goBack()}/>
+    return <SetupBank catererEmail={this.state.catererEmail} catererPaymentAccountID={this.state.catererPaymentAccountID} stripe={this.props.stripe} goBack={()=>this.goBack()}/>
   }
 
   renderAddBank() {
-    return <AddBank catererEmail={this.state.catererEmail} catererPaymentAccoundID={this.state.catererPaymentAccoundID} stripe={this.props.stripe} goBack={()=>this.goBack()}/>
+    return <AddBank catererEmail={this.state.catererEmail} catererPaymentAccountID={this.state.catererPaymentAccountID} stripe={this.props.stripe} goBack={()=>this.goBack()}/>
   }
 
   renderDisplayBankAccount() {
-    return <DisplayBankAccount catererpaymentdetails={this.state.catererpaymentdetails} paymentcarddetails={this.state.paymentcarddetails.reverse()} addBank={(e) =>this.addBankClicked(e)} updateBankAccount={() =>this.getCatererPaymentAccount(this.state.catererPaymentAccoundID)}/>
+    return <DisplayBankAccount catererpaymentdetails={this.state.catererpaymentdetails} paymentcarddetails={this.state.paymentcarddetails.reverse()} addBank={(e) =>this.addBankClicked(e)} updateBankAccount={() =>this.getCatererPaymentAccount(this.state.catererPaymentAccountID)}/>
   }
 
   

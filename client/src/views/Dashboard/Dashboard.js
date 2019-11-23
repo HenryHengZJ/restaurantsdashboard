@@ -624,7 +624,7 @@ class Dashboard extends Component {
     for (let i = 0; i < tableitems.length; i++) {
       itemarray.push(
         <tr>
-          <td style={{width: '10%'}}>{tableitems[i].customerFirstName} {tableitems[i].customerLastName.charAt(0)} .</td>
+          <td style={{width: '10%'}}>{tableitems[i].customerDetails[0].customerFirstName}{" "}{tableitems[i].customerDetails[0].customerLastName.charAt(0)}.</td>
           <td style={{width: '15%'}}>
             <StarRatingComponent
               name="rating"

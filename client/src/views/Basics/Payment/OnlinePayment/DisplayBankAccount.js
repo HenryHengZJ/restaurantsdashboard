@@ -75,13 +75,13 @@ class DisplayBankAccount extends Component {
 
   getCatererPerson = () => {
 
-    var catererPaymentAccoundID = this.props.catererpaymentdetails.id
+    var catererPaymentAccountID = this.props.catererpaymentdetails.id
 
     var headers = {
       'Content-Type': 'application/json',
     }
 
-    var url = apis.GETcaterer_person + "?catererPaymentAccoundID=" + catererPaymentAccoundID;
+    var url = apis.GETcaterer_person + "?catererPaymentAccountID=" + catererPaymentAccountID;
 
     axios.get(url, {headers: headers})
       .then((response) => {
@@ -101,7 +101,7 @@ class DisplayBankAccount extends Component {
       loadingModal: true
     })
     
-    var catererPaymentAccoundID = this.props.catererpaymentdetails.id
+    var catererPaymentAccountID = this.props.catererpaymentdetails.id
 
     var bankID = this.props.paymentcarddetails[index].id
 
@@ -110,7 +110,7 @@ class DisplayBankAccount extends Component {
     }
 
     var body = {
-      catererPaymentAccoundID: catererPaymentAccoundID,
+      catererPaymentAccountID: catererPaymentAccountID,
       bankID: bankID
     }
 
@@ -140,7 +140,7 @@ class DisplayBankAccount extends Component {
 
   deleteBankAccount = (index) => {
 
-    var catererPaymentAccoundID = this.props.catererpaymentdetails.id
+    var catererPaymentAccountID = this.props.catererpaymentdetails.id
 
     var bankID = this.props.paymentcarddetails[index].id
 
@@ -149,11 +149,11 @@ class DisplayBankAccount extends Component {
     }
 
     var body = {
-      catererPaymentAccoundID: catererPaymentAccoundID,
+      catererPaymentAccountID: catererPaymentAccountID,
       bankID: bankID
     }
 
-    var url = apis.DELETE_caterer_external_bankaccount + "?catererPaymentAccoundID=" + catererPaymentAccoundID + "&bankID=" + bankID
+    var url = apis.DELETE_caterer_external_bankaccount + "?catererPaymentAccountID=" + catererPaymentAccountID + "&bankID=" + bankID
 
     axios.delete(url, {headers: headers})
       .then((response) => {

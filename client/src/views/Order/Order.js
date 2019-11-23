@@ -79,7 +79,7 @@ class Order extends Component {
 
   getLocalStorage = () => {
     
-    var maxDate = moment().toDate();
+    var maxDate = moment().add(1, 'days').toDate();
 
     var currentDate = moment(sessionStorage.getItem("currentLunchOrderDateString"), 'ddd, DD MMM YYYY').toDate()
   
@@ -94,12 +94,15 @@ class Order extends Component {
   }
 
   getTodayDate = () => {
+
+    var maxDate = moment().add(1, 'days').toDate();
+
     var currentDate = moment().toDate();
 
     var currentDateString = moment(currentDate).format("ddd, DD MMM YYYY")
   
     this.setState({
-      maxDate: currentDate,
+      maxDate: maxDate,
       currentDate: currentDate,
     }, () => {
       this.getOrder(currentDateString)
@@ -485,6 +488,20 @@ class Order extends Component {
             >
               Accepted
             </Button>
+          ) : selectedLunchOrderItem.orderStatus === "cancelled" ? (
+            <Button
+              style={{
+                opacity: 1,
+                padding: 10,
+                fontSize: 17,
+                fontWeight: "600"
+              }}
+              disabled
+              block
+              color="secondary"
+            >
+              Cancelled
+            </Button>
           ) : selectedLunchOrderItem.orderStatus === "rejected" ? (
             <Button
               style={{
@@ -499,7 +516,21 @@ class Order extends Component {
             >
               Rejected
             </Button>
-          ) : null}
+          ) : selectedLunchOrderItem.orderStatus === "pickedup" ? (
+            <Button
+              style={{
+                opacity: 1,
+                padding: 10,
+                fontSize: 17,
+                fontWeight: "600"
+              }}
+              disabled
+              block
+              color="primary"
+            >
+              Picked Up
+            </Button>
+           ) : null }
         </ModalFooter>
       </Modal>
     );
@@ -593,6 +624,11 @@ class Order extends Component {
                       >
                         Rejected
                       </DropdownItem>
+                      <DropdownItem
+                        onClick={() => this.onStatusClicked("pickedup")}
+                      >
+                        Picked Up
+                      </DropdownItem>
                       <DropdownItem onClick={() => this.onStatusClicked("all")}>
                         All
                       </DropdownItem>
@@ -659,6 +695,8 @@ class Order extends Component {
                     ? "success"
                     : tableitems[i].orderStatus === "rejected"
                     ? "danger"
+                    : tableitems[i].orderStatus === "pickedup"
+                    ? "primary"
                     : "secondary"
                 }
               >

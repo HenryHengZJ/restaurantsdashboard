@@ -70,7 +70,7 @@ class AddBank extends Component {
     this.state = {
       loadingModal: false,
       agreementChecked: false,
-      catererPaymentAccoundID: "",
+      catererPaymentAccountID: "",
       catererEmail: "",
       holdername:"",
       holdertype: "",
@@ -169,9 +169,9 @@ class AddBank extends Component {
       maxDate: currentDate
     })
    
-   if (this.props.catererPaymentAccoundID && this.props.catererPaymentAccoundID !== "") {
+   if (this.props.catererPaymentAccountID && this.props.catererPaymentAccountID !== "") {
      this.setState({
-        catererPaymentAccoundID: this.props.catererPaymentAccoundID,
+        catererPaymentAccountID: this.props.catererPaymentAccountID,
      })
    }
    if (this.props.catererEmail && this.props.catererEmail !== "") {
@@ -312,7 +312,7 @@ class AddBank extends Component {
     var url = apis.POSTcreate_caterer_external_bankaccount;
 
     var body = {
-       catererPaymentAccoundID: this.state.catererPaymentAccoundID, bankacctoken: token 
+       catererPaymentAccountID: this.state.catererPaymentAccountID, bankacctoken: token 
     }
 
     axios.post(url, body, {headers: headers})

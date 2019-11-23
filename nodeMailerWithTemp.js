@@ -210,7 +210,7 @@ exports.sendResetPasswordEmail = function (path, sendtoemail, resetlink) {
 
 exports.sendCustomerLunchOrderEmail = function (path,  orderdetails,  catererDetails, customerEmail, orderStatus) {
   
-    getCustomerLunchOrderVariables(orderdetails, orderStatus, function(err, totalRow, str_orderDescrip, str_orderStatus, str_orderID, str_orderNumber, str_updatedAt, str_pickupTime, str_companyName, str_companyAddress, str_subtotal, str_deliveryfee, str_ordertotal, str_footer1) {
+    getCustomerLunchOrderVariables(orderdetails, orderStatus, function(err, totalRow, str_orderDescrip, str_orderStatus, str_orderID, str_orderNumber, str_updatedAt, str_pickupTime, str_subtotal, str_deliveryfee, str_ordertotal, str_footer1) {
 
         readHTMLFile(__dirname + path, function(err, html) {
             var template = handlebars.compile(html);
@@ -232,8 +232,6 @@ exports.sendCustomerLunchOrderEmail = function (path,  orderdetails,  catererDet
                 str_orderNumber: str_orderNumber,
                 str_updatedAt: str_updatedAt,
                 str_pickupTime: str_pickupTime,
-                str_companyName: str_companyName,
-                str_companyAddress: str_companyAddress,
                 str_subtotal: str_subtotal,
                 str_deliveryfee: str_deliveryfee,
                 str_ordertotal: str_ordertotal,
@@ -325,10 +323,6 @@ var getCustomerLunchOrderVariables = function(orderdetails, orderStatus, callbac
     var str_updatedAt = moment(order.updatedAt).format("MMM DD, YYYY");
 
     var str_pickupTime =  moment(order.pickupTime).format("hh:mm A");
-
-    var str_companyName = order.customerCompanyDetails[0].companyName
-     
-    var str_companyAddress = order.customerCompanyDetails[0].companyAddress
   
     var subtotal = order.totalOrderPrice - 0
     var str_subtotal = '€' + Number(subtotal).toFixed(2);
@@ -347,12 +341,12 @@ var getCustomerLunchOrderVariables = function(orderdetails, orderStatus, callbac
 
         var newRow = "";
  
-        newRow = `<tr style="border-collapse:collapse;"> <td align="left" style="Margin:0;padding-top:5px;padding-bottom:10px;padding-right:20px;padding-left:40px;"> <table cellspacing="0" cellpadding="0" width="100%" style="mso-table-lspace:0pt;mso-table-rspace:0pt;border-collapse:collapse;border-spacing:0px;"> <tr style="border-collapse:collapse;"> <td width="540" align="left" style="padding:0;Margin:0;"> <table width="100%" cellspacing="0" cellpadding="0" style="mso-table-lspace:0pt;mso-table-rspace:0pt;border-collapse:collapse;border-spacing:0px;"> <tr style="border-collapse:collapse;"> <td align="left" style="padding:0;Margin:0;"> <p style="Margin:0;-webkit-text-size-adjust:none;-ms-text-size-adjust:none;mso-line-height-rule:exactly;font-size:14px;font-family:arial, 'helvetica neue', helvetica, sans-serif;line-height:21px;color:#333333;"><br></p> <table style="mso-table-lspace:0pt;mso-table-rspace:0pt;border-collapse:collapse;border-spacing:0px;width:100%;" class="cke_show_border" cellspacing="1" cellpadding="1" border="0"> <tr style="border-collapse:collapse;"> <td style="padding:0;Margin:0;"><a target="_blank" style="-webkit-text-size-adjust:none;-ms-text-size-adjust:none;mso-line-height-rule:exactly;font-family:arial, 'helvetica neue', helvetica, sans-serif;font-size:15px;text-decoration:underline;color:#0C9CE2;" href="https://foodiebee.eu">${orderItem[x].title}</a></td> <td style="padding:0;Margin:0;text-align:center;" width="60">${1}</td> <td style="padding:0;Margin:0;text-align:center;" width="100">€${Number(orderItem[x].totalprice).toFixed(2)}</td> </tr> </table> <p style="Margin:0;-webkit-text-size-adjust:none;-ms-text-size-adjust:none;mso-line-height-rule:exactly;font-size:14px;font-family:arial, 'helvetica neue', helvetica, sans-serif;line-height:21px;color:#333333;"><br></p> </td> </tr> </table> </td> </tr> </table> </td></tr>`;
+        newRow = `<tr style="border-collapse:collapse;"> <td align="left" style="Margin:0;padding-top:5px;padding-bottom:10px;padding-right:20px;padding-left:40px;"> <table cellspacing="0" cellpadding="0" width="100%" style="mso-table-lspace:0pt;mso-table-rspace:0pt;border-collapse:collapse;border-spacing:0px;"> <tr style="border-collapse:collapse;"> <td width="540" align="left" style="padding:0;Margin:0;"> <table width="100%" cellspacing="0" cellpadding="0" style="mso-table-lspace:0pt;mso-table-rspace:0pt;border-collapse:collapse;border-spacing:0px;"> <tr style="border-collapse:collapse;"> <td align="left" style="padding:0;Margin:0;"> <p style="Margin:0;-webkit-text-size-adjust:none;-ms-text-size-adjust:none;mso-line-height-rule:exactly;font-size:14px;font-family:arial, 'helvetica neue', helvetica, sans-serif;line-height:21px;color:#333333;"><br></p> <table style="mso-table-lspace:0pt;mso-table-rspace:0pt;border-collapse:collapse;border-spacing:0px;width:100%;" class="cke_show_border" cellspacing="1" cellpadding="1" border="0"> <tr style="border-collapse:collapse;"> <td style="padding:0;Margin:0;"><a target="_blank" style="-webkit-text-size-adjust:none;-ms-text-size-adjust:none;mso-line-height-rule:exactly;font-family:arial, 'helvetica neue', helvetica, sans-serif;font-size:15px;text-decoration:underline;color:#0C9CE2;" href="https://foodiebee.eu">${orderItem[x].title}</a></td> <td style="padding:0;Margin:0;text-align:center;" width="60">${1}</td> <td style="padding:0;Margin:0;text-align:center;" width="100">€${Number(orderItem[x].priceperunit).toFixed(2)}</td> </tr> </table> <p style="Margin:0;-webkit-text-size-adjust:none;-ms-text-size-adjust:none;mso-line-height-rule:exactly;font-size:14px;font-family:arial, 'helvetica neue', helvetica, sans-serif;line-height:21px;color:#333333;"><br></p> </td> </tr> </table> </td> </tr> </table> </td></tr>`;
 
         totalRow = totalRow + newRow
     }
 
-    callback(null, totalRow, str_orderDescrip, str_orderStatus, str_orderID, str_orderNumber, str_updatedAt, str_pickupTime, str_companyName, str_companyAddress, str_subtotal, str_deliveryfee, str_ordertotal, str_footer1)
+    callback(null, totalRow, str_orderDescrip, str_orderStatus, str_orderID, str_orderNumber, str_updatedAt, str_pickupTime, str_subtotal, str_deliveryfee, str_ordertotal, str_footer1)
 
 }
 
@@ -375,7 +369,7 @@ var getCatererLunchOrderVariables = function(orderdetails, catererEmail, callbac
     for(var x=0; x< order.length; x++) {
         var newRow = "";
         var orderItemTitle = "1x " + order[x].orderItem[0].title
-        var orderItemPrice = order[x].orderItem[0].totalprice
+        var orderItemPrice = order[x].orderItem[0].priceperunit
         var customerName = order[x].customerDetails[0].customerFirstName + " " + order[x].customerDetails[0].customerLastName.charAt(0) + "."
         newRow = `<tr style="border-collapse:collapse;"><td align="left" style="Margin:0;padding-top:5px;padding-bottom:10px;padding-right:20px;padding-left:40px;"><table cellspacing="0" cellpadding="0" width="100%" style="mso-table-lspace:0pt;mso-table-rspace:0pt;border-collapse:collapse;border-spacing:0px;"><tr style="border-collapse:collapse;"><td width="540" align="left" style="padding:0;Margin:0;"><table width="100%" cellspacing="0" cellpadding="0" style="mso-table-lspace:0pt;mso-table-rspace:0pt;border-collapse:collapse;border-spacing:0px;"><tr style="border-collapse:collapse;"><td align="left" style="padding:0;Margin:0;"><p style="Margin:0;-webkit-text-size-adjust:none;-ms-text-size-adjust:none;mso-line-height-rule:exactly;font-size:14px;font-family:arial, 'helvetica neue', helvetica, sans-serif;line-height:21px;color:#333333;"><br></p><table style="mso-table-lspace:0pt;mso-table-rspace:0pt;border-collapse:collapse;border-spacing:0px;width:100%;" class="cke_show_border" cellspacing="1" cellpadding="1" border="0"><tr style="border-collapse:collapse;"><td style="padding:0;Margin:0;text-align:center;" width="100">${customerName}</td><td style="padding:0;Margin:0;"><a target="_blank" style="-webkit-text-size-adjust:none;-ms-text-size-adjust:none;mso-line-height-rule:exactly;font-family:arial, 'helvetica neue', helvetica, sans-serif;font-size:15px;text-decoration:underline;color:#0C9CE2;" href="https://caterer.foodiebee.eu">${orderItemTitle}</a></td><td style="padding:0;Margin:0;text-align:center;" width="60">€${Number(orderItemPrice).toFixed(2)}</td></tr></table><p style="Margin:0;-webkit-text-size-adjust:none;-ms-text-size-adjust:none;mso-line-height-rule:exactly;font-size:14px;font-family:arial, 'helvetica neue', helvetica, sans-serif;line-height:21px;color:#333333;"><br></p></td></tr></table></td></tr></table></td></tr>`;
         totalRow = totalRow + newRow

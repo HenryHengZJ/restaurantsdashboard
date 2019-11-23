@@ -11,10 +11,6 @@ class AutoCompleteAddress extends React.Component {
     this.autocompleteInput = React.createRef();
     this.autocomplete = null;
     this.handlePlaceChanged = this.handlePlaceChanged.bind(this);
-
-    this.setState({
-      inputVal: "",
-    })
   }
 
   componentDidMount() {

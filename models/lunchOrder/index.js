@@ -6,9 +6,9 @@ var newObjectId = require('mongodb').ObjectID;
 
 var cartSchema = mongoose.Schema({
 	title: String,
-	menuID: ObjectId,
 	descrip: String,
-	totalprice: Number,
+	priceperunit: Number,
+	src: Number,
 });
 
 var orderSchema = mongoose.Schema({
@@ -17,7 +17,6 @@ var orderSchema = mongoose.Schema({
 	orderItem: [cartSchema],
 	catererID: ObjectId,
 	customerID: ObjectId,
-	customerCompanyID: ObjectId,
 	customerType: String,
 	totalOrderPrice: Number,
 	commission: Number,

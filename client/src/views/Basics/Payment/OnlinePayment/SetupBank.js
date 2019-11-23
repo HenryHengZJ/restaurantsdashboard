@@ -70,7 +70,7 @@ class SetupBank extends Component {
     this.state = {
       loadingModal: false,
       agreementChecked: false,
-      catererPaymentAccoundID: "",
+      catererPaymentAccountID: "",
       catererEmail: "",
 
       firstname:"",
@@ -213,9 +213,9 @@ class SetupBank extends Component {
       maxDate: currentDate
     })
    
-   if (this.props.catererPaymentAccoundID && this.props.catererPaymentAccoundID !== "") {
+   if (this.props.catererPaymentAccountID && this.props.catererPaymentAccountID !== "") {
      this.setState({
-        catererPaymentAccoundID: this.props.catererPaymentAccoundID,
+        catererPaymentAccountID: this.props.catererPaymentAccountID,
      })
    }
    if (this.props.catererEmail && this.props.catererEmail !== "") {
@@ -602,10 +602,10 @@ class SetupBank extends Component {
       owneraddress1, owneraddress2, ownercity, ownercountry, ownercounty,
       accountopeneraddress1, accountopeneraddress2, accountopenercity, accountopenercountry, accountopenercounty,
       selectedOwnerDate, selectedDate,
-      agreementChecked, iban,  holdertype, ownerSameAccountOpener, catererEmail, catererPaymentAccoundID, companytaxid
+      agreementChecked, iban,  holdertype, ownerSameAccountOpener, catererEmail, catererPaymentAccountID, companytaxid
     } = this.state
 
-    if (this.state.catererPaymentAccoundID === "" && this.state.catererEmail !== "") {
+    if (this.state.catererPaymentAccountID === "" && this.state.catererEmail !== "") {
 
       var selectedDateDay = selectedDate.split(" / ")[0]
       var selectedDateMonth = selectedDate.split(" / ")[1]
@@ -769,10 +769,10 @@ class SetupBank extends Component {
       .then((response) => {
           if (response.status === 200) {
             this.setState({
-              catererPaymentAccoundID: response.data.id
+              catererPaymentAccountID: response.data.id
             }, () => {
               if (holdertype === "company") {
-                this.createCompanyPerson(this.state.catererPaymentAccoundID, ownerSameAccountOpener, accountopenerbody, ownerbody, directorbody)
+                this.createCompanyPerson(this.state.catererPaymentAccountID, ownerSameAccountOpener, accountopenerbody, ownerbody, directorbody)
               }
               else {
                 this.generateBankToken()
@@ -797,22 +797,22 @@ class SetupBank extends Component {
     }
   }
 
-  createCompanyPerson = (catererPaymentAccoundID, ownerSameAccountOpener, accountopenerbody, ownerbody, directorbody) => {
+  createCompanyPerson = (catererPaymentAccountID, ownerSameAccountOpener, accountopenerbody, ownerbody, directorbody) => {
 
     //Create 3 persons
 
     var accountopener_updatebody = {
-      catererPaymentAccoundID: catererPaymentAccoundID,
+      catererPaymentAccountID: catererPaymentAccountID,
       persondetails: accountopenerbody
     }
 
     var owner_updatebody = {
-      catererPaymentAccoundID: catererPaymentAccoundID,
+      catererPaymentAccountID: catererPaymentAccountID,
       persondetails: ownerSameAccountOpener ? null : ownerbody
     }
 
     var director_updatebody = {
-      catererPaymentAccoundID: catererPaymentAccoundID,
+      catererPaymentAccountID: catererPaymentAccountID,
       persondetails: directorbody
     }
        
@@ -832,7 +832,7 @@ class SetupBank extends Component {
       axios.all(axiosarray)
       .then(axios.spread((accountopener_response, director_response) => {
         if (accountopener_response.status === 201 && director_response.status === 201) {
-            this.updateCatererPaymentAccount(catererPaymentAccoundID)
+            this.updateCatererPaymentAccount(catererPaymentAccountID)
         } 
       }))
       .catch((error) => {
@@ -854,7 +854,7 @@ class SetupBank extends Component {
       axios.all(axiosarray)
       .then(axios.spread((accountopener_response, owner_response, director_response) => {
         if (accountopener_response.status === 201 && owner_response.status === 201 && director_response.status === 201) {
-            this.updateCatererPaymentAccount(catererPaymentAccoundID)
+            this.updateCatererPaymentAccount(catererPaymentAccountID)
         } 
       }))
       .catch((error) => {
@@ -869,10 +869,10 @@ class SetupBank extends Component {
     }
   }
 
-  updateCatererPaymentAccount = (catererPaymentAccoundID) => {
+  updateCatererPaymentAccount = (catererPaymentAccountID) => {
 
     var updatebody = {
-      catererPaymentAccoundID: catererPaymentAccoundID,
+      catererPaymentAccountID: catererPaymentAccountID,
       updatebody: {
         company: {
           owners_provided: true,
@@ -962,13 +962,13 @@ class SetupBank extends Component {
     var url = apis.POSTcreate_caterer_external_bankaccount;
 
     var body = {
-       catererPaymentAccoundID: this.state.catererPaymentAccoundID, bankacctoken: token 
+       catererPaymentAccountID: this.state.catererPaymentAccountID, bankacctoken: token 
     }
 
     axios.post(url, body, {headers: headers})
     .then((response) => {
         if (response.status === 200) {
-          this.updateUserData(this.state.catererPaymentAccoundID)
+          this.updateUserData(this.state.catererPaymentAccountID)
         } 
     })
     .catch((error) => {
@@ -984,10 +984,10 @@ class SetupBank extends Component {
     });
   }
 
-  updateUserData = (catererPaymentAccoundID) => {
+  updateUserData = (catererPaymentAccountID) => {
     
     var data = {
-      catererPaymentAccoundID: catererPaymentAccoundID,
+      catererPaymentAccountID: catererPaymentAccountID,
     }
 
     var headers = {

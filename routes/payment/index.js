@@ -5,7 +5,7 @@ const stripe = require('stripe')(process.env.STRIPE_KEY);
 
 router.get('/get_customer_paymentaccount', (req, res) => { 
 
-	stripe.customers.retrieve(req.query.customerPaymentAccoundID, function(err, customer) {
+	stripe.customers.retrieve(req.query.customerPaymentAccountID, function(err, customer) {
 		if (err) return res.status(500).send({ error: err });
 		res.status(200).json(customer);
 	});
@@ -39,8 +39,11 @@ router.post('/create_caterer_paymentaccount', (req, res) => {
 
 router.get('/get_caterer_paymentaccount', (req, res) => { 
 
-	stripe.accounts.retrieve(req.query.catererPaymentAccoundID, function(err, connectedacc) {
-		if (err) return res.status(500).send({ error: err });
+	stripe.accounts.retrieve(req.query.catererPaymentAccountID, function(err, connectedacc) {
+    if (err)  {
+      console.log(err)
+      return res.status(500).send({ error: err });
+    }
 		res.status(200).json(connectedacc);
 	});
 	
@@ -50,7 +53,7 @@ router.get('/get_caterer_paymentaccount', (req, res) => {
 router.get('/get_caterer_person', (req, res) => { 
 
 	stripe.accounts.listPersons(
-    req.query.catererPaymentAccoundID,
+    req.query.catererPaymentAccountID,
     function(err, persons) {
       if (err) return res.status(500).send({ error: err });
       res.status(200).json(persons);
@@ -62,7 +65,7 @@ router.get('/get_caterer_person', (req, res) => {
 router.get('/get_caterer_balance', (req, res) => { 
 
   stripe.balance.retrieve({
-    stripe_account: req.query.catererPaymentAccoundID
+    stripe_account: req.query.catererPaymentAccountID
   }, function(err, connectedacc) {
 		if (err) return res.status(500).send({ error: err });
 		res.status(200).json(connectedacc);
@@ -73,7 +76,7 @@ router.get('/get_caterer_balance', (req, res) => {
 
 router.post('/create_caterer_external_bankaccount', (req, res) => { 
 
-    stripe.accounts.createExternalAccount(req.body.catererPaymentAccoundID,{external_account: req.body.bankacctoken}, function(err, connectedacc) {
+    stripe.accounts.createExternalAccount(req.body.catererPaymentAccountID,{external_account: req.body.bankacctoken}, function(err, connectedacc) {
       
       if (err) {
         console.log(err)
@@ -89,7 +92,7 @@ router.post('/create_caterer_external_bankaccount', (req, res) => {
 
 router.put('/update_caterer_external_bankaccount', (req, res) => { 
 
-  stripe.accounts.updateExternalAccount( req.body.catererPaymentAccoundID, req.body.bankID,
+  stripe.accounts.updateExternalAccount( req.body.catererPaymentAccountID, req.body.bankID,
     { default_for_currency: true },
     function(err, bank_account) {
       if (err) return res.status(500).send({ error: err });
@@ -100,11 +103,11 @@ router.put('/update_caterer_external_bankaccount', (req, res) => {
 
 router.delete('/delete_caterer_external_bankaccount', (req, res) => { 
 
-  console.log(req.query.catererPaymentAccoundID)
+  console.log(req.query.catererPaymentAccountID)
 
   console.log(req.query.bankID)
 
-  stripe.accounts.deleteExternalAccount(req.query.catererPaymentAccoundID, req.query.bankID, function(err, confirmation) {
+  stripe.accounts.deleteExternalAccount(req.query.catererPaymentAccountID, req.query.bankID, function(err, confirmation) {
     if (err) {
       console.log(err)
       return res.status(500).send({ error: err });
@@ -124,7 +127,7 @@ router.put('/update_caterer_paymentaccount', (req, res) => {
     console.log(updatebody)
 
     stripe.accounts.update(
-        req.body.catererPaymentAccoundID,
+        req.body.catererPaymentAccountID,
         updatebody,
         function(err, connectedacc) {
             if (err) {
@@ -145,7 +148,7 @@ router.put('/update_caterer_person', (req, res) => {
   console.log(persondetails)
 
   stripe.accounts.createPerson(
-    req.body.catererPaymentAccoundID,
+    req.body.catererPaymentAccountID,
     persondetails,
     function(err, person) {
       if (err) {
@@ -178,13 +181,13 @@ router.post('/confirm_payment', async (request, response) => {
           payment_method_types: ['card'],
           currency: 'eur',
           application_fee_amount: 123,
-          customer: request.body.customerPaymentAccoundID,
+          customer: request.body.customerPaymentAccountID,
           statement_descriptor: 'New Order',
           amount: 1099,
           confirmation_method: 'manual',
           confirm: true,
           transfer_data: {
-            destination: request.body.catererPaymentAccoundID,
+            destination: request.body.catererPaymentAccountID,
           },
         });
       } else if (request.body.payment_intent_id) {
