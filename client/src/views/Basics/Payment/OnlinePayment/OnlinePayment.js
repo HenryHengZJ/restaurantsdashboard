@@ -201,7 +201,7 @@ class OnlinePayment extends Component {
           this.setState({
             paymentcarddetails: response.data.external_accounts.data,
             catererpaymentdetails: response.data,
-            verifyAccount: response.data.requirements.disabled_reason === null ? false : response.data.requirements.past_due.length === 0 ? false :  response.data.requirements.past_due[0] === 'external_account' ? false  : true,
+            verifyAccount: response.data.requirements.disabled_reason === null ? false : response.data.requirements.past_due.length === 0 ? false :  response.data.requirements.past_due.length === 1 && response.data.requirements.past_due[0] === 'external_account' ? false  : true,
             loading: false
           })
           if (response.data.business_type !== null && response.data.country !== null) {
