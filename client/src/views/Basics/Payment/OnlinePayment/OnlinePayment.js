@@ -73,6 +73,7 @@ class OnlinePayment extends Component {
       paymentcarddetails: [],
       isNextButtonActive: false,
       verifyAccount: false,
+      pendingVerification: false,
     };
 
     this.HolderType  = [
@@ -202,6 +203,7 @@ class OnlinePayment extends Component {
             paymentcarddetails: response.data.external_accounts.data,
             catererpaymentdetails: response.data,
             verifyAccount: response.data.requirements.disabled_reason === null ? false : response.data.requirements.past_due.length === 0 ? false :  response.data.requirements.past_due.length === 1 && response.data.requirements.past_due[0] === 'external_account' ? false  : true,
+            pendingVerification: response.data.requirements.pending_verification.length > 0 ? true : false,
             loading: false
           })
           if (response.data.business_type !== null && response.data.country !== null) {
@@ -477,7 +479,7 @@ class OnlinePayment extends Component {
   }
 
   renderDisplayBankAccount() {
-    return <DisplayBankAccount catererpaymentdetails={this.state.catererpaymentdetails} paymentcarddetails={this.state.paymentcarddetails.reverse()} addBank={(e) =>this.addBankClicked(e)} updateBankAccount={() =>this.getCatererPaymentAccount(this.state.catererPaymentAccountID)}/>
+    return <DisplayBankAccount pendingVerification={this.state.pendingVerification} catererpaymentdetails={this.state.catererpaymentdetails} paymentcarddetails={this.state.paymentcarddetails.reverse()} addBank={(e) =>this.addBankClicked(e)} updateBankAccount={() =>this.getCatererPaymentAccount(this.state.catererPaymentAccountID)}/>
   }
 
   

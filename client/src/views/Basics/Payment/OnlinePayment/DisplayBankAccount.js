@@ -176,6 +176,11 @@ class DisplayBankAccount extends Component {
     return (
       <div >
         <strong>Identity</strong>
+
+        <Badge style={{ marginLeft: 10 }} color={this.props.pendingVerification ? "warning" : "success"}>
+          {this.props.pendingVerification ? "PENDING VERIFICATION" : "VERIFIED"}
+        </Badge>
+
         <Card style={{ marginTop: 20 , padding:20}}>
           <CardBody style={{ margin: 0, padding: 0 }}>
             <Table borderless responsive>
@@ -219,6 +224,9 @@ class DisplayBankAccount extends Component {
     return (
       <div>
         <strong>Business Entity</strong>
+        <Badge style={{ marginLeft: 10 }} color={this.props.pendingVerification ? "warning" : "success"}>
+          {this.props.pendingVerification ? "PENDING VERIFICATION" : "VERIFIED"}
+        </Badge>
         <Card style={{ marginTop: 20 , padding:20}}>
           <CardBody style={{ margin: 0, padding: 0 }}>
             <Table borderless responsive>
