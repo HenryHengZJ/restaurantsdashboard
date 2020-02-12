@@ -245,7 +245,7 @@ class DisplayBankAccount extends Component {
             </Table>
           </CardBody>
         </Card>
-        {this.renderManagementInfo()}
+      
       </div>
     )
   }

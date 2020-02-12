@@ -46,38 +46,112 @@ import {
 import './style.css';
 import axios from 'axios';
 import apis from "../../../../apis";
-import SetupBank from "./SetupBank";
 import AddBank from "./AddBank";
 import DisplayBankAccount from "./DisplayBankAccount";
 import ContentLoader, { Facebook } from "react-content-loader";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 class OnlinePayment extends Component {
 
   constructor(props) {
     super(props);
 
-    this.toggle = this.toggle.bind(this);
     this.toggleModal = this.toggleModal.bind(this);
     this.handleNext = this.handleNext.bind(this);
-    this.handleCheckbox = this.handleCheckbox.bind(this);
-    this.handleCardHolderName = this.handleCardHolderName.bind(this);
+    this.handleVerify = this.handleVerify.bind(this);
 
     this.state = {
       loading: true,
       catererEmail: "",
       catererPaymentAccountID: "",
       addBank: false,
-      setupBank: false,
-      collapse: true,
-      isMasterCardChecked: true,
-      isVisaCardChecked: true,
-      isAmericanExpressChecked: true,
-      cardElement: null,
-      cardholdername: "",
-      isCardHolderNameEmpty: "",
+      holdertype: "",
+      country: "",
+      currency: "EUR",
       catererpaymentdetails: null,
-      paymentcarddetails: []
+      paymentcarddetails: [],
+      isNextButtonActive: false,
+      verifyAccount: false,
     };
+
+    this.HolderType  = [
+      {
+          "key": "Individual",
+          "value": "individual"
+      },
+      {
+          "key": "Company",
+          "value": "company"
+      },
+    ]
+
+    this.EuropeCountry  = [
+      {
+          "key": "Austria",
+          "value": "AT"
+      },
+      {
+          "key": "Belgium",
+          "value": "BE"
+      },
+      {
+          "key": "Denmark",
+          "value": "DK"
+      },
+      {
+          "key": "Finland",
+          "value": "FI"
+      },
+      {
+          "key": "France",
+          "value": "FR"
+      },
+      {
+          "key": "Germany",
+          "value": "DE"
+      },
+      {
+          "key": "Ireland",
+          "value": "IE"
+      },
+      {
+          "key": "Italy",
+          "value": "IT"
+      },
+      {
+          "key": "Luxembourg",
+          "value": "LU"
+      },
+      {
+          "key": "Netherlands",
+          "value": "NL"
+      },
+      {
+          "key": "Norway",
+          "value": "NO"
+      },
+      {
+          "key": "Portugal",
+          "value": "PT"
+      },
+      {
+          "key": "Spain",
+          "value": "ES"
+      },
+      {
+          "key": "Sweden",
+          "value": "SE"
+      },
+      {
+          "key": "Switzerland",
+          "value": "CH"
+      },
+      {
+          "key": "United Kingdom",
+          "value": "UK"
+      },
+    ];
   }
 
   componentDidMount() {
@@ -105,6 +179,7 @@ class OnlinePayment extends Component {
         } 
       })
       .catch((error) => {
+        console.log(error)
         this.setState({
           loading: false
         })
@@ -122,22 +197,56 @@ class OnlinePayment extends Component {
     axios.get(url, {headers: headers})
       .then((response) => {
         if (response.status === 200) {
+          console.log(response.data)
           this.setState({
             paymentcarddetails: response.data.external_accounts.data,
             catererpaymentdetails: response.data,
+            verifyAccount: response.data.requirements.disabled_reason === null ? false : response.data.requirements.past_due.length === 0 ? false :  response.data.requirements.past_due[0] === 'external_account' ? false  : true,
             loading: false
           })
+          if (response.data.business_type !== null && response.data.country !== null) {
+            this.getInput('holdertype', response.data.business_type)
+            this.getInput('country', response.data.country)
+          }
         } 
       })
       .catch((error) => {
+        console.log(error)
         this.setState({
           loading: false
         })
       });
   }
 
-  toggle() {
-    this.setState({ collapse: !this.state.collapse });
+  getInput = (type, value) => {
+    if (type === 'holdertype') {
+      for (let i = 0; i < this.HolderType.length; i++) { 
+        if (value === this.HolderType[i].value) {
+          this.setState({
+            holdertype: this.HolderType[i].key
+          })
+        }
+      }
+    }
+    else {
+      for (let x = 0; x < this.EuropeCountry.length; x++) { 
+        if (value === this.EuropeCountry[x].value) {
+          this.setState({
+            country: this.EuropeCountry[x].key
+          })
+        }
+      }
+    }
+  }
+
+  clearInput = () => {
+    this.setState({
+      holdertype: "",
+      country: "",
+      verifyAccount: false,
+      isNextButtonActive: false,
+      catererPaymentAccountID: "",
+    })
   }
 
   toggleModal() {
@@ -147,14 +256,36 @@ class OnlinePayment extends Component {
   }
 
   handleNext() {
-    this.setState({
-      setupBank: true
+    this.addNewCard()
+  }
+
+  handleVerify() {
+    this.gotoAccountLink(this.state.catererPaymentAccountID)
+  }
+
+  handleHolderType(e) {
+    this.setState({ 
+      holdertype: e.target.value, 
+    },() => {
+      this.checkAllInput()
     })
   }
 
+
+  /////////////////////////////////////////////////Address Change//////////////////////////////////////////////////
+
+  
+  handleCountryChange(e) {
+    this.setState({ 
+      country: e.target.value, 
+    },() => {
+      this.checkAllInput()
+    })
+  }
+
+
   goBack() {
     this.setState({
-      setupBank: false,
       addBank: false
     }, () => {
       this.getCatererAccount()
@@ -168,119 +299,126 @@ class OnlinePayment extends Component {
     })
   }
 
-  handleCheckbox(e) {
-    const name = e.target.name;
-    const checked = e.target.checked;
-    this.setState({
-      [name]: !this.state[name]
-    })
+  checkAllInput = () => {
+    const { country,   holdertype, } = this.state
+    
+    if ( holdertype !== "" && country !== "" ) {
+        this.setState({ 
+          isNextButtonActive: true, 
+        });
+    }
+    else {
+        this.setState({ 
+          isNextButtonActive: false, 
+        });  
+    }
   }
 
-  handleCardHolderName(e) {
+  addNewCard = () => {
+
     this.setState({
-      cardholdername: e.target.value,
-      isCardHolderNameEmpty: false
+      loading: true
+    })
+
+    const {catererEmail, holdertype, country } = this.state
+
+    var headers = {
+      'Content-Type': 'application/json',
+    }
+
+    var url = apis.POSTcreate_caterer_paymentaccount;
+
+    var body = {
+      email: catererEmail ,
+      business_type: holdertype,
+      country: country,
+    }
+
+    axios.post(url, body, {headers: headers})
+    .then((response) => {
+        if (response.status === 200) {
+          const catererPaymentAccountID =  response.data.id
+          this.updateUserData(catererPaymentAccountID)
+        } 
+    })
+    .catch((error) => {
+      if (error) {
+          toast(<ErrorInfo/>, {
+            position: toast.POSITION.BOTTOM_RIGHT
+          });
+          this.setState({
+            loading: false
+          })
+        }
     });
   }
 
-  handleSubmit = async ev => {
-    const { isCardHolderNameEmpty, cardholdername } = this.state;
+  updateUserData = (catererPaymentAccountID) => {
+    
+    var data = {
+      catererPaymentAccountID: catererPaymentAccountID,
+    }
 
-    ev.preventDefault();
-    if (this.props.stripe) {
-      /*this.props.stripe.createToken({type: 'card', name: 'Jenny Rosen'})
-      .then((err, payload) => 
-        {
-          if (err) {
-            alert(JSON.stringify(err))
-          }
-          else {
-            alert('[token]', payload)
-          }
-      });
+    var headers = {
+      'Content-Type': 'application/json',
+    }
 
-      this.props.stripe.createToken(
-        'bank_account',
-        {
-          country: 'DE',
-          currency: 'EUR',
-          account_holder_name: 'ss',
-          account_holder_type: 'individual',
-          account_number: 'DE89370400440532013000',
-        })
-        .then((err, payload) => 
-          {
-            if (err) {
-              alert(JSON.stringify(err))
-            }
-            else {
-              alert('[token]', payload)
-            }
-        });*/
+    var url = apis.UPDATEcaterer;
 
-      if (cardholdername === "") {
-        this.setState({
-          isCardHolderNameEmpty: true
-        });
-      } else {
-        const {
-          paymentMethod,
-          error
-        } = await this.props.stripe.createPaymentMethod("card", this.state.cardElement, {
-          billing_details: { name: cardholdername }
-        });
-        if (error) {
-          // Show error in payment form
-          alert(JSON.stringify(error));
-        } else {
-          // Send paymentMethod.id to your server (see Step 2)
-        
-          const response = await fetch(apis.POSTconfirm_payment, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ payment_method_id: paymentMethod.id, catererPaymentAccountID: "acct_1EfY1KLxUavDIOFF", customerPaymentAccoundID: "cus_FA9wbWP1GOicRC" })
+    axios.put(url, data, {withCredentials: true}, {headers: headers})
+      .then((response) => {
+        if (response.status === 201) {
+          toast(<SuccessInfo/>, {
+            position: toast.POSITION.BOTTOM_RIGHT
           });
-
-          const json = await response.json();
-
-          // Handle server response (see Step 3)
-          this.handleServerResponse(json);
+          this.gotoAccountLink(catererPaymentAccountID)
         }
-      }
-    } else {
-      console.log("Stripe.js hasn't loaded yet.");
-    }
-  };
-
-  handleServerResponse = async (response) => {
-    if (response.error) {
-      // Show error from server on payment form
-    } else if (response.requires_action) {
-      // Use Stripe.js to handle the required card action
-      const { error: errorAction, paymentIntent } =
-        await this.props.stripe.handleCardAction(response.payment_intent_client_secret);
-  
-      if (errorAction) {
-        // Show error from Stripe.js in payment form
-      } else {
-        // The card action has been handled
-        // The PaymentIntent can be confirmed again on the server
-        const serverResponse = await fetch(apis.POSTconfirm_payment, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ payment_intent_id: paymentIntent.id })
+      })
+      .catch((error) => {
+        toast(<ErrorInfo/>, {
+          position: toast.POSITION.BOTTOM_RIGHT
         });
-        this.handleServerResponse(await serverResponse.json());
-      }
-    } else {
-      // Show success message
-      alert('successfully paid')
-    }
+        this.setState({
+          loading: false
+        })  
+      });
   }
 
-  handleReady = (element) => {
-    this.setState({cardElement: element}) ;
-  };
+
+  gotoAccountLink = (catererPaymentAccountID) => {
+
+    var headers = {
+      'Content-Type': 'application/json',
+    }
+
+    var url = apis.POSTcreate_accountlink;
+
+    var body = {
+      accountID: catererPaymentAccountID ,
+    }
+
+    axios.post(url, body, {headers: headers})
+    .then((response) => {
+        if (response.status === 200) {
+          this.setState({
+            catererPaymentAccountID: catererPaymentAccountID
+          }, () => {
+            window.location.assign(response.data.url);
+          })
+        } 
+    })
+    .catch((error) => {
+      if (error) {
+          toast(<ErrorInfo/>, {
+            position: toast.POSITION.BOTTOM_RIGHT
+          });
+          this.setState({
+            loading: false
+          })
+        }
+    });
+
+  }
 
   renderPGProviderModal() {
     return (
@@ -334,106 +472,6 @@ class OnlinePayment extends Component {
     )
   }
 
-  renderCard(cardName, cardChecked, srcimg) {
-    return(
-      <Card style={{marginLeft: 15, borderColor: cardChecked ? '#20a8d8': null}}>
-        <CardBody>
-          <Col>
-            <Input style={{ width: 15, height: 15 }} onChange={this.handleCheckbox} name={cardName} className="form-check-input" type="checkbox" value={cardChecked} checked={cardChecked} />
-            <img style={{ marginLeft: 10, objectFit:'cover', width: 60, height: 30 }} src={srcimg}  />
-          </Col>
-        </CardBody>
-      </Card>
-    )
-  }
-
-  renderCheckOut() {
-    const createOptions = (fontSize, padding) => {
-      return {
-        style: {
-          base: {
-            fontSize,
-            color: "#424770",
-            letterSpacing: "0.025em",
-            fontFamily: "Source Code Pro, monospace",
-            "::placeholder": {
-              color: "#aab7c4"
-            },
-            padding: 20
-          },
-          invalid: {
-            color: "#9e2146"
-          }
-        }
-      };
-    };
-
-    return (
-
-      <Row
-        style={{ marginTop: 20, marginBottom:20, flex: 1, display: "flex" }}
-        className="justify-content-center"
-      >
-        <Col xs="12" md="12">
-          <form onSubmit={this.handleSubmit}>
-            <Row
-              style={{ marginTop: 20, flex: 1, display: "flex" }}
-              className="justify-content-center"
-            >
-              <Col xs="12">
-                <Label style={{ fontWeight: 400, letterSpacing: 0.025 }}>
-                  Card Holder Name
-                </Label>
-                <input
-                  className="StripeElement"
-                  style={{
-                    fontSize: 15,
-                    fontWeight: 500,
-                    width: "100%",
-                    outline: 0,
-                    border: 0,
-                    marginBottom: 20,
-                    marginTop: 10,
-                    color: "rgba(0,0,0,0.8)"
-                  }}
-                  value={this.state.cardholdername}
-                  onChange={e => this.handleCardHolderName(e)}
-                  type="text"
-                  placeholder="Card Holder Name"
-                />
-                {this.state.isCardHolderNameEmpty ? (
-                  <Label style={{ color: "red", fontSize: 13, marginBottom: 20 }}>
-                    Please enter card holder name
-                  </Label>
-                ) : null}
-              </Col>
-
-              <Col xs="12">
-                <Label style={{ fontWeight: 400, letterSpacing: 0.025 }}>
-                  Card Details
-                </Label>
-                <CardElement
-                  onReady={this.handleReady}
-                  {...createOptions(15)}
-                />
-              </Col>
-
-              <Col xs="12">
-                <Button block color="success">
-                  Pay
-                </Button>
-              </Col>
-            </Row>
-          </form>
-        </Col>
-      </Row>  
-    );
-  }
-
-  renderSetupBank() {
-    return <SetupBank catererEmail={this.state.catererEmail} catererPaymentAccountID={this.state.catererPaymentAccountID} stripe={this.props.stripe} goBack={()=>this.goBack()}/>
-  }
-
   renderAddBank() {
     return <AddBank catererEmail={this.state.catererEmail} catererPaymentAccountID={this.state.catererPaymentAccountID} stripe={this.props.stripe} goBack={()=>this.goBack()}/>
   }
@@ -483,22 +521,40 @@ class OnlinePayment extends Component {
         </CardHeader>
         <CardBody>
 
-          <FormGroup row className="my-0">
-            <Col xs="10">
-              <Label htmlFor="OnlinePayment">Do you accept online / credit card payments?</Label>
-            </Col>
-            <Col xs="2">
-              <AppSwitch onChange={this.toggle} className={'mx-1 float-right'} variant={'3d'} color={'success'} checked={true} label dataOn={'Yes'} dataOff={'No'}/>   
-            </Col>
+          <FormGroup>
+            <Label style={{fontWeight: '600'}}>Holder Type</Label>
+            {this.state.verifyAccount ? 
+            <Input value={this.state.holdertype} disabled type="text" name="holdertype" ></Input>
+            :
+            <Input value={this.state.holdertype} onChange={(e) => this.handleHolderType(e)} style={{color: this.state.holdertype == "" ? 'grey': 'black'}} type="select" name="holdertype">
+              <option value='' disabled>Select Holder Type</option>
+              {this.HolderType.map(holdertype =>
+                <option style={{color:'black'}} key={holdertype.key} value={holdertype.value}>{holdertype.key}</option>
+              )}
+            </Input>
+            }
           </FormGroup>
 
-          <Collapse style={{paddingTop: 20}} isOpen={this.state.collapse}>
-            <Row>
-              {this.renderCard('isVisaCardChecked', this.state.isVisaCardChecked, require("../../../../assets/img/visa.png"))}
-              {this.renderCard('isMasterCardChecked', this.state.isMasterCardChecked, require("../../../../assets/img/mastercard.png"))}
-              {this.renderCard('isAmericanExpressChecked', this.state.isAmericanExpressChecked, require("../../../../assets/img/americanexpress.png"))}
-            </Row>
-            <div>
+          <FormGroup>
+            <Label style={{fontWeight: '600'}}>Currency</Label>
+            <Input value={this.state.currency} disabled type="text" name="currency" ></Input>
+          </FormGroup>
+
+          <FormGroup>
+            <Label style={{fontWeight: '600'}}>Country</Label>
+            {this.state.verifyAccount ? 
+            <Input value={this.state.country} disabled type="text" name="country" ></Input>
+            :
+            <Input value={this.state.country} onChange={(e) => this.handleCountryChange(e)} style={{color: this.state.country == "" ? 'grey': 'black'}} type="select" name="country">
+              <option value='' disabled>Select Country</option>
+              {this.EuropeCountry.map(country =>
+                <option style={{color:'black'}} key={country.key} value={country.value}>{country.key}</option>
+              )}
+            </Input>
+            }
+          </FormGroup>
+
+          <div>
               <Label style={{marginTop: 10, marginBottom: 20}}>Payment Gateway Provider</Label>
               <Row>
                 <Card style={{marginLeft: 15, borderColor: '#20a8d8'}}>
@@ -510,11 +566,18 @@ class OnlinePayment extends Component {
                 </Card>
                 <Button onClick={this.toggleModal} color="link">What is Stripe?</Button>
               </Row>
-            </div>
-          </Collapse>
+          </div>
 
           <div className="form-actions">
-            <Button style={{marginTop: 20}} onClick={this.handleNext} className="float-right" type="submit" color="primary">Setup Account</Button>
+            {this.state.verifyAccount ? 
+            <Button style={{marginTop: 20}} onClick={this.handleVerify} className="float-right" type="submit" color="success">Verify Account</Button>
+              :
+            <Button style={{marginTop: 20}} onClick={this.handleNext} disabled={!this.state.isNextButtonActive} className="float-right" type="submit" color="primary">Setup Account</Button>
+            }
+
+            {this.state.verifyAccount ? 
+            <Button style={{marginTop: 20}} onClick={() => this.clearInput()} className="float-left" type="submit" color="primary">New account</Button>
+              : null }
           </div>
 
           {this.renderPGProviderModal()}
@@ -534,15 +597,37 @@ class OnlinePayment extends Component {
           <Col xs="12" md="9" sm="9" lg="9">
             {this.state.loading ? 
             this.renderLoadingItems() 
-            :
-            this.state.setupBank ? this.renderSetupBank() : this.state.addBank ? this.renderAddBank() : this.state.paymentcarddetails.length > 0 ? this.renderDisplayBankAccount() : this.renderOnlinePayment()
+            : this.state.addBank ? this.renderAddBank() : this.state.catererPaymentAccountID !== "" && !this.state.verifyAccount ? this.renderDisplayBankAccount() : this.renderOnlinePayment()
             }
           </Col>
         </Row>
+        
+        <ToastContainer hideProgressBar/>
+
       </div>
 
     );
   }
 }
+
+
+const SuccessInfo = ({ closeToast }) => (
+  <div>
+    <img style={ { marginLeft:10, objectFit:'cover', width: 25, height: 25 }} src={require("../../../../assets/img/checked.png")} />
+
+     <b style={{marginLeft:10, marginTop:5, color: 'green'}}>Account created</b>
+   
+  </div>
+)
+
+const ErrorInfo = ({ closeToast }) => (
+  <div>
+    <img style={ { marginLeft:10, objectFit:'cover', width: 25, height: 25 }} src={require("../../../../assets/img/cancel.png")} />
+
+     <b style={{marginLeft:10, marginTop:5, color: 'red'}}>Error adding account. Please try again</b>
+   
+  </div>
+)
+
 
 export default injectStripe(OnlinePayment);

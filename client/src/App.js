@@ -68,14 +68,20 @@ class App extends Component {
 
   constructor(props) {
     super(props);
-    this.state = {}
+    this.state = {loggedIn: false}
     this.connecToServer = this.connecToServer.bind(this);
   }
+
   connecToServer() {
     fetch('/');
   }
 
   componentDidMount() {
+    if (localStorage.getItem('jwt') && typeof localStorage.getItem('jwt') !== 'undefined') {
+      this.setState({
+        loggedIn: true
+      })
+    }
     this.connecToServer();
   }
 
@@ -93,7 +99,7 @@ class App extends Component {
             <Route exact path="/404" name="Page 404" component={Page404} />
             <Route exact path="/500" name="Page 500" component={Page500} />
             <Route path="/caterer" name="Caterer Dashboard" component={DefaultLayout} />
-            <Route path="/" name="CatererLogin" component={CatererLogin} />
+            <Route path="/" name={this.state.loggedIn ? "Caterer Dashboard" : "CatererLogin"} component={this.state.loggedIn ? DefaultLayout : CatererLogin} />
           </Switch>
       </HashRouter>
     );

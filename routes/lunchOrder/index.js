@@ -192,6 +192,7 @@ function acceptAction(lunchorderdoc, paymentIntentID, lunchOrderID, lunchOrderIt
         if (stripe_err) {
             updateData = {
                 orderStatus: "accepted",
+                totalOrderPrice: 0,
                 paymentStatus: "incomplete"
             }
         }
@@ -281,7 +282,7 @@ function updateRejectAction(lunchOrderID) {
     return new Promise((resolve, reject) => {
 
         var updateData = {}
-        updateData = {orderStatus: "rejected"}
+        updateData = {orderStatus: "rejected", totalOrderPrice: 0,}
       
         LunchOrder.findOneAndUpdate({_id: lunchOrderID}, {$set: updateData}, {returnOriginal: false, runValidators: true}, (updated_err, updateddoc) => {
             if (updated_err) {

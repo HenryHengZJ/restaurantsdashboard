@@ -1,7 +1,9 @@
 var express = require('express');
 var router = express.Router();
 require('dotenv').config();
-const stripe = require('stripe')(process.env.STRIPE_KEY);
+const stripe = require('stripe')(process.env.STRIPE_KEY, {
+  apiVersion: '2019-12-03',
+});
 
 router.get('/get_customer_paymentaccount', (req, res) => { 
 
@@ -14,6 +16,24 @@ router.get('/get_customer_paymentaccount', (req, res) => {
 
 //////////////////////////////////////CATERER///////////////////////////////////////////////////
 
+router.post('/create_accountlink', (req, res) => { 
+  var accountID = req.body.accountID
+  stripe.accountLinks.create(
+    {
+      account: accountID,
+      failure_url: 'https://caterer.foodiebee.eu/#/caterer/basics/onlinepayment',
+      success_url: 'https://caterer.foodiebee.eu/#/caterer/basics/onlinepayment',
+      type: 'custom_account_verification',
+      collect: 'eventually_due'
+    },
+    function(err, accountLink) {
+      // asynchronously called
+      if (err) return res.status(500).send({ error: err });
+      return res.send(accountLink);
+    }
+  );
+})
+
 router.post('/create_caterer_paymentaccount', (req, res) => { 
 
   console.log(req.body)
@@ -24,6 +44,7 @@ router.post('/create_caterer_paymentaccount', (req, res) => {
     date: Math.floor(Date.now() / 1000),
     ip: req.connection.remoteAddress // Assumes you're not using a proxy
   };
+  body.requested_capabilities = ['card_payments','transfers']
 
   console.log(body)
 

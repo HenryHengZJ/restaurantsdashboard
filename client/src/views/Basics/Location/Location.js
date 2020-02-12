@@ -52,6 +52,9 @@ class Location extends Component {
       catererCountry: "",
       isProceedButtonVisible: false,
       isSaving: false,
+      isSearched: false,
+      zoom: 14,
+      isStreetAddressMissing: false,
     };
 
     this.marker = null;
@@ -121,8 +124,6 @@ class Location extends Component {
       catererCounty: catererCounty,
     }
 
-    console.log(data)
-
     var headers = {
       'Content-Type': 'application/json',
     }
@@ -153,37 +154,82 @@ class Location extends Component {
 
   }
 
-  showPlaceDetails(address) {
-    var lat = Number(address.geometry.location.lat())
-    var lng = Number(address.geometry.location.lng())
+  showPlaceDetails(details) {
+
+    var lat = Number(details.geometry.location.lat())
+    var lng = Number(details.geometry.location.lng())
     
     Geocode.fromLatLng(lat, lng).then(
       response => {
 
-        //Get rid of postal code
-        for(var i = 0 ; i < response.results[0].address_components.length ; i++){
-          if (response.results[0].address_components[i].types[0] === "postal_code") {
-            response.results[0].address_components.splice(i, 1)
+        var results = response.results
+        var catererCountry = ""
+        var catererCounty = ""
+        var catererCity = ""
+        var catererAddress = ""
+        var catererFullAddress = ""
+  
+        for (var x = 0; x < results.length; x++) {
+        
+          //Check for country
+          if (results[x].types.includes('country')) {
+            catererCountry = results[x].address_components[0].long_name
           }
+          
+          //Check for county
+          if (results[x].types.includes('administrative_area_level_1')) {
+            catererCounty = results[x].address_components[0].long_name
+          }
+          
+          //Check for city
+          if (results[x].types.includes('locality')) {
+            catererCity = results[x].address_components[0].long_name
+          }
+
         }
 
-        var address_components = response.results[0].address_components
- 
-        var catererAddress = ""
-        for(var i = address_components.length - 4 ; i >= 0; i--){
-          catererAddress = address_components[i].long_name + ( i === address_components.length - 4 ? "" : ", " ) + catererAddress 
+        for (var i = 0; i < details.address_components.length; i++) {
+            
+              //Check for street_number
+              if (details.address_components[i].types.includes('street_number')) {
+                catererAddress = catererAddress + details.address_components[i].long_name + ", "
+              }
+              
+              //Check for route
+              if (details.address_components[i].types.includes('route')) {
+                catererAddress = catererAddress + details.address_components[i].long_name + ", "
+              }
+              
+              //Check for sublocality
+              if (details.address_components[i].types.includes('sublocality')) {
+                catererAddress = catererAddress + details.address_components[i].long_name + ", "
+              }
+            
+        }
+            
+        //Remove last 2 substrings of catererAddress
+        catererAddress = catererAddress.substring(0, catererAddress.length - 2);
+
+        catererFullAddress = details.formatted_address
+
+        var newCenter = {
+          lat: lat,
+          lng: lng,
         }
         
         this.setState({
-          center: {
-            lat: lat,
-            lng: lng,
-          },
-          catererFullAddress: response.results[0].formatted_address,
-          catererAddress: catererAddress,
-          catererCity: address_components[address_components.length - 3].long_name,
-          catererCounty: address_components[address_components.length - 2].long_name,
-          catererCountry: address_components[address_components.length - 1].long_name,
+          catererFullAddress,
+          catererAddress,
+          catererCity,
+          catererCounty,
+          catererCountry,
+          isSearched: true,
+          isStreetAddressMissing: catererAddress === "" ? true : false,
+        }, () => {
+          this.setState({
+            zoom: 16,
+            center: newCenter
+          })
         })
       },
       error => {
@@ -198,7 +244,20 @@ class Location extends Component {
     })
   }
 
+  onDrag = (map) => {
+    // alert('drag end = ', JSON.stringify(map))
+     if (this.state.isSearched) {
+       this.setState({
+         isSearched: false
+       })
+     }
+   }
+
   onMapChange = ({center}) => {
+
+    if (this.state.isSearched) {
+      return;
+    }
    
     var lat = center.lat;
     var lng = center.lng;
@@ -206,29 +265,79 @@ class Location extends Component {
     Geocode.fromLatLng(lat, lng).then(
       response => {
 
-        //Get rid of postal code
-        for(var i = 0 ; i < response.results[0].address_components.length ; i++){
-          if (response.results[0].address_components[i].types[0] === "postal_code") {
-            response.results[0].address_components.splice(i, 1)
+        var results = response.results
+        var catererCountry = ""
+        var catererCounty = ""
+        var catererCity = ""
+        var catererAddress = ""
+        var catererFullAddress = ""
+        var isStreetAddressAppeared = false
+        
+        for (var x = 0; x < results.length; x++) {
+        
+          //Check for country
+          if (results[x].types.includes('country')) {
+            catererCountry = results[x].address_components[0].long_name
+          }
+          
+          //Check for county
+          if (results[x].types.includes('administrative_area_level_1')) {
+            catererCounty = results[x].address_components[0].long_name
+          }
+          
+          //Check for city
+          if (results[x].types.includes('locality')) {
+            catererCity = results[x].address_components[0].long_name
+          }
+          
+          //Check for street_address
+          if (results[x].types.includes('street_address') && !isStreetAddressAppeared) {
+            
+            var street_address_components = results[x].address_components
+
+            for (var i = 0; i < street_address_components.length; i++) {
+            
+              //Check for street_number
+              if (street_address_components[i].types.includes('street_number')) {
+                catererAddress = catererAddress + street_address_components[i].long_name + ", "
+              }
+              
+              //Check for route
+              if (street_address_components[i].types.includes('route')) {
+                catererAddress = catererAddress + street_address_components[i].long_name + ", "
+              }
+              
+              //Check for sublocality
+              if (street_address_components[i].types.includes('sublocality')) {
+                catererAddress = catererAddress + street_address_components[i].long_name + ", "
+              }
+            
+            }
+            
+            //Remove last 2 substrings of catererAddress
+            catererAddress = catererAddress.substring(0, catererAddress.length - 2);
+
+            catererFullAddress = results[x].formatted_address
+
+            //Set isStreetAddressAppeared to true to ensure only 1 address
+            isStreetAddressAppeared = true
+
           }
         }
 
-        var address_components = response.results[0].address_components
-
-        var catererAddress = ""
-        for(var i =address_components.length - 4 ; i >= 0; i--){
-          catererAddress = address_components[i].long_name + ( i === address_components.length - 4 ? "" : ", " ) + catererAddress 
+        var newCenter = {
+          lat: lat,
+          lng: lng,
         }
+
         this.setState({
-          center: {
-            lat: lat,
-            lng: lng,
-          },
-          catererFullAddress: response.results[0].formatted_address,
-          catererAddress: catererAddress,
-          catererCity: address_components[address_components.length - 3].long_name,
-          catererCounty: address_components[address_components.length - 2].long_name,
-          catererCountry: address_components[address_components.length - 1].long_name,
+          center: newCenter,
+          catererFullAddress,
+          catererAddress,
+          catererCity,
+          catererCounty,
+          catererCountry,
+          isStreetAddressMissing: catererAddress === "" ? true : false,
         })
       },
       error => {
@@ -274,16 +383,21 @@ class Location extends Component {
                   </Col>
                   <Col style={{marginTop:20}} xs="3">
                   {this.state.isProceedButtonVisible ? 
-                    <Button style={{marginLeft:10, fontSize: 17}} onClick={() => this.handleProceed()} className="float-right" color="success">Proceed</Button>
+                    <Button disabled={this.state.isStreetAddressMissing} style={{marginLeft:10, fontSize: 17}} onClick={() => this.handleProceed()} className="float-right" color="success">Proceed</Button>
                   : null}
-                  <Button style={{ fontSize: 17}} onClick={this.handleNext} className="float-right" type="submit" color="primary">{this.state.isSaving ? "Updating..." : "Update" }</Button>
+                  <Button disabled={this.state.isStreetAddressMissing} style={{ fontSize: 17}} onClick={this.handleNext} className="float-right" type="submit" color="primary">{this.state.isSaving ? "Updating..." : "Update" }</Button>
                   </Col>
+                  {this.state.isStreetAddressMissing ? 
+                  <Col xs="12">
+                    <Label style={{fontWeight: '500', fontSize: 12, color: 'red'}}>Please enter address with street name</Label>
+                  </Col> : null }
                 </FormGroup>
                 <div style={{ marginTop:25, height: '60vh', width: '100%' }}>
                   <GoogleMapReact
                     bootstrapURLKeys={{ key: [GOOGLE_API_KEY] }}
                     center={this.state.center}
-                    zoom={14}
+                    zoom={this.state.zoom}
+                    onDrag={this.onDrag}
                     onChange={this.onMapChange}
                   >
                   </GoogleMapReact>

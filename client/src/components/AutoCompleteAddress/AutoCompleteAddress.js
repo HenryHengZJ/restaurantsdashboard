@@ -27,7 +27,6 @@ class AutoCompleteAddress extends React.Component {
   }
 
   handleChange = (event) => {
-    console.log(event.target.value)
     this.props.onInputChanged(event.target.value);
   }
 

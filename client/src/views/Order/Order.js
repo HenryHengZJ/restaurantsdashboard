@@ -127,13 +127,15 @@ class Order extends Component {
             empty: response.data.length === 0 ? true : false,
             totalOrderCount: response.data.length,
             pagesCount,
-            currentPage: 1
+            currentPage: 1,
+            loadingModal: false,
           })
         } 
       })
       .catch((error) => {
         this.setState({
-          empty: true 
+          empty: true ,
+          loadingModal: false,
         })
       });
   }
@@ -159,6 +161,7 @@ class Order extends Component {
       currentDate: date,
       currentDateString: moment(date).format("ddd, DD MMM YYYY"),
       dropDownDate: !this.state.dropDownDate, 
+      loadingModal: true,
     }, () => {
       sessionStorage.setItem('currentLunchOrderDateString', moment(date).format("ddd, DD MMM YYYY"))
       this.getOrder(moment(date).format("ddd, DD MMM YYYY"))

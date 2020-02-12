@@ -104,14 +104,10 @@ router.post('/catererlogin', (req, res) => {
         }
         else {
             /** This is what ends up in our JWT */
-            var myDate = new Date();
-            myDate.setHours(myDate.getHours() + 24);
-            console.log(myDate)
             const payload = {
                 catererID: user._id,
                 catererName: user.catererName,
                 catererEmail: user.catererEmail,
-                expires: myDate,
             };
 
             /** assigns payload to req.user */
@@ -122,8 +118,8 @@ router.post('/catererlogin', (req, res) => {
                 }
                 else {
                     /** generate a signed json web token and return it in the response */
-                    const token = jwt.sign(payload, process.env.jwtSecretKey, {expiresIn: '24h'} );
-
+                    const token = jwt.sign(payload, process.env.jwtSecretKey, {expiresIn: '999y'});
+                    payload.token = token
                     /** assign our jwt to the cookie */
                     res.cookie('jwt', token, { httpOnly: true});
                     res.status(200).json(payload);

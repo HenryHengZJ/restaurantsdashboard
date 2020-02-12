@@ -80,6 +80,8 @@ class CatererLogin extends Component {
     axios.post(url, data, {withCredentials: true}, {headers: headers})
       .then((response) => {
         if (response.status === 200) {
+          var jwt = response.data.token
+          localStorage.setItem('jwt', jwt)
           this.props.history.push('/caterer')
         }
         else {

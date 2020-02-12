@@ -31,6 +31,7 @@ export default {
     PUTupdate_caterer_paymentaccount: "/payment/update_caterer_paymentaccount",
     PUTupdate_caterer_external_bankaccount: "/payment/update_caterer_external_bankaccount",
     DELETE_caterer_external_bankaccount: "/payment/delete_caterer_external_bankaccount",
+    POSTcreate_accountlink: "/payment/create_accountlink",
 
     /*Review API*/
     GETreview: "/review/getreview",

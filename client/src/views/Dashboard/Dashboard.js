@@ -180,7 +180,7 @@ class Dashboard extends Component {
             profilesrc: typeof response.data[0].profilesrc !== 'undefined' ? response.data[0].profilesrc : "https://s3-eu-west-1.amazonaws.com/foodiebeegeneralphoto/user_default.png",
             coversrc: typeof response.data[0].coversrc !== 'undefined' ? response.data[0].coversrc : "https://stmed.net/sites/default/files/food-wallpapers-28249-101905.jpg",
             catererAddress: typeof response.data[0].catererAddress !== 'undefined' ? response.data[0].catererAddress : "",
-            rating: typeof response.data[0].rating !== 'undefined' ? response.data[0].rating : 0,
+            rating: typeof response.data[0].rating !== 'undefined' ? Number(response.data[0].rating).toFixed(1) : 0,
             numofreview: typeof response.data[0].numofreview !== 'undefined' ? response.data[0].numofreview : 0,
           }, () => {
           //  this.putInitialData(this.state.catererName)
@@ -350,7 +350,7 @@ class Dashboard extends Component {
       'Content-Type': 'application/json',
     }
 
-    var url = apis.GETreview + "?lteDate=" + currentDateString + "&gteDate=" + previousDateString;
+    var url = apis.GETreview + "?limit=10";
 
     axios.get(url, {withCredentials: true}, {headers: headers})
       .then((response) => {
@@ -792,7 +792,7 @@ class Dashboard extends Component {
                     emptyStarColor="#D3D3D3"
                     starCount={5}
                     editing={false}
-                    value={this.state.rating}
+                    value={parseInt(this.state.rating)}
                   />
                   {this.state.rating === 0 ? null : <b style={{ marginLeft: 5, color: "darkorange" }}>{this.state.rating}</b> }
                   {this.state.numofreview === 0 ? 

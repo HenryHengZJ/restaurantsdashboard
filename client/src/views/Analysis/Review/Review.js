@@ -128,7 +128,7 @@ class Review extends Component {
       'Content-Type': 'application/json',
     }
 
-    var url = apis.GETreview + "?lteDate=" + currentDateString + "&gteDate=" + previousDateString;
+    var url = apis.GETreview;
 
     axios.get(url, {withCredentials: true}, {headers: headers})
       .then((response) => {
@@ -370,42 +370,8 @@ class Review extends Component {
                 </Row>
               </CardHeader>
               <CardBody>
-                <Row style={{ marginLeft: 0 }}>
-                  <h4>{this.state.dateRange}</h4>
-                  <UncontrolledDropdown style={{marginLeft: 10}} isOpen={this.state.dropDownDate}  toggle={() => this.toggleDropDown()}>
-                    <DropdownToggle
-                      style={{
-                        borderColor: "#20a8d8",
-                        backgroundColor: "white",
-                        paddingTop: 3,
-                        paddingRight: 10,
-                        paddingLeft: 10,
-                        paddingBottom: 5
-                      }}
-                    >
-                      <img style={{ objectFit:'cover', width: 17, height: 17 }} src={require("../../../assets/img/calendar.png")} />
-
-                    </DropdownToggle>
-                    <DropdownMenu>
-                      <div >
-                        <DateRange
-                          onChange={this.handleRangeChange.bind(this, 'dateRangePicker')}
-                          showSelectionPreview={true}
-                          moveRangeOnFirstSelection={false}
-                          className={'PreviewArea'}
-                          months={1}
-                          ranges={[this.state.dateRangePicker.selection]}
-                          direction="horizontal"
-                          maxDate={this.state.maxDate}
-                        />
-                      </div>
-                      <div className="float-right">
-                        {this.renderDateAction()}     
-                      </div>
-                    </DropdownMenu>
-                  </UncontrolledDropdown>
-                </Row>
-                <div style={{marginTop: 20}}>
+                
+                <div style={{marginTop: 0}}>
                   {this.renderReviewTable()}
                 </div>
               </CardBody>

@@ -384,7 +384,7 @@ class AddBank extends Component {
           </CardHeader>
           <CardBody>
             <FormGroup>
-              <Label >Holder Type</Label>
+              <Label style={{fontWeight: '600'}}>Holder Type</Label>
               <Input value={this.state.holdertype} onChange={(e) => this.handleHolderType(e)} style={{color: this.state.holdertype == "" ? 'grey': 'black'}} type="select" name="holdertype">
               <option value='' disabled>Select Holder Type</option>
               {this.HolderType.map(holdertype =>
@@ -394,17 +394,17 @@ class AddBank extends Component {
             </FormGroup>
 
             <FormGroup>
-              <Label >Holder Name</Label>
+              <Label style={{fontWeight: '600'}}>Holder Name</Label>
               <Input style={{color: 'black'}} value={this.state.holdername} onChange={(e) => this.handleHolderNameChange(e)} type="text" id="holdername" placeholder="Enter account holder name" />
             </FormGroup>
            
             <FormGroup>
-              <Label >Currency</Label>
+              <Label style={{fontWeight: '600'}}>Currency</Label>
               <Input value={this.state.currency} disabled type="text" name="currency" ></Input>
             </FormGroup>
 
             <FormGroup>
-              <Label >Country</Label>
+              <Label style={{fontWeight: '600'}}>Country</Label>
               <Input value={this.state.country} onChange={(e) => this.handleCountryChange(e)} style={{color: this.state.country == "" ? 'grey': 'black'}} type="select" name="country">
               <option value='' disabled>Select Country</option>
               {this.EuropeCountry.map(country =>
@@ -414,7 +414,7 @@ class AddBank extends Component {
             </FormGroup>
 
             <FormGroup>
-              <Label >IBAN</Label>
+              <Label style={{fontWeight: '600'}}>IBAN</Label>
               <Input style={{color: 'black'}} value={this.state.iban} onChange={(e) => this.handleIBANChange(e)} type="text" id="IBAN" placeholder="Enter your IBAN number"/>
               <FormFeedback>Please enter your IBAN number</FormFeedback>
             </FormGroup>

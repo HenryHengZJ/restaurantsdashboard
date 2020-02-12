@@ -35,6 +35,7 @@ import { format, addDays, subDays } from 'date-fns';
 import axios from 'axios';
 import apis from "../../../apis";
 import TablePagination from "../../../components/TablePagination";
+import Lottie from 'react-lottie';
 
 const options = {
   tooltips: {
@@ -121,6 +122,7 @@ class Sales extends Component {
       pageSize: 2,
       currentPage: 1,
       totalSalesCount: 0,
+      loadingModal: false
     };
   }
 
@@ -202,7 +204,8 @@ class Sales extends Component {
             empty: response.data.length === 0 ? true : false,
             totalSalesCount: response.data.length,
             pagesCount,
-            currentPage: 1
+            currentPage: 1,
+            loadingModal: false
           }, () => {
             this.getChartData()
           })
@@ -210,7 +213,8 @@ class Sales extends Component {
       })
       .catch((error) => {
         this.setState({
-          empty: true 
+          empty: true ,
+          loadingModal: false
         })
       });
   }
@@ -359,6 +363,7 @@ class Sales extends Component {
       line: newline,
       bar: newbar,
       dateArray: finalDateArray,
+      loadingModal: true,
     }, () => {
       sessionStorage.setItem('currentLunchSalesDateString', endDate)
       sessionStorage.setItem('previousLunchSalesDateString', startDate)
@@ -687,6 +692,38 @@ class Sales extends Component {
     );
   }
 
+  renderLoadingModal() {
+
+    const defaultOptions = {
+      loop: true,
+      autoplay: true, 
+      animationData: require('../../../assets/animation/order_loading.json'),
+      rendererSettings: {
+        preserveAspectRatio: 'xMidYMid slice'
+      }
+    };
+
+    return (
+      <Modal    
+        aria-labelledby="contained-modal-title-vcenter"
+        centered
+        isOpen={this.state.loadingModal} >
+        <ModalBody>
+          <div>
+            <Lottie 
+              options={defaultOptions}
+              height={200}
+              width={200}/>
+
+            <p style={{textAlign: 'center', paddingLeft:20, paddingRight:20, fontSize: 16, fontWeight: '600'}}>
+              Processing...
+            </p>
+          </div>
+        </ModalBody>
+      </Modal>
+    )
+  }
+
   render() {
     const {
       isTablePressed,
@@ -789,6 +826,7 @@ class Sales extends Component {
             </Card>
           </Col>
           {this.state.selectedOrderItem !== null ? this.renderSalesModal() : null}
+          {this.renderLoadingModal()}
         </Row>
       </div>
     );
