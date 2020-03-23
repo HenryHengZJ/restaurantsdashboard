@@ -97,6 +97,14 @@ class Location extends Component {
         } 
       })
       .catch((error) => {
+          var center;
+          center =  {
+            lat: 53.350140,
+            lng: -6.266155
+          };
+          this.setState({
+            center,
+          })
       });
   }
 

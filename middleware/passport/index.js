@@ -48,10 +48,8 @@ var myLocalConfig = (passport) => {
 					var catererStatus = caterer.status
 					if (catererStatus === 'new') {
 						//first time enter
-						if (password === "12345678") {
+						if (password === "12345678" || caterer.validPassword(password)) {
 
-							console.log('default PWWW')
-							
 							var matchquery;
 							matchquery = {_id: new ObjectId(caterer._id)}
 
