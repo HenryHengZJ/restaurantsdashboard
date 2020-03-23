@@ -204,7 +204,7 @@ class OnlinePayment extends Component {
             catererpaymentdetails: response.data,
             verifyAccount: response.data.requirements.disabled_reason === null ? false : response.data.requirements.past_due.length === 0 ? false :  response.data.requirements.past_due.length === 1 && response.data.requirements.past_due[0] === 'external_account' ? false  : true,
             pendingVerification: response.data.requirements.pending_verification.length > 0 ? true : false,
-            loading: false
+            loading: false 
           })
           if (response.data.business_type !== null && response.data.country !== null) {
             this.getInput('holdertype', response.data.business_type)
