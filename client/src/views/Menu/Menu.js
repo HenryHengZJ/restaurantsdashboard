@@ -910,6 +910,14 @@ class Menu extends Component {
   }
 
   
+  renderEmptyCategoryItems() {
+    return (
+      <Row>
+        {this.renderEmptyItem()}
+      </Row>
+    );
+  }
+
   renderForm() {
 
     var selectedItemTitle = this.state.selectedMenuItem.title;
@@ -1326,6 +1334,8 @@ class Menu extends Component {
                       <Col style={{ marginTop: 20 }} xs="12">
                         {this.state.loading
                           ? this.renderLoadingItems()
+                          : this.state.empty 
+                          ? this.renderEmptyCategoryItems()
                           :  this.renderCategoryItems()
                           }
                       </Col>

@@ -44,6 +44,7 @@ class DefaultLayout extends Component {
       .then((response) => {
         if (response.status === 200) {
           //window.location.assign('https://foodiebeecaterer.herokuapp.com');
+          localStorage.removeItem('jwt')
           this.props.history.push('/')
         }
       })
