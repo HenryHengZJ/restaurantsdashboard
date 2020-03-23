@@ -48,17 +48,8 @@ var myLocalConfig = (passport) => {
 					var catererStatus = caterer.status
 					if (catererStatus === 'new') {
 						//first time enter
-						if (password === "12345678" || caterer.validPassword(password)) {
-
-							var matchquery;
-							matchquery = {_id: new ObjectId(caterer._id)}
-
-							var updateData = {status: 'verified'}
-
-							Caterer.findOneAndUpdate(matchquery, {$set: updateData}, {runValidators: true}, (err, doc) => {
-								if (err) return done(null, false);
-								return done(null, doc);
-							});
+						if (password === "12345678") {
+							return done(null, caterer);
 						}
 						else {
 							console.log('wrong default pw')

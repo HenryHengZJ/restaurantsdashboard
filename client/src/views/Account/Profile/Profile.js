@@ -33,13 +33,11 @@ class Profile extends Component {
     super(props);
 
     this.handleEmailChange = this.handleEmailChange.bind(this);
-    this.handleOldPasswordChange = this.handleOldPasswordChange.bind(this);
     this.handleNewPasswordChange = this.handleNewPasswordChange.bind(this);
     this.handleConfirmPasswordChange = this.handleConfirmPasswordChange.bind(this);
 
     this.state = {
       catererEmail: "",
-      oldpassword: "",
       newpassword: "",
       confirmpassword: "",
       isChangePasswordClicked: false,
@@ -74,12 +72,6 @@ class Profile extends Component {
   handleEmailChange(e) {
     this.setState({
       catererEmail: e.target.value
-    });
-  }
-
-  handleOldPasswordChange(e) {
-    this.setState({
-      oldpassword: e.target.value,
     });
   }
 
@@ -134,7 +126,7 @@ class Profile extends Component {
 
   updatePassword = () => {
 
-    const {oldpassword, newpassword, confirmpassword} = this.state
+    const { newpassword, confirmpassword} = this.state
 
     if (!this.validatePassword(newpassword)) {
       this.setState({
@@ -145,7 +137,6 @@ class Profile extends Component {
       if (newpassword === confirmpassword) {
 
         var data = {
-          originalpassword: oldpassword,
           newpassword: newpassword
         }
 
@@ -207,23 +198,6 @@ class Profile extends Component {
         </CardHeader>
         <CardBody>
           <Form action="" method="post" className="form-horizontal">
-            <FormGroup row>
-              <Col md="3">
-                <Label>Old Password</Label>
-              </Col>
-              <Col xs="12" md="9">
-                <Input
-                  type="password"
-                  placeholder="Enter Old Password"
-                  autoComplete="old-password"
-                  value={this.state.oldpassword}
-                  onChange={e => {
-                    this.handleOldPasswordChange(e);
-                  }}
-                />
-              </Col>
-            </FormGroup>
-
             <FormGroup row>
               <Col md="3">
                 <Label>New Password</Label>

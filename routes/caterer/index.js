@@ -61,28 +61,20 @@ router.put('/updatecatererpassword', authenticate(), (req, res) => {
     var userID = user.catererID
 
     var matchquery;
-    matchquery = {_id: new ObjectId(userID), status: 'verified'}
-    
-    var updateData = req.body
-    var originalpassword = updateData.originalpassword
-    var newpassword = updateData.newpassword
+    matchquery = {_id: new ObjectId(userID)}
 
-    Caterer.findOne(matchquery, function(err, caterer) {
-        // if there are any errors, return the error
+    var newCaterer = new Caterer();
+
+    var updateData = {
+        catererPassword : newCaterer.generateHash(req.body.newpassword),
+        status : 'verified'
+    }
+
+    Caterer.findOneAndUpdate(matchquery, {$set: updateData}, {upsert:true, runValidators: true, setDefaultsOnInsert: true}, (err, doc) => {
         if (err) return res.status(500).send({ error: err });
-        // if no caterer is found, return the message
-        if (!caterer) return res.status(404).send({ error: err });
-        // check caterer's password
-        if (caterer.validPassword(originalpassword))
-        {
-            caterer.update({
-                catererPassword: caterer.generateHash(newpassword)
-            }).then(() => res.status(201).json(caterer));
-        } 
-        else {
-            return res.status(401).send({ error: 'invalid password' });
-        } 
+        return res.status(201).json(doc);
     });
+
 });
 
 router.put('/updatecaterernameaddress', authenticate(), upload.any(), (req, res) => {
