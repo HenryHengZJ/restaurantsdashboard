@@ -8,6 +8,8 @@ var multerS3 = require('multer-s3')
 var aws = require('aws-sdk')
 var s3 = require('../../config/s3');
 var bcrypt   = require('bcrypt-nodejs');
+const jwt = require('jsonwebtoken');
+require('dotenv').config();
 
 let upload = multer({
     storage: multerS3({
@@ -23,7 +25,7 @@ let upload = multer({
     })
 })
 
-router.get('/getcaterer', passport.authenticate('jwt', {session: false}), (req, res) => {
+router.get('/getcaterer', authenticate(), (req, res) => {
 
     const { user } = req;
     var userID = user.catererID
@@ -38,7 +40,7 @@ router.get('/getcaterer', passport.authenticate('jwt', {session: false}), (req, 
 }); 
 
 
-router.put('/updatecaterer', passport.authenticate('jwt', {session: false}), (req, res) => {
+router.put('/updatecaterer', authenticate(), (req, res) => {
     const { user } = req;
     var userID = user.catererID
 
@@ -54,7 +56,7 @@ router.put('/updatecaterer', passport.authenticate('jwt', {session: false}), (re
 });
 
 
-router.put('/updatecatererpassword', passport.authenticate('jwt', {session: false}), (req, res) => {
+router.put('/updatecatererpassword', authenticate(), (req, res) => {
     const { user } = req;
     var userID = user.catererID
 
@@ -83,7 +85,7 @@ router.put('/updatecatererpassword', passport.authenticate('jwt', {session: fals
     });
 });
 
-router.put('/updatecaterernameaddress', passport.authenticate('jwt', {session: false}), upload.any(), (req, res) => {
+router.put('/updatecaterernameaddress', authenticate(), upload.any(), (req, res) => {
     const { user } = req;
     var userID = user.catererID
 
@@ -112,5 +114,58 @@ router.put('/updatecaterernameaddress', passport.authenticate('jwt', {session: f
         return res.status(201).json(doc);
     });
 });
+
+
+function authenticate() {
+    return (req, res, next) => {
+      passport.authenticate('jwt', {session: false}, (err, user, info) => {
+        if (err) {
+            console.log( 'err = ', err)
+            next(err);
+        } 
+        else if (info) {
+            console.log(info)
+            if (info.name === 'TokenExpiredError') {
+
+               if (req && req.cookies['jwt'] && req.cookies['refreshToken']) {
+
+                    const refresh_token = req.cookies['refreshToken']
+                    const jwttoken = req.cookies['jwt']
+                    var decoded = jwt.decode(jwttoken, {complete: true});
+                    var decodedPayload = decoded.payload
+  
+                    if (decodedPayload.refreshToken === refresh_token) {
+                        const payload = {
+                            catererID: decodedPayload.catererID,
+                            catererName: decodedPayload.catererName,
+                            catererEmail: decodedPayload.catererEmail,
+                            refreshToken: decodedPayload.refreshToken,
+                        };
+                        const token = jwt.sign(payload, process.env.jwtSecretKey, {expiresIn: '30m'} );
+                        req.user = payload;
+                        req.jwttoken = token
+                        next();
+                    }
+                    else {
+                        res.status(401).send('Unauthorized');
+                    }
+                }
+                else {
+                    res.status(401).send('Unauthorized');
+                }
+            }
+            else {
+                res.status(401).send('Unauthorized');
+            }
+        } 
+        else {
+            console.log(user)
+            req.user = user;
+            next();
+        }
+      })(req, res, next);
+    };
+  }
+
 
 module.exports = router;

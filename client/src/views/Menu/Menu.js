@@ -1326,9 +1326,8 @@ class Menu extends Component {
                       <Col style={{ marginTop: 20 }} xs="12">
                         {this.state.loading
                           ? this.renderLoadingItems()
-                          : this.state.data.length > 0
-                          ? this.renderCategoryItems()
-                          : null}
+                          :  this.renderCategoryItems()
+                          }
                       </Col>
                     </Row>
                   </Col>

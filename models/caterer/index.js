@@ -31,7 +31,7 @@ var catererSchema = mongoose.Schema({
     catererDietaryConcern: [String],
     catererPickup: Boolean,
 	catererDelivery: Boolean,
-	location: { type: {type:String}, coordinates: [Number]},
+	location: { type: String, coordinates: [Number]},
 	deliveryradius: Number,
     deliveryfee: Number,
 	minimumspend: Number,

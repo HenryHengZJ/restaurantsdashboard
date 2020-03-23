@@ -2,6 +2,7 @@
 const passport = require('passport');
 const LocalStrategy    = require('passport-local').Strategy;
 const passportJWT = require('passport-jwt');
+var ObjectId = require('mongodb').ObjectID;
 const JWTStrategy = passportJWT.Strategy;
 require('dotenv').config();
 
@@ -29,7 +30,7 @@ var myLocalConfig = (passport) => {
 
 		// asynchronous
 		process.nextTick(function() {
-			Caterer.findOne({ 'catererEmail' :  email, 'status': 'verified' }, function(err, caterer) {
+			Caterer.findOne({ 'catererEmail' :  email }, function(err, caterer) {
 				// if there are any errors, return the error
 				if (err)
 				{
@@ -42,20 +43,45 @@ var myLocalConfig = (passport) => {
 					console.log('no user')
 					return done(null, false);
 				}
-					
-				// check caterer's password
-				if (!caterer.validPassword(password))
-				{
-					console.log('no pw')
-					return done(null, false);
-				}
-					
-				// all is well, return caterer
-				else
-				{
-					return done(null, caterer);
+				else {
+					//check if caterer is first time enter with default password
+					var catererStatus = caterer.status
+					if (catererStatus === 'new') {
+						//first time enter
+						if (password === "12345678") {
+
+							console.log('default PWWW')
+							
+							var matchquery;
+							matchquery = {_id: new ObjectId(caterer._id)}
+
+							var updateData = {status: 'verified'}
+
+							Caterer.findOneAndUpdate(matchquery, {$set: updateData}, {runValidators: true}, (err, doc) => {
+								if (err) return done(null, false);
+								return done(null, doc);
+							});
+						}
+						else {
+							console.log('wrong default pw')
+							return done(null, false);
+						}
+					}
+					else if (catererStatus === 'verified') {
+						// check caterer's password
+						if (!caterer.validPassword(password))
+						{
+							console.log('wrong pw')
+							return done(null, false);
+						}
+							
+						// all is well, return caterer
+						else
+						{
+							return done(null, caterer);
+						}	
+					}
 				}	
-					
 			});
 		});
 

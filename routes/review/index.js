@@ -4,8 +4,10 @@ var Review = require('../../models/review');
 var ObjectId = require('mongodb').ObjectID;
 var passport = require('passport');
 var moment = require('moment');
+const jwt = require('jsonwebtoken');
+require('dotenv').config();
 
-router.get('/getreview', passport.authenticate('jwt', {session: false}), (req, res) => {
+router.get('/getreview', authenticate(), (req, res) => {
 
     const { user } = req;
     var userID = user.catererID
@@ -25,7 +27,7 @@ router.get('/getreview', passport.authenticate('jwt', {session: false}), (req, r
 
     matchquery.catererID = new ObjectId(userID)
 
-    Review.aggregate([ 
+    var aggregationquery = [
         {$match: matchquery},
         {$lookup: {
             from: "caterer", 
@@ -39,12 +41,72 @@ router.get('/getreview', passport.authenticate('jwt', {session: false}), (req, r
             foreignField: "_id", 
             as: "customerDetails" }
         },
-        { $sort : { createdAt : -1 } },
-        { $limit: limitnum },
-      ], (err,doc) => {
-         if (err) return res.status(500).send({ error: err });
+        { $sort : { createdAt : -1 } }
+    ]
+
+    if (limitnum > 0) {
+        aggregationquery.push({ $limit: limitnum })
+    }
+
+
+    Review.aggregate(aggregationquery, (err,doc) => {
+         if (err) {
+             console.log(err)
+             return res.status(500).send({ error: err });
+         }
          return res.status(200).json(doc);
       });
 });
+
+
+function authenticate() {
+    return (req, res, next) => {
+      passport.authenticate('jwt', {session: false}, (err, user, info) => {
+        if (err) {
+            console.log( 'err = ', err)
+            next(err);
+        } 
+        else if (info) {
+            if (info.name === 'TokenExpiredError') {
+
+               if (req && req.cookies['jwt'] && req.cookies['refreshToken']) {
+
+                    const refresh_token = req.cookies['refreshToken']
+                    const jwttoken = req.cookies['jwt']
+                    var decoded = jwt.decode(jwttoken, {complete: true});
+                    var decodedPayload = decoded.payload
+
+                    if (decodedPayload.refreshToken === refresh_token) {
+                        const payload = {
+                            catererID: decodedPayload.catererID,
+                            catererName: decodedPayload.catererName,
+                            catererEmail: decodedPayload.catererEmail,
+                            refreshToken: decodedPayload.refreshToken,
+                        };
+                        const token = jwt.sign(payload, process.env.jwtSecretKey, {expiresIn: '30m'} );
+                        req.user = payload;
+                        req.jwttoken = token
+                        next();
+                    }
+                    else {
+                        res.status(401).send('Unauthorized');
+                    }
+                }
+                else {
+                    res.status(401).send('Unauthorized');
+                }
+            }
+            else {
+                res.status(401).send('Unauthorized');
+            }
+        } 
+        else {
+            console.log(user)
+            req.user = user;
+            next();
+        }
+      })(req, res, next);
+    };
+  }
 
 module.exports = router;

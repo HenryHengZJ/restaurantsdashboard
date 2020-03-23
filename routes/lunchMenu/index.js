@@ -8,6 +8,8 @@ var multer = require('multer');
 var multerS3 = require('multer-s3')
 var aws = require('aws-sdk')
 var s3 = require('../../config/s3');
+const jwt = require('jsonwebtoken');
+require('dotenv').config();
 
 let upload = multer({
     storage: multerS3({
@@ -23,7 +25,7 @@ let upload = multer({
     })
 })
 
-router.get('/getLunchMenu', passport.authenticate('jwt', {session: false}), (req, res) => {
+router.get('/getLunchMenu', authenticate(), (req, res) => {
 
     const { user } = req;
     var userID = user.catererID
@@ -49,7 +51,7 @@ router.get('/getLunchMenu', passport.authenticate('jwt', {session: false}), (req
     });
 });
 
-router.post('/addLunchMenu', passport.authenticate('jwt', {session: false}), upload.any(), (req, res) => {
+router.post('/addLunchMenu', authenticate(), upload.any(), (req, res) => {
 	
     const { user } = req;
     var userID = user.catererID
@@ -73,7 +75,7 @@ router.post('/addLunchMenu', passport.authenticate('jwt', {session: false}), upl
 
 });
 
-router.put('/updateLunchMenu', passport.authenticate('jwt', {session: false}), upload.any(), (req, res) => {
+router.put('/updateLunchMenu', authenticate(), upload.any(), (req, res) => {
 	
 	const { user } = req;
     var userID = user.catererID
@@ -104,7 +106,7 @@ router.put('/updateLunchMenu', passport.authenticate('jwt', {session: false}), u
     });
 });
  
-router.put('/makeDefault_LunchMenu', passport.authenticate('jwt', {session: false}), (req, res) => {
+router.put('/makeDefault_LunchMenu', authenticate(), (req, res) => {
 	
 	const { user } = req;
     var userID = user.catererID
@@ -141,7 +143,7 @@ router.put('/makeDefault_LunchMenu', passport.authenticate('jwt', {session: fals
     });
 });
 
-router.delete('/deleteLunchMenu', passport.authenticate('jwt', {session: false}), (req, res) => {
+router.delete('/deleteLunchMenu', authenticate(), (req, res) => {
 	
 	const { user } = req;
     var userID = user.catererID
@@ -156,5 +158,56 @@ router.delete('/deleteLunchMenu', passport.authenticate('jwt', {session: false})
         return res.status(200).json(doc);
     });
 });
+
+
+function authenticate() {
+    return (req, res, next) => {
+      passport.authenticate('jwt', {session: false}, (err, user, info) => {
+        if (err) {
+            console.log( 'err = ', err)
+            next(err);
+        } 
+        else if (info) {
+            if (info.name === 'TokenExpiredError') {
+
+               if (req && req.cookies['jwt'] && req.cookies['refreshToken']) {
+
+                    const refresh_token = req.cookies['refreshToken']
+                    const jwttoken = req.cookies['jwt']
+                    var decoded = jwt.decode(jwttoken, {complete: true});
+                    var decodedPayload = decoded.payload
+
+                    if (decodedPayload.refreshToken === refresh_token) {
+                        const payload = {
+                            catererID: decodedPayload.catererID,
+                            catererName: decodedPayload.catererName,
+                            catererEmail: decodedPayload.catererEmail,
+                            refreshToken: decodedPayload.refreshToken,
+                        };
+                        const token = jwt.sign(payload, process.env.jwtSecretKey, {expiresIn: '30m'} );
+                        req.user = payload;
+                        req.jwttoken = token
+                        next();
+                    }
+                    else {
+                        res.status(401).send('Unauthorized');
+                    }
+                }
+                else {
+                    res.status(401).send('Unauthorized');
+                }
+            }
+            else {
+                res.status(401).send('Unauthorized');
+            }
+        } 
+        else {
+            console.log(user)
+            req.user = user;
+            next();
+        }
+      })(req, res, next);
+    };
+  }
 
 module.exports = router;

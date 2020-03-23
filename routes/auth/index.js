@@ -1,5 +1,6 @@
 var express = require('express');
 var router = express.Router();
+var randtoken = require('rand-token') 
 const jwt = require('jsonwebtoken');
 var passport = require('passport');
 var Caterer = require('../../models/caterer');
@@ -104,10 +105,12 @@ router.post('/catererlogin', (req, res) => {
         }
         else {
             /** This is what ends up in our JWT */
+            var refreshToken = randtoken.uid(256) 
             const payload = {
                 catererID: user._id,
                 catererName: user.catererName,
                 catererEmail: user.catererEmail,
+                refreshToken: refreshToken,
             };
 
             /** assigns payload to req.user */
@@ -118,10 +121,11 @@ router.post('/catererlogin', (req, res) => {
                 }
                 else {
                     /** generate a signed json web token and return it in the response */
-                    const token = jwt.sign(payload, process.env.jwtSecretKey, {expiresIn: '999y'});
+                    const token = jwt.sign(payload, process.env.jwtSecretKey, {expiresIn: '1m'});
                     payload.token = token
                     /** assign our jwt to the cookie */
                     res.cookie('jwt', token, { httpOnly: true});
+                    res.cookie('refreshToken', refreshToken, { httpOnly: true,});
                     res.status(200).json(payload);
                 }
             });
@@ -147,7 +151,6 @@ router.put('/updatepassword', (req, res) => {
 });
 
 router.get('/getresetpassword', (req, res) => {
-    console.log(req.query.resetPasswordToken)
     Caterer.findOne({
         resetPasswordToken: req.query.resetPasswordToken,
       }).then((caterer) => {
@@ -165,12 +168,6 @@ router.get('/getresetpassword', (req, res) => {
           });
         }
       });
-});
-
-router.get('/testget', passport.authenticate('jwt', {session: false}), (req, res) => {
-    const { user } = req;
-    console.log('req = ', user)
-    res.status(200).send({ user });
 });
 
 router.get('/logout', (req, res) => {

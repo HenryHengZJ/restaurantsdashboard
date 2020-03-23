@@ -6,7 +6,9 @@ var ObjectId = require('mongodb').ObjectID;
 var passport = require('passport');
 var moment = require('moment');
 var mail = require('../../nodeMailerWithTemp');
+const jwt = require('jsonwebtoken');
 require('dotenv').config();
+
 const stripe = require('stripe')(process.env.STRIPE_KEY);
 
 
@@ -19,7 +21,7 @@ router.post('/addLunchOrder', (req, res) => {
 
 });
 
-router.get('/getlunchorder', passport.authenticate('jwt', {session: false}), (req, res) => {
+router.get('/getlunchorder', authenticate(), (req, res) => {
 
     const { user } = req;
     var userID = user.catererID
@@ -67,7 +69,7 @@ router.get('/getlunchorder', passport.authenticate('jwt', {session: false}), (re
       });
 });
 
-router.get('/getlunchorder_customer', passport.authenticate('jwt', {session: false}), (req, res) => {
+router.get('/getlunchorder_customer', authenticate(), (req, res) => {
 
     const { user } = req;
     var userID = user.catererID
@@ -116,7 +118,7 @@ router.get('/getlunchorder_customer', passport.authenticate('jwt', {session: fal
       
 });
 
-router.put('/acceptlunchorder', passport.authenticate('jwt', {session: false}), (req, res) => {
+router.put('/acceptlunchorder', authenticate(), (req, res) => {
 
     var matchquery = {};
     var arrayOfLunchOrderIDString = JSON.parse(req.body.arrayOfLunchOrderID)
@@ -217,7 +219,7 @@ function acceptAction(lunchorderdoc, paymentIntentID, lunchOrderID, lunchOrderIt
    });
  }
 
- router.put('/rejectlunchorder', passport.authenticate('jwt', {session: false}), (req, res) => {
+ router.put('/rejectlunchorder', authenticate(), (req, res) => {
 
     var matchquery = {}
 
@@ -295,5 +297,56 @@ function updateRejectAction(lunchOrderID) {
       
     });
  }
+
+
+ function authenticate() {
+    return (req, res, next) => {
+      passport.authenticate('jwt', {session: false}, (err, user, info) => {
+        if (err) {
+            console.log( 'err = ', err)
+            next(err);
+        } 
+        else if (info) {
+            if (info.name === 'TokenExpiredError') {
+                
+               if (req && req.cookies['jwt'] && req.cookies['refreshToken']) {
+
+                    const refresh_token = req.cookies['refreshToken']
+                    const jwttoken = req.cookies['jwt']
+                    var decoded = jwt.decode(jwttoken, {complete: true});
+                    var decodedPayload = decoded.payload
+
+                    if (decodedPayload.refreshToken === refresh_token) {
+                        const payload = {
+                            catererID: decodedPayload.catererID,
+                            catererName: decodedPayload.catererName,
+                            catererEmail: decodedPayload.catererEmail,
+                            refreshToken: decodedPayload.refreshToken,
+                        };
+                        const token = jwt.sign(payload, process.env.jwtSecretKey, {expiresIn: '30m'} );
+                        req.user = payload;
+                        req.jwttoken = token
+                        next();
+                    }
+                    else {
+                        res.status(401).send('Unauthorized');
+                    }
+                }
+                else {
+                    res.status(401).send('Unauthorized');
+                }
+            }
+            else {
+                res.status(401).send('Unauthorized');
+            }
+        } 
+        else {
+            console.log(user)
+            req.user = user;
+            next();
+        }
+      })(req, res, next);
+    };
+  }
 
 module.exports = router;
