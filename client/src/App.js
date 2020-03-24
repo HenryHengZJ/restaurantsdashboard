@@ -3,6 +3,7 @@ import { HashRouter, Route, Switch } from 'react-router-dom';
 // import { renderRoutes } from 'react-router-config';
 import Loadable from 'react-loadable';
 import './App.scss';
+import Cookies from 'js-cookie';
 
 const loading = () => <div className="animated fadeIn pt-3 text-center">Loading...</div>;
 
@@ -29,31 +30,6 @@ const CatererLogin = Loadable({
   loading
 });
 
-const DeliveryConfirmation = Loadable({
-  loader: () => import('./views/Pages/DeliveryConfirmation'),
-  loading
-});
-
-const SearchCaterer = Loadable({
-  loader: () => import('./views/Pages/SearchCaterer'),
-  loading
-});
-
-const CatererDetail = Loadable({
-  loader: () => import('./views/Pages/CatererDetail'),
-  loading
-});
-
-const Login = Loadable({
-  loader: () => import('./views/Pages/Login'),
-  loading
-});
-
-const Register = Loadable({
-  loader: () => import('./views/Pages/Register'),
-  loading
-});
-
 const Page404 = Loadable({
   loader: () => import('./views/Pages/Page404'),
   loading
@@ -77,7 +53,8 @@ class App extends Component {
   }
 
   componentDidMount() {
-    if (localStorage.getItem('jwt') && typeof localStorage.getItem('jwt') !== 'undefined') {
+    console.log(Cookies.get('refreshToken'))
+    if (typeof Cookies.get('refreshToken') !== 'undefined') {
       this.setState({
         loggedIn: true
       })
@@ -91,15 +68,11 @@ class App extends Component {
           <Switch>
             <Route exact path="/forgotpassword" name="Forgot Password" component={ForgotPassword} />
             <Route exact path="/resetpassword/:resetlink" name="Reset Password" component={ResetPassword} />
-            <Route exact path="/deliveryconfirmation" name="Delivery Confirmation" component={DeliveryConfirmation} />
-            <Route exact path="/catererdetail" name="Caterer Detail" component={CatererDetail} />
-            <Route exact path="/searchcaterer" name="Search Caterer" component={SearchCaterer} />
-            <Route exact path="/login" name="Login Page" component={Login} />
-            <Route exact path="/register" name="Register Page" component={Register} />
             <Route exact path="/404" name="Page 404" component={Page404} />
             <Route exact path="/500" name="Page 500" component={Page500} />
+            <Route exact path="/login" name="Caterer Login" component={CatererLogin} />
             <Route path="/caterer" name="Caterer Dashboard" component={DefaultLayout} />
-            <Route path="/" name={this.state.loggedIn ? "Caterer Dashboard" : "CatererLogin"} component={this.state.loggedIn ? DefaultLayout : CatererLogin} />
+            <Route path="/" name={this.state.loggedIn ? "Caterer Dashboard" : "Caterer Login"} component={this.state.loggedIn ? DefaultLayout : CatererLogin} />
           </Switch>
       </HashRouter>
     );

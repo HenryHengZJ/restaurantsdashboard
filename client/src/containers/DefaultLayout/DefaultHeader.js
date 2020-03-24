@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
-import { Badge, DropdownItem, DropdownMenu, DropdownToggle, Nav, NavItem, NavLink, Label } from 'reactstrap';
+import { Badge, Dropdown, DropdownItem, DropdownMenu, DropdownToggle, Nav, NavItem, NavLink, Label } from 'reactstrap';
 import PropTypes from 'prop-types';
 import axios from 'axios';
 import apis from "../../apis";
@@ -21,6 +21,7 @@ class DefaultHeader extends Component {
     this.state = {
       catererName: "",
       profilesrc: "",
+      dropdownOpen: false
     };
   }
 
@@ -45,6 +46,13 @@ class DefaultHeader extends Component {
       });
   }
 
+  
+  toggleDropDown = () => {
+    this.setState({
+      dropdownOpen: !this.state.dropdownOpen
+    })
+  }
+
   render() {
 
     // eslint-disable-next-line
@@ -66,19 +74,20 @@ class DefaultHeader extends Component {
           <NavItem className="d-md-down-none">
             <Label style={{marginTop: 5, marginLeft: 10, marginRight: 10}} className="h5">{this.state.catererName}</Label>
           </NavItem>
+
           
-          <AppHeaderDropdown style={{marginRight: 20}} direction="down">
+          <Dropdown isOpen={this.state.dropdownOpen} toggle={this.toggleDropDown} style={{marginRight: 20}} direction="down">
             <DropdownToggle nav>
               <img style={{width: 40, height: 40, position: 'relative', overflow: 'hidden', borderRadius: '50%'}} src={this.state.profilesrc} className="img-avatar" alt="" />
-              <i className="fa fa-chevron-down fa-1x" />
+              <i style={{marginLeft: 10}} className="fa fa-chevron-down fa-1x" />
             </DropdownToggle>
-            <DropdownMenu right style={{ right: 'auto' }}>
+            <DropdownMenu >
               <DropdownItem onClick={e => this.props.onProfileClicked(e)}><i className="fa fa-user"></i> Profile</DropdownItem>
               <DropdownItem onClick={e => this.props.onTermsConditionClicked(e)}><i className="fa fa-shield"></i> Terms & Conditions</DropdownItem>
               <DropdownItem onClick={e => this.props.onPrivacyPolicyClicked(e)}><i className="fa fa-lock"></i> Privacy Policy</DropdownItem>
               <DropdownItem onClick={e => this.props.onLogout(e)}><i className="fa fa-sign-out"></i> Logout</DropdownItem>
             </DropdownMenu>
-          </AppHeaderDropdown>
+          </Dropdown>
         </Nav>
         
       </React.Fragment>

@@ -133,7 +133,7 @@ function authenticate() {
                             catererEmail: decodedPayload.catererEmail,
                             refreshToken: decodedPayload.refreshToken,
                         };
-                        const token = jwt.sign(payload, process.env.jwtSecretKey, {expiresIn: '30m'} );
+                        const token = jwt.sign(payload, process.env.jwtSecretKey, {expiresIn: '7d'} );
                         req.user = payload;
                         req.jwttoken = token
                         next();

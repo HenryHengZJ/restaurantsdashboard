@@ -43,9 +43,7 @@ class DefaultLayout extends Component {
     axios.get(url, {withCredentials: true}, {headers: headers})
       .then((response) => {
         if (response.status === 200) {
-          //window.location.assign('https://foodiebeecaterer.herokuapp.com');
-          localStorage.removeItem('jwt')
-          this.props.history.push('/')
+          this.props.history.push('/login')
         }
       })
       .catch((error) => {

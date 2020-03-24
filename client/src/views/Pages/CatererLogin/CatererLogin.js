@@ -162,7 +162,7 @@ class CatererLogin extends Component {
                         className="text-muted text-center"
                       >
                         Don't have an account?&nbsp;
-                        <Button href="https://foodiebee.eu/caterersignup" color="link" onClick={() => this.signUp()} style={{ fontWeight: '500',color: "#20a8d8" }} >
+                        <Button href="https://foodiebee.eu/caterersignup" color="link" style={{ fontWeight: '500',color: "#20a8d8" }} >
                           <p style={{padding: 0, marginTop: 10}}>Sign Up</p>
                         </Button>
                       </p>

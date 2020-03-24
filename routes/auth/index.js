@@ -121,11 +121,11 @@ router.post('/catererlogin', (req, res) => {
                 }
                 else {
                     /** generate a signed json web token and return it in the response */
-                    const token = jwt.sign(payload, process.env.jwtSecretKey, {expiresIn: '1m'});
+                    const token = jwt.sign(payload, process.env.jwtSecretKey, {expiresIn: '7d'});
                     payload.token = token
                     /** assign our jwt to the cookie */
                     res.cookie('jwt', token, { httpOnly: true});
-                    res.cookie('refreshToken', refreshToken, { httpOnly: true,});
+                    res.cookie('refreshToken', refreshToken);
                     res.status(200).json(payload);
                 }
             });
@@ -172,6 +172,7 @@ router.get('/getresetpassword', (req, res) => {
 
 router.get('/logout', (req, res) => {
     req.logout();
+    res.clearCookie('refreshToken')
     res.status(200).clearCookie('jwt', {path: '/'}).json({message: "successfully logout"});
 });
 
