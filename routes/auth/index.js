@@ -105,7 +105,15 @@ router.post('/catererlogin', (req, res) => {
         }
         else {
             /** This is what ends up in our JWT */
-            var refreshToken = randtoken.uid(256) 
+            const refresh_payload = {
+                customerID: user._id,
+                customerName: user.customerFirstName,
+                customerEmail: user.customerEmail,
+                customerCompanyID: user.customerCompanyID,
+            };
+
+            const refreshToken = jwt.sign(refresh_payload, process.env.jwtSecretKey, {expiresIn: '365d'} );
+
             const payload = {
                 catererID: user._id,
                 catererName: user.catererName,
@@ -122,11 +130,11 @@ router.post('/catererlogin', (req, res) => {
                 else {
                     /** generate a signed json web token and return it in the response */
                     const token = jwt.sign(payload, process.env.jwtSecretKey, {expiresIn: '7d'});
-                    payload.token = token
+                    
                     /** assign our jwt to the cookie */
                     res.cookie('jwt', token, { httpOnly: true});
-                    res.cookie('refreshToken', refreshToken);
-                    res.status(200).json(payload);
+                    res.cookie('refreshToken', refreshToken, {maxAge: 365 * 24 * 60 * 60 * 1000});
+                    res.status(200).header('x-auth', token).json(payload);
                 }
             });
         }

@@ -168,6 +168,7 @@ function authenticate() {
             next(err);
         } 
         else if (info) {
+
             if (info.name === 'TokenExpiredError') {
 
                if (req && req.cookies['jwt'] && req.cookies['refreshToken']) {
@@ -176,7 +177,7 @@ function authenticate() {
                     const jwttoken = req.cookies['jwt']
                     var decoded = jwt.decode(jwttoken, {complete: true});
                     var decodedPayload = decoded.payload
-
+  
                     if (decodedPayload.refreshToken === refresh_token) {
                         const payload = {
                             catererID: decodedPayload.catererID,
@@ -197,8 +198,26 @@ function authenticate() {
                     res.status(401).send('Unauthorized');
                 }
             }
+            //No JWT Token (jwt in cookies is gone)
             else {
-                res.status(401).send('Unauthorized');
+                if (req && req.cookies['refreshToken']) {
+                    const refresh_token = req.cookies['refreshToken']
+                    var decoded = jwt.decode(refresh_token, {complete: true});
+                    var decodedPayload = decoded.payload
+                    const payload = {
+                        catererID: decodedPayload.catererID,
+                        catererName: decodedPayload.catererName,
+                        catererEmail: decodedPayload.catererEmail,
+                        refreshToken: refresh_token,
+                    };
+                    const token = jwt.sign(payload, process.env.jwtSecretKey, {expiresIn: '7d'} );
+                    req.user = payload;
+                    req.jwttoken = token
+                    next(); 
+                }
+                else {
+                    res.status(401).send('Unauthorized');
+                }
             }
         } 
         else {
