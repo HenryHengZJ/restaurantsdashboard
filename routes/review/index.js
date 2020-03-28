@@ -11,6 +11,7 @@ router.get('/getreview', authenticate(), (req, res) => {
 
     const { user } = req;
     var userID = user.catererID
+    var token = jwttoken
 
 	var matchquery = {};
 
@@ -51,10 +52,14 @@ router.get('/getreview', authenticate(), (req, res) => {
 
     Review.aggregate(aggregationquery, (err,doc) => {
          if (err) {
-             console.log(err)
              return res.status(500).send({ error: err });
          }
-         return res.status(200).json(doc);
+         else {
+            if (typeof token !== 'undefined') {
+                res.cookie('jwt', token, { httpOnly: true,});
+            }
+            return res.status(200).json(doc);
+         }
       });
 });
 

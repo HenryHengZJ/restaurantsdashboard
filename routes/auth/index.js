@@ -106,10 +106,9 @@ router.post('/catererlogin', (req, res) => {
         else {
             /** This is what ends up in our JWT */
             const refresh_payload = {
-                customerID: user._id,
-                customerName: user.customerFirstName,
-                customerEmail: user.customerEmail,
-                customerCompanyID: user.customerCompanyID,
+                catererID: user._id,
+                catererName: user.catererName,
+                catererEmail: user.catererEmail,
             };
 
             const refreshToken = jwt.sign(refresh_payload, process.env.jwtSecretKey, {expiresIn: '365d'} );

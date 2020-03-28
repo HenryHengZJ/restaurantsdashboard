@@ -27,22 +27,32 @@ let upload = multer({
 
 router.get('/getcaterer', authenticate(), (req, res) => {
 
-    const { user } = req;
+    const { user, jwttoken } = req;
     var userID = user.catererID
+    var token = jwttoken
 
     var matchquery;
     matchquery = {_id: new ObjectId(userID)}
 
     Caterer.find(matchquery, (err,doc) => {
-        if (err) return res.status(500).send({ error: err });
-        return res.status(200).json(doc);
+        if (err) {
+            return res.status(500).send({ error: err });
+        }
+        else {
+            if (typeof token !== 'undefined') {
+                res.cookie('jwt', token, { httpOnly: true,});
+            }
+            return res.status(200).json(doc);
+        }
     });
 }); 
 
 
 router.put('/updatecaterer', authenticate(), (req, res) => {
-    const { user } = req;
+
+    const { user, jwttoken } = req;
     var userID = user.catererID
+    var token = jwttoken
 
     var matchquery;
     matchquery = {_id: new ObjectId(userID)}
@@ -50,15 +60,24 @@ router.put('/updatecaterer', authenticate(), (req, res) => {
     var updateData = req.body
 
     Caterer.findOneAndUpdate(matchquery, {$set: updateData}, {upsert:true, new: true, runValidators: true, setDefaultsOnInsert: true}, (err, doc) => {
-        if (err) return res.status(500).send({ error: err });
-        return res.status(201).json(doc);
+        if (err) {
+            return res.status(500).send({ error: err });
+        }
+        else {
+            if (typeof token !== 'undefined') {
+                res.cookie('jwt', token, { httpOnly: true,});
+            }
+            return res.status(201).json(doc);
+        }
     });
 });
 
 
 router.put('/updatecatererpassword', authenticate(), (req, res) => {
-    const { user } = req;
+
+    const { user, jwttoken } = req;
     var userID = user.catererID
+    var token = jwttoken
 
     var matchquery;
     matchquery = {_id: new ObjectId(userID)}
@@ -71,22 +90,30 @@ router.put('/updatecatererpassword', authenticate(), (req, res) => {
     }
 
     Caterer.findOneAndUpdate(matchquery, {$set: updateData}, {upsert:true, runValidators: true, setDefaultsOnInsert: true}, (err, doc) => {
-        if (err) return res.status(500).send({ error: err });
-        return res.status(201).json(doc);
+        if (err){
+            return res.status(500).send({ error: err });
+        }
+        else {
+            if (typeof token !== 'undefined') {
+                res.cookie('jwt', token, { httpOnly: true,});
+            }
+            return res.status(201).json(doc);
+        }
     });
 
 });
 
 router.put('/updatecaterernameaddress', authenticate(), upload.any(), (req, res) => {
-    const { user } = req;
+
+    const { user, jwttoken } = req;
     var userID = user.catererID
+    var token = jwttoken
 
     var matchquery;
     matchquery = {_id: new ObjectId(userID)}
     
     var updateData = req.body
     var files = req.files;
-    console.log(files)
 
 	if (files.length > 0) {
        for (let i = 0; i < files.length; i++) {
@@ -98,12 +125,17 @@ router.put('/updatecaterernameaddress', authenticate(), upload.any(), (req, res)
         }
        }
     }
-    
-    console.log(updateData)
-
+  
     Caterer.findOneAndUpdate(matchquery, {$set: updateData}, {upsert:true, new: true, runValidators: true, setDefaultsOnInsert: true}, (err, doc) => {
-        if (err) return res.status(500).send({ error: err });
-        return res.status(201).json(doc);
+        if (err) {
+            return res.status(500).send({ error: err });
+        }
+        else {
+            if (typeof token !== 'undefined') {
+                res.cookie('jwt', token, { httpOnly: true,});
+            }
+            return res.status(201).json(doc);
+        }
     });
 });
 

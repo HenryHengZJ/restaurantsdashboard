@@ -27,8 +27,9 @@ let upload = multer({
 
 router.get('/getLunchMenu', authenticate(), (req, res) => {
 
-    const { user } = req;
+    const { user, jwttoken } = req;
     var userID = user.catererID
+    var token = jwttoken
 
     var matchquery;
     matchquery = {catererID: new ObjectId(userID)}
@@ -45,16 +46,23 @@ router.get('/getLunchMenu', authenticate(), (req, res) => {
     }
 
     menuquery.exec((err,doc) => {
-        if (err) return res.status(500).send({ error: err });
-        console.log(doc)
-        return res.status(200).json(doc);
+        if (err) {
+             return res.status(500).send({ error: err })
+        }
+        else{
+            if (typeof token !== 'undefined') {
+                res.cookie('jwt', token, { httpOnly: true,});
+            }
+            return res.status(200).json(doc);
+        }  
     });
 });
 
 router.post('/addLunchMenu', authenticate(), upload.any(), (req, res) => {
 	
-    const { user } = req;
+    const { user, jwttoken } = req;
     var userID = user.catererID
+    var token = jwttoken
    
     var newData = req.body
     if (typeof newData.markitem !== 'undefined') {
@@ -77,8 +85,9 @@ router.post('/addLunchMenu', authenticate(), upload.any(), (req, res) => {
 
 router.put('/updateLunchMenu', authenticate(), upload.any(), (req, res) => {
 	
-	const { user } = req;
+    const { user, jwttoken } = req;
     var userID = user.catererID
+    var token = jwttoken
 
     var matchquery;
     if (typeof req.query._id === 'undefined') {
@@ -102,14 +111,19 @@ router.put('/updateLunchMenu', authenticate(), upload.any(), (req, res) => {
     LunchMenu.findOneAndUpdate(matchquery, {$set: updateData}, {runValidators: true}, (err, doc) => {
         if (err) return res.status(500).send({ error: err });
 		if (doc === null) return res.status(404).send({ error: 'document not found' });
+        if (typeof token !== 'undefined') {
+            res.cookie('jwt', token, { httpOnly: true,});
+        }
         return res.status(201).json(doc);
     });
 });
  
 router.put('/makeDefault_LunchMenu', authenticate(), (req, res) => {
 	
-	const { user } = req;
+    const { user, jwttoken } = req;
     var userID = user.catererID
+    var token = jwttoken
+
     var arrayOfLunchMenuID = []
     var matchquery = {catererID: new ObjectId(userID)};
 
@@ -137,6 +151,9 @@ router.put('/makeDefault_LunchMenu', authenticate(), (req, res) => {
             bulkLunchMenu.execute((err, doc) => {
                 if (err) return res.status(500).send({ error: err });
                 if (doc === null) return res.status(404).send({ error: 'document not found' });
+                if (typeof token !== 'undefined') {
+                    res.cookie('jwt', token, { httpOnly: true,});
+                }
                 return res.status(201).json(doc);
             });
         }
@@ -145,8 +162,9 @@ router.put('/makeDefault_LunchMenu', authenticate(), (req, res) => {
 
 router.delete('/deleteLunchMenu', authenticate(), (req, res) => {
 	
-	const { user } = req;
+    const { user, jwttoken } = req;
     var userID = user.catererID
+    var token = jwttoken
 
     var matchquery = {};
     if (typeof req.query._id !== 'undefined') {
@@ -154,8 +172,15 @@ router.delete('/deleteLunchMenu', authenticate(), (req, res) => {
     }
 
     LunchMenu.remove(matchquery, (err, doc) => {
-        if (err) return res.status(500).send({ error: err });
-        return res.status(200).json(doc);
+        if (err) {
+            return res.status(500).send({ error: err })
+        }
+        else {
+            if (typeof token !== 'undefined') {
+                res.cookie('jwt', token, { httpOnly: true,});
+            }
+            return res.status(200).json(doc);
+        }
     });
 });
 

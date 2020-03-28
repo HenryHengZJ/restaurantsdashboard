@@ -25,6 +25,8 @@ router.get('/getlunchorder', authenticate(), (req, res) => {
 
     const { user } = req;
     var userID = user.catererID
+    var token = jwttoken
+
     var matchquery = {}
     matchquery.catererID = new ObjectId(userID);
     
@@ -64,6 +66,9 @@ router.get('/getlunchorder', authenticate(), (req, res) => {
         }
         else {
             console.log(doc)
+            if (typeof token !== 'undefined') {
+                res.cookie('jwt', token, { httpOnly: true,});
+            }
             return res.status(200).json(doc);
         }
       });
@@ -73,6 +78,8 @@ router.get('/getlunchorder_customer', authenticate(), (req, res) => {
 
     const { user } = req;
     var userID = user.catererID
+    var token = jwttoken
+
     var matchquery = {}
 	matchquery.catererID = new ObjectId(userID);
 
@@ -112,6 +119,9 @@ router.get('/getlunchorder_customer', authenticate(), (req, res) => {
         }
         else {
             console.log(doc)
+            if (typeof token !== 'undefined') {
+                res.cookie('jwt', token, { httpOnly: true,});
+            }
             return res.status(200).json(doc);
         }
      });
@@ -119,6 +129,10 @@ router.get('/getlunchorder_customer', authenticate(), (req, res) => {
 });
 
 router.put('/acceptlunchorder', authenticate(), (req, res) => {
+
+    const { user } = req;
+    var userID = user.catererID
+    var token = jwttoken
 
     var matchquery = {};
     var arrayOfLunchOrderIDString = JSON.parse(req.body.arrayOfLunchOrderID)
@@ -172,6 +186,9 @@ router.put('/acceptlunchorder', authenticate(), (req, res) => {
                 Promise.all(promiseArr)
                 .then((result) => {
                     console.log('result = ', result)
+                    if (typeof token !== 'undefined') {
+                        res.cookie('jwt', token, { httpOnly: true,});
+                    }
                     return res.status(201).json("updated");
                 })
                 .catch((err) => {
