@@ -6,6 +6,7 @@ import Footer from '../../../components/Footer/Footer';
 import caterer_login_wallpaper from "../../../assets/img/caterer_login_wallpaper.jpg";
 import axios from 'axios';
 import apis from "../../../apis";
+import color from "../../../assets/color"
 
 class CatererLogin extends Component {
 
@@ -66,7 +67,7 @@ class CatererLogin extends Component {
 
     const {useremail, userpassword} = this.state;
 
-    var data = {
+    /*var data = {
       email: useremail.toLowerCase(),
       password: userpassword
     }
@@ -94,16 +95,18 @@ class CatererLogin extends Component {
         this.setState({
           invalidUser: true
         })
-      });
+      });*/
+
+      this.props.history.push('/restaurant')
     
   };
 
   openEmail = () => {
-    window.location.href = `mailto:support@foodiebee.eu`;
+    window.location.href = `mailto:restaurantt@koyomari.eu`;
   }
 
   signUp = () => {
-    window.open('https://foodiebee.eu/caterersignup', '_blank');
+   // window.open('https://foodiebee.eu/caterersignup', '_blank');
   }
 
   render() {
@@ -135,16 +138,15 @@ class CatererLogin extends Component {
                   <img
                       style={{
                         objectFit: "cover",
-                        height: 70,
-                        width: 180,
-                        marginBottom: 20
+                        height: 120,
+                        width: 120,
+                        marginBottom: 10
                       }}
-                      src={require("../../../assets/img/brandlogo_dark.png")}
+                      src={require("../../../assets/img/logo.png")}
                     />
-                  <h2 style={{ fontSize: 40 }}>Boost your business</h2>
+                  <h2 style={{ fontSize: 40 }}>Koyomari | The Shushi Bar</h2>
                   <h6 style={{ lineHeight:2, fontSize: 18, letterSpacing: 2, marginTop: 30 }}>
-                    Orders management, marketting channels, reviews and feedback.
-                    There are much more benefits when you join us.
+                    Orders management, marketting channels, reviews and feedback, all in one dashboard.
                   </h6>
                 </Col>
 
@@ -156,13 +158,13 @@ class CatererLogin extends Component {
                   <CardBody className="text-center">
                     
                     <Form>
-                      <h2>Caterer Login</h2>
+                      <h2>Login</h2>
                       <p
                         style={{ marginBottom: 20 }}
                         className="text-muted text-center"
                       >
                         Don't have an account?&nbsp;
-                        <Button href="https://foodiebee.eu/caterersignup" color="link" style={{ fontWeight: '500',color: "#20a8d8" }} >
+                        <Button href="/" color="link" style={{ fontWeight: '500',color: color.primary }} >
                           <p style={{padding: 0, marginTop: 10}}>Sign Up</p>
                         </Button>
                       </p>
@@ -205,9 +207,8 @@ class CatererLogin extends Component {
                       <Row>
                         <Col xs="6" md="6">
                           <Button
-                            style={{ backgroundColor: "#20a8d8" }}
+                            style={{ backgroundColor: color.primary, color: 'white' }}
                             onClick={e => this.login(e)}
-                            color="primary"
                             className="px-4"
                           >
                             Login
@@ -218,9 +219,9 @@ class CatererLogin extends Component {
                             style={{
                               boxShadow: "none",
                               background: "none",
-                              fontWeight: "500"
+                              fontWeight: "500",
+                              color: color.primary
                             }}
-                            color="link"
                             onClick={() => this.forgotPasswordClick()}
                             className="px-4"
                             href="/#/forgotpassword"
@@ -235,8 +236,8 @@ class CatererLogin extends Component {
                       className="text-muted text-center"
                     >
                       Have a question?&nbsp;
-                      <Button color="link" onClick={() => this.openEmail()} style={{ fontWeight: '500',color: "#20a8d8" }} >
-                        <p style={{padding: 0, marginTop: 10}}>support@foodiebee.eu</p>
+                      <Button color="link" onClick={() => this.openEmail()} style={{ fontWeight: '500',color: color.primary }} >
+                        <p style={{padding: 0, marginTop: 10}}>support@restaurant.com</p>
                       </Button>
                     </p>
                   </CardBody>

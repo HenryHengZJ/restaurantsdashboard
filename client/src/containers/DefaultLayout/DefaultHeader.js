@@ -33,7 +33,7 @@ class DefaultHeader extends Component {
 
     var url = apis.GETcaterer;
 
-    axios.get(url, {withCredentials: true}, {headers: headers})
+    /*axios.get(url, {withCredentials: true}, {headers: headers})
       .then((response) => {
         if (response.status === 200) {
           this.setState({
@@ -43,9 +43,16 @@ class DefaultHeader extends Component {
         } 
       })
       .catch((error) => {
-      });
+      });*/
+      this.putInitialData()
   }
 
+  putInitialData = () => {
+    this.setState({
+      catererName: "Koyomari Sushi Bar",
+      profilesrc: "https://s3-eu-west-1.amazonaws.com/foodiebeegeneralphoto/logo.png",
+    })
+  }
   
   toggleDropDown = () => {
     this.setState({
@@ -61,10 +68,7 @@ class DefaultHeader extends Component {
     return (
       <React.Fragment>
         <AppSidebarToggler className="d-lg-none" display="md" mobile />
-        <AppNavbarBrand>
-          <img style={{objectFit: 'cover', height: 50, width: 160, marginLeft: 20, marginTop: 10}} src={require('../../assets/img/brandlogo_light.png')}/>
-
-        </AppNavbarBrand>
+  
         <AppSidebarToggler className="d-md-down-none" display="lg" />
 
         
@@ -83,8 +87,6 @@ class DefaultHeader extends Component {
             </DropdownToggle>
             <DropdownMenu >
               <DropdownItem onClick={e => this.props.onProfileClicked(e)}><i className="fa fa-user"></i> Profile</DropdownItem>
-              <DropdownItem onClick={e => this.props.onTermsConditionClicked(e)}><i className="fa fa-shield"></i> Terms & Conditions</DropdownItem>
-              <DropdownItem onClick={e => this.props.onPrivacyPolicyClicked(e)}><i className="fa fa-lock"></i> Privacy Policy</DropdownItem>
               <DropdownItem onClick={e => this.props.onLogout(e)}><i className="fa fa-sign-out"></i> Logout</DropdownItem>
             </DropdownMenu>
           </Dropdown>

@@ -70,9 +70,9 @@ class App extends Component {
             <Route exact path="/resetpassword/:resetlink" name="Reset Password" component={ResetPassword} />
             <Route exact path="/404" name="Page 404" component={Page404} />
             <Route exact path="/500" name="Page 500" component={Page500} />
-            <Route exact path="/login" name="Caterer Login" component={CatererLogin} />
-            <Route path="/caterer" name="Caterer Dashboard" component={DefaultLayout} />
-            <Route path="/" name={this.state.loggedIn ? "Caterer Dashboard" : "Caterer Login"} component={this.state.loggedIn ? DefaultLayout : CatererLogin} />
+            <Route exact path="/login" name="Login" component={CatererLogin} />
+            <Route path="/restaurant" name="Dashboard" component={DefaultLayout} />
+            <Route path="/" name={this.state.loggedIn ? "Dashboard" : "Login"} component={this.state.loggedIn ? DefaultLayout : CatererLogin} />
           </Switch>
       </HashRouter>
     );

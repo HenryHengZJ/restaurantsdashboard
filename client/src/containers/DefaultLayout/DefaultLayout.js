@@ -34,7 +34,7 @@ class DefaultLayout extends Component {
   signOut(e) {
     e.preventDefault()
 
-    var headers = {
+    /*var headers = {
       'Content-Type': 'application/json',
     }
 
@@ -50,23 +50,15 @@ class DefaultLayout extends Component {
         toast(<ErrorInfo/>, {
           position: toast.POSITION.BOTTOM_RIGHT
         });
-      });
+      });*/
+
+      this.props.history.push('/login')
     
   }
 
   onProfileClicked(e) {
     e.preventDefault()
-    this.props.history.push('/caterer/account/profile')
-  }
-
-  onTermsConditionClicked(e) {
-    e.preventDefault()
-    this.props.history.push('/caterer/account/termscondition')
-  }
-
-  onPrivacyPolicyClicked(e) {
-    e.preventDefault()
-    this.props.history.push('/caterer/account/privacypolicy')
+    this.props.history.push('/restaurant/account/profile')
   }
 
   render() {
@@ -76,9 +68,7 @@ class DefaultLayout extends Component {
           <Suspense  fallback={this.loading()}>
             <DefaultHeader 
             onLogout={e=>this.signOut(e)} 
-            onProfileClicked={e=>this.onProfileClicked(e)} 
-            onTermsConditionClicked={e=>this.onTermsConditionClicked(e)}
-            onPrivacyPolicyClicked={e=>this.onPrivacyPolicyClicked(e)}/>
+            onProfileClicked={e=>this.onProfileClicked(e)} />
           </Suspense>
         </AppHeader>
         <div className="app-body">
@@ -108,7 +98,7 @@ class DefaultLayout extends Component {
                         )} />
                     ) : (null);
                   })}
-                  <Redirect from="/" to="/caterer/dashboard" />
+                  <Redirect from="/" to="/restaurant/dashboard" />
                 </Switch>
               </Suspense>
             </Container>

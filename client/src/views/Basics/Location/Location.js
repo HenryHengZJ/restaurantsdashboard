@@ -109,7 +109,7 @@ class Location extends Component {
   }
 
   handleProceed = () => {
-    this.props.history.push('/caterer/basics/cuisine')
+    this.props.history.push('/restaurant/basics/payment')
   }
 
   handleNext() {

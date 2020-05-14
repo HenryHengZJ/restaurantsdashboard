@@ -9,7 +9,6 @@ const logger = require('morgan');
 var cors = require('cors');
 const passport = require('passport');
 const cookieParser = require('cookie-parser');
-var cronJob = require('./cronJob')
 require('dotenv').config();
 require('./middleware/passport')(passport);
 
@@ -52,8 +51,6 @@ app.use('/review', reviewRoutes);
 app.use('/auth', authRoutes);
 app.use('/payment', paymentRoutes);
 app.use('/lunchOrder', lunchOrderRoutes);
-
-//cronJob.executeCronJob()
 
 //Static file declaration
 app.use(express.static(path.join(__dirname, 'client/build')));

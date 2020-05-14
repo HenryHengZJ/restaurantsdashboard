@@ -117,7 +117,31 @@ class Sales extends Component {
           }
         ]
       },
-      tableitems: [],
+      tableitems: [
+        {
+          orderItemID: "123456789",
+          orderNumber: "478",
+          orderItem: [{
+            title: "Yasai Gyoza",
+            descrip: "Finely chopped seasonal vegetables dumpling steamed and then pan fried, served with traditional gyoza sauce",
+            priceperunit: 6.8,
+          }],
+          customerID: "123123123",
+          customerDetails: [{
+            customerFirstName: "John",
+            customerLastName: "King",
+            customerPhoneNumber: "083-9457891",
+          }],
+          customerType: "recurring",
+          totalOrderPrice: 6.8,
+          orderStatus: "accepted",
+          paymentIntentID: "123123123",
+          paymentType: "visa",
+          paymentStatus: "succeeded",
+          pickupTime: new Date(),
+          createdAt: new Date(),
+        }
+      ],
       pagesCount: 0,
       pageSize: 2,
       currentPage: 1,
@@ -157,39 +181,35 @@ class Sales extends Component {
 
   componentDidMount() {
 
-    if (sessionStorage.getItem("currentLunchSalesDateString") !== null && sessionStorage.getItem("previousLunchSalesDateString") !== null) {
-      this.getLocalStorage()
-    }
-    else {
-      var currentDate = moment().toDate();
-      var previousDate = this.getPreviousDate(currentDate, 7);
+    var currentDate = moment().toDate();
+    var previousDate = this.getPreviousDate(currentDate, 7);
 
-      var currentDateString = moment(currentDate).format("ddd, DD MMM YYYY")
-      var previousDateString = moment(previousDate).format("ddd, DD MMM YYYY")
-      var finalSelectionDate = previousDateString + ' - ' + currentDateString
-      var finalDateArray = this.getIntervalDates(currentDate, previousDate).reverse();
-      var newline = this.state.line;
-      newline.labels = finalDateArray;
-      var newbar = this.state.bar;
-      newbar.labels = finalDateArray;
+    var currentDateString = moment(currentDate).format("ddd, DD MMM YYYY")
+    var previousDateString = moment(previousDate).format("ddd, DD MMM YYYY")
+    var finalSelectionDate = previousDateString + ' - ' + currentDateString
+    var finalDateArray = this.getIntervalDates(currentDate, previousDate).reverse();
+    var newline = this.state.line;
+    newline.labels = finalDateArray;
+    var newbar = this.state.bar;
+    newbar.labels = finalDateArray;
 
-      this.setState({
-        maxDate: currentDate,
-        currentDate: currentDate,
-        previousDate: previousDate,
-        dateRange: finalSelectionDate,
-        line: newline,
-        bar: newbar,
-        dateArray: finalDateArray,
-      }, () => {
-        this.getSales(currentDateString, previousDateString)
-      })
-    }
+    this.setState({
+      maxDate: currentDate,
+      currentDate: currentDate,
+      previousDate: previousDate,
+      dateRange: finalSelectionDate,
+      line: newline,
+      bar: newbar,
+      dateArray: finalDateArray,
+    }, () => {
+      this.getSales(currentDateString, previousDateString)
+    })
+    
   }
 
   getSales = (currentDateString, previousDateString) => {
   
-    var headers = {
+   /* var headers = {
       'Content-Type': 'application/json',
     }
 
@@ -216,7 +236,17 @@ class Sales extends Component {
           empty: true ,
           loadingModal: false
         })
-      });
+      });*/
+
+      this.setState({
+        empty: false,
+        totalSalesCount: 1,
+        pagesCount: 1,
+        currentPage: 1,
+        loadingModal: false
+      }, () => {
+        this.getChartData()
+      })
   }
 
   getChartData = () => {
@@ -229,7 +259,7 @@ class Sales extends Component {
       var sales = 0
       for (let x = 0; x < tableitems.length; x++) {
         if (moment(tableitems[x].createdAt).format("ddd, DD MMM YYYY") === dateArray[i]) {
-          sales = sales + tableitems[x].netOrderPrice
+          sales = sales + tableitems[x].totalOrderPrice
         }
       }
       linedata.push(sales)
@@ -363,11 +393,11 @@ class Sales extends Component {
       line: newline,
       bar: newbar,
       dateArray: finalDateArray,
-      loadingModal: true,
+  //    loadingModal: true,
     }, () => {
-      sessionStorage.setItem('currentLunchSalesDateString', endDate)
-      sessionStorage.setItem('previousLunchSalesDateString', startDate)
-      this.getSales(endDate, startDate)
+    //  sessionStorage.setItem('currentLunchSalesDateString', endDate)
+    //  sessionStorage.setItem('previousLunchSalesDateString', startDate)
+    //  this.getSales(endDate, startDate)
     })
   }
 
@@ -506,18 +536,6 @@ class Sales extends Component {
                 €{Number(selectedOrderItem.totalOrderPrice).toFixed(2)}
               </td>
             </tr>
-            <tr>
-              <td style={{ fontSize: 16, textAlign: "start" }}>FoodieBee Commission</td>
-              <td style={{ fontSize: 16, fontWeight: "600", textAlign: "end" }}>
-                {selectedOrderItem.commission}%
-              </td>
-            </tr>
-            <tr>
-              <td style={{ fontSize: 16, textAlign: "start" }}>Net Sales</td>
-              <td style={{ fontSize: 16, fontWeight: "600", textAlign: "end" }}>
-                €{Number(selectedOrderItem.netOrderPrice).toFixed(2)}
-              </td>
-            </tr>
           </tbody>
         </Table>
       </div>
@@ -601,8 +619,6 @@ class Sales extends Component {
               {this.capitalizeFirstLetter(tableitems[i].paymentStatus)}
             </Badge>
           </td>
-          <td>{tableitems[i].paymentStatus !== "succeeded" ? "0" : tableitems[i].commission}</td>
-          <td>{tableitems[i].paymentStatus !== "succeeded" ? "0" : Number(tableitems[i].netOrderPrice).toFixed(2)}</td>
         </tr>
       );
     }
@@ -652,8 +668,6 @@ class Sales extends Component {
               <th>Item</th>
               <th>Order Price (€)</th>
               <th>Payment Status</th>
-              <th>Commission (%)</th>
-              <th>Net Sales (€)</th>
             </tr>
           </thead>
           {this.state.empty ? null : this.renderTableItems()}

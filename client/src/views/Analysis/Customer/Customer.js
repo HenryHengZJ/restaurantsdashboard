@@ -125,7 +125,53 @@ class Customer extends Component {
           }
         ]
       },
-      tableitems: [],
+      tableitems: [
+        {
+          orderItemID: "123456789",
+          orderNumber: "123",
+          orderItem: [{
+            title: "Ebi Furai",
+            descrip: "Deep fried king prawns coated in seasonal breadcrumbs served with sweet Japanese sauce",
+            priceperunit: 5.9,
+          }],
+          customerID: "123123123",
+          customerDetails: [{
+            customerFirstName: "Cian",
+            customerLastName: "Horan",
+            customerPhoneNumber: "083-9920456",
+          }],
+          customerType: "new",
+          totalOrderPrice: 5.9,
+          orderStatus: "pending",
+          paymentIntentID: "123123123",
+          paymentType: "visa",
+          paymentStatus: "pending",
+          pickupTime: new Date(),
+        },
+        {
+          orderItemID: "123456789",
+          orderNumber: "478",
+          orderItem: [{
+            title: "Yasai Gyoza",
+            descrip: "Finely chopped seasonal vegetables dumpling steamed and then pan fried, served with traditional gyoza sauce",
+            priceperunit: 6.8,
+          }],
+          customerID: "123123123",
+          customerDetails: [{
+            customerFirstName: "John",
+            customerLastName: "King",
+            customerPhoneNumber: "083-9457891",
+          }],
+          customerType: "recurring",
+          totalOrderPrice: 6.8,
+          orderStatus: "accepted",
+          paymentIntentID: "123123123",
+          paymentType: "visa",
+          paymentStatus: "succeeded",
+          pickupTime: new Date(),
+          createdAt: new Date(),
+        }
+      ],
       filtered_data: [],
       pagesCount: 0,
       pageSize: 2,
@@ -165,39 +211,35 @@ class Customer extends Component {
 
   componentDidMount() {
 
-    if (sessionStorage.getItem("currentCustomerDateString") !== null && sessionStorage.getItem("previousCustomerDateString") !== null) {
-      this.getSessionStorage()
-    }
-    else {
-      var currentDate = moment().toDate();
-      var previousDate = this.getPreviousDate(currentDate, 7);
+    var currentDate = moment().toDate();
+    var previousDate = this.getPreviousDate(currentDate, 7);
 
-      var currentDateString = moment(currentDate).format("ddd, DD MMM YYYY")
-      var previousDateString = moment(previousDate).format("ddd, DD MMM YYYY")
-      var finalSelectionDate = previousDateString + ' - ' + currentDateString
-      var finalDateArray = this.getIntervalDates(currentDate, previousDate).reverse();
-      var newline = this.state.line;
-      newline.labels = finalDateArray;
-      var newbar = this.state.bar;
-      newbar.labels = finalDateArray;
+    var currentDateString = moment(currentDate).format("ddd, DD MMM YYYY")
+    var previousDateString = moment(previousDate).format("ddd, DD MMM YYYY")
+    var finalSelectionDate = previousDateString + ' - ' + currentDateString
+    var finalDateArray = this.getIntervalDates(currentDate, previousDate).reverse();
+    var newline = this.state.line;
+    newline.labels = finalDateArray;
+    var newbar = this.state.bar;
+    newbar.labels = finalDateArray;
 
-      this.setState({
-        maxDate: currentDate,
-        currentDate: currentDate,
-        previousDate: previousDate,
-        dateRange: finalSelectionDate,
-        line: newline,
-        bar: newbar,
-        dateArray: finalDateArray,
-      }, () => {
-        this.getCustomer(currentDateString, previousDateString)
-      })
-    }
+    this.setState({
+      maxDate: currentDate,
+      currentDate: currentDate,
+      previousDate: previousDate,
+      dateRange: finalSelectionDate,
+      line: newline,
+      bar: newbar,
+      dateArray: finalDateArray,
+    }, () => {
+      this.getCustomer(currentDateString, previousDateString)
+    })
+    
   }
 
   getCustomer = (currentDateString, previousDateString) => {
   
-    var headers = {
+   /* var headers = {
       'Content-Type': 'application/json',
     }
 
@@ -222,7 +264,15 @@ class Customer extends Component {
         this.setState({
           empty: true 
         })
-      });
+      });*/
+      this.setState({
+        empty: false,
+        totalCustomerCount: 2,
+        pagesCount: 1,
+        currentPage: 1
+      }, () => {
+        this.getChartData()
+      })
   }
 
   getChartData = () => {
@@ -391,9 +441,9 @@ class Customer extends Component {
       bar: newbar,
       dateArray: finalDateArray,
     }, () => {
-      sessionStorage.setItem('currentCustomerDateString', endDate)
-      sessionStorage.setItem('previousCustomerDateString', startDate)
-      this.getCustomer(endDate, startDate)
+   //   sessionStorage.setItem('currentCustomerDateString', endDate)
+   //   sessionStorage.setItem('previousCustomerDateString', startDate)
+   //   this.getCustomer(endDate, startDate)
     })
   }
 
@@ -538,6 +588,7 @@ class Customer extends Component {
               {this.capitalizeFirstLetter(tableitems[i].customerType)}
             </Badge>
           </td>
+          <td>{tableitems[i].customerDetails[0].customerPhoneNumber}</td>
           <td>#{tableitems[i].orderNumber}</td>
           <td>{moment(tableitems[i].createdAt).format("DD MMM, YYYY")}</td>
           <td>1x {tableitems[i].orderItem[0].title}</td>
@@ -642,6 +693,7 @@ class Customer extends Component {
                   </Dropdown>
               </Row>
             </th>
+            <th>Phone No.</th>
             <th>Last Order No.</th>
             <th style={{ cursor: "pointer" }} className={!this.state.sortDate ? "headerSortUp" : "headerSortDown"} onClick={() => this.sortDateClicked()}>Last Order Date</th>
             <th>Last Order Item</th>

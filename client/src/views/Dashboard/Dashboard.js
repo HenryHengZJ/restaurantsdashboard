@@ -166,7 +166,7 @@ class Dashboard extends Component {
       dateArray: finalDateArray,
     });
 
-    var headers = {
+    /*var headers = {
       'Content-Type': 'application/json',
     }
 
@@ -183,7 +183,7 @@ class Dashboard extends Component {
             rating: typeof response.data[0].rating !== 'undefined' ? Number(response.data[0].rating).toFixed(1) : 0,
             numofreview: typeof response.data[0].numofreview !== 'undefined' ? response.data[0].numofreview : 0,
           }, () => {
-          //  this.putInitialData(this.state.catererName)
+            this.putInitialData(this.state.catererName)
             this.getOrderSales(currentDateString, previousDateString)
             this.getMenuItems()
             this.getReview(currentDateString, previousDateString)
@@ -191,108 +191,71 @@ class Dashboard extends Component {
         } 
       })
       .catch((error) => {
-      });
+      });*/
+
+      this.putInitialData()
+
   }
 
-  putInitialData = (catererName) => {
-    if (catererName === 'Asian Wok') {
-      var newline = this.state.orderline
-      var linedata = [1, 15, 2, 4, 5, 10, 7, 2]
-      newline.datasets[0].data = linedata
-      newline.datasets[0].orderlast7days = 150
-      newline.datasets[0].orderalltime = 400
+  putInitialData = () => {
+ 
+    var newline = this.state.orderline
+    var linedata = [1, 15, 2, 4, 5, 10, 7, 2]
+    newline.datasets[0].data = linedata
+    newline.datasets[0].orderlast7days = 150
+    newline.datasets[0].orderalltime = 400
 
-      var newbar = this.state.salesbar
-      var bardata = [15.00, 29.99, 45.50, 55.00, 57.45, 10.99, 7.99, 2.50]
-      newbar.datasets[0].data = bardata
-      newbar.datasets[0].saleslast7days = 15000
-      newbar.datasets[0].salesalltime = 2578521
-  
-      var newpie = this.state.customerpie
-      var piedata = [20, 44]
-      newpie.datasets[0].data = piedata
-      newpie.datasets[0].newcustomerlast7days = 150
-      newpie.datasets[0].recurringcustomerlast7days = 200
-      newpie.datasets[0].totalcustomers = 350
-  
-      var topsellinglunchitems = [
-        {
-          title: 'Chicken Sandwich',
-          soldamount: 108,
-        },
-        {
-          title: 'Dublin Salad',
-          soldamount: 87,
-        },
-        {
-          title: 'Caesar Salad',
-          soldamount: 76,
-        },
-        {
-          title: 'Tomato Wrap',
-          soldamount: 65,
-        },
-        {
-          title: 'Falalel Wrap',
-          soldamount: 54,
-        },
-        {
-          title: 'Meatball Burrito',
-          soldamount: 27,
-        },
-      ]
+    var newbar = this.state.salesbar
+    var bardata = [15.00, 29.99, 45.50, 55.00, 57.45, 10.99, 7.99, 2.50]
+    newbar.datasets[0].data = bardata
+    newbar.datasets[0].saleslast7days = 15000
+    newbar.datasets[0].salesalltime = 2578521
 
-      var review = [
-        {
-          customerFirstName: "Kieran",
-          customerCity: 'Limerick, Ireland',
-          customerComment: "Everyone was very happy. Hearty sandwiches. Very nice dessert sandwiches",
-          createdAt: "5 days ago",
-          customerRating: 5,
-        },
-        {
-          customerFirstName: "Qiana",
-          customerCity: 'Dublin, Ireland',
-          customerComment: "The food smelled pretty good and staff seemed excited because they eat there on their own time. The only downside is they delivered 45 mins. early, which is better than being late. I guess it didn't matter much since we did sandwiches and not something that would be bad if it got cold (i.e., pasta or other hot entree).",
-          createdAt: "7 days ago",
-          customerRating: 4,
-        },
-        {
-          customerFirstName: "Aldo",
-          customerCity: 'Limerick, Ireland',
-          customerComment: "Food is on time, great experience, food is delicious",
-          createdAt: "8 days ago",
-          customerRating: 5,
-        },
-        {
-          customerFirstName: "Connie",
-          customerCity: 'Limerick, Ireland',
-          customerComment: "The food was delicious and the presentation looked great. Perfect portions. We will order again!",
-          createdAt: "15 days ago",
-          customerRating: 4,
-        },
-        {
-          customerFirstName: "Chandra",
-          customerCity: 'Limerick, Ireland',
-          customerComment: "First time ordering from Italian Gourmet for this group. Everything was a big hit--even though they were a bit early.",
-          createdAt: "1 month ago",
-          customerRating: 5,
-        },
-      ]
+    var newpie = this.state.customerpie
+    var piedata = [20, 44]
+    newpie.datasets[0].data = piedata
+    newpie.datasets[0].newcustomerlast7days = 150
+    newpie.datasets[0].recurringcustomerlast7days = 200
+    newpie.datasets[0].totalcustomers = 350
 
-      var rating = 4.7
-      var numofreview = 150
-  
-      this.setState({
-        orderline: newline,
-        salesbar: newbar,
-        customerpie: newpie,
-        topsellinglunchitems,
-        review,
-        rating,
-        numofreview
-      });
-    }
+    var topsellinglunchitems = [
+      {
+        title: 'Chicken Sandwich',
+        soldamount: 108,
+      },
+      {
+        title: 'Dublin Salad',
+        soldamount: 87,
+      },
+      {
+        title: 'Caesar Salad',
+        soldamount: 76,
+      },
+      {
+        title: 'Tomato Wrap',
+        soldamount: 65,
+      },
+      {
+        title: 'Falalel Wrap',
+        soldamount: 54,
+      },
+      {
+        title: 'Meatball Burrito',
+        soldamount: 27,
+      },
+    ]
+
+    this.setState({
+      catererName: "Koyomari Sushi Bar",
+      profilesrc: "https://s3-eu-west-1.amazonaws.com/foodiebeegeneralphoto/logo.png",
+      coversrc: "https://s3-eu-west-1.amazonaws.com/foodiebeegeneralphoto/welcome_pic_compressed.jpg",
+      catererAddress: "123, Dublin, Ireland",
+      orderline: newline,
+      salesbar: newbar,
+      customerpie: newpie,
+      topsellinglunchitems,
+    });
+    
   }
 
   getOrderSales = (currentDateString, previousDateString) => {
@@ -547,7 +510,7 @@ class Dashboard extends Component {
               <a
                 style={{marginLeft: 10, cursor: 'pointer', opacity: 0.6}} 
                 className="card-header-action float-right"
-                onClick={() => this.goToPage("/caterer/" +pathToPage)}
+                onClick={() => this.goToPage("/restaurant/" +pathToPage)}
               >
                 <i className="fa fa-external-link" />
               </a> : null}
@@ -569,7 +532,7 @@ class Dashboard extends Component {
           <a
             style={{marginLeft: 10, cursor: 'pointer', opacity: 0.6}} 
             className="card-header-action float-right"
-            onClick={() => this.goToPage('/caterer/analysis/customer')}
+            onClick={() => this.goToPage('/restaurant/analysis/customer')}
           >
             <i className="fa fa-external-link" />
           </a> : null}
@@ -592,7 +555,7 @@ class Dashboard extends Component {
           <a
             style={{marginLeft: 10, cursor: 'pointer', opacity: 0.6}} 
             className="card-header-action float-right"
-            onClick={() => this.goToPage('/caterer/analysis/review')}
+            onClick={() => this.goToPage('/restaurant/analysis/review')}
           >
             <i className="fa fa-external-link" />
           </a> : null}
@@ -691,7 +654,7 @@ class Dashboard extends Component {
           <Button
             color="primary"
             className="float-center"
-            onClick={() => this.goToPage('/caterer/ordersmenu/menusetup')}
+            onClick={() => this.goToPage('/restaurant/ordersmenu/menusetup')}
           >
             Add Item
           </Button>
@@ -773,7 +736,7 @@ class Dashboard extends Component {
             <Card onMouseEnter={() => this.toggle('profileEdit')} onMouseLeave={() => this.toggle('profileEdit')} style={{ textAlign: "center", marginTop: -250 }} >
               <CardBody>
               
-                <div style={{width: 80, height: 80, position: 'relative', margin: 'auto', overflow: 'hidden', borderRadius: '50%'}}>
+                <div style={{width: 100, height: 100, position: 'relative', margin: 'auto', overflow: 'hidden', borderRadius: '50%'}}>
                   <img style={{ objectFit:'cover', width: 'auto', height: '100%', display: 'inline' }} src={this.state.profilesrc}/>
                 </div>
               
@@ -782,33 +745,18 @@ class Dashboard extends Component {
                 <a
                   style={{position: 'absolute', right: 20, top:20, cursor: 'pointer', opacity: 0.6}} 
                   className="card-header-action float-right"
-                  onClick={() => this.goToPage('/caterer/basics/businessprofile')}
+                  onClick={() => this.goToPage('/restaurant/basics/businessprofile')}
                 >
                   <i className="fa fa-external-link" />
                 </a> : null}
-                <Row className="justify-content-center">
-                  <StarRatingComponent
-                    name="rate1"
-                    emptyStarColor="#D3D3D3"
-                    starCount={5}
-                    editing={false}
-                    value={parseInt(this.state.rating)}
-                  />
-                  {this.state.rating === 0 ? null : <b style={{ marginLeft: 5, color: "darkorange" }}>{this.state.rating}</b> }
-                  {this.state.numofreview === 0 ? 
-                    <Label style={{ fontWeight: '500', marginLeft: 5, color: "darkorange" }}>
-                      No Ratings Yet
-                    </Label> 
-                    :
-                    <Label style={{ fontWeight: '500', marginLeft: 5, color: "darkorange" }}>
-                      ({this.state.numofreview}) Reviews
-                    </Label> 
-                  }
-                </Row>
 
-                <Label style={{ marginTop: 10 }} className="h6">
-                  {this.state.catererAddress}
-                </Label>
+                <div>
+                  <Label style={{ marginTop: 10 }} className="h6">
+                    {this.state.catererAddress}
+                  </Label>
+                </div>
+              
+                
 
               </CardBody>
             </Card>
@@ -845,7 +793,7 @@ class Dashboard extends Component {
                   <a
                     style={{marginLeft: 10, cursor: 'pointer', opacity: 0.6}} 
                     className="card-header-action float-right"
-                    onClick={() => this.goToPage('/caterer/menusetup')}
+                    onClick={() => this.goToPage('/restaurant/menusetup')}
                   >
                     <i className="fa fa-external-link" />
                   </a> : null}
@@ -866,16 +814,7 @@ class Dashboard extends Component {
           </Col>
         </Row>
 
-        <Row style= {{marginTop: 0}} className="justify-content-center">
-          <Col xs="12" >
-            <Card onMouseEnter={() => this.toggle('reviewEdit')} onMouseLeave={() => this.toggle('reviewEdit')}>
-              {this.renderReviewTitle('Reviews', this.state.rating, this.state.numofreview)}
-              <CardBody>
-                {this.renderReviewTable()}
-              </CardBody>
-            </Card>
-          </Col>
-        </Row>
+      
       </div>
     );
   }

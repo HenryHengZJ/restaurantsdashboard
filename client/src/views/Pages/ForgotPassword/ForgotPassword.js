@@ -145,11 +145,11 @@ class ForgotPassword extends Component {
                       <img
                         style={{
                           objectFit: "cover",
-                          height: 70,
-                          width: 180,
-                          marginBottom: 20
+                          height: 100,
+                          width: 100,
+                          marginBottom: 10
                         }}
-                        src={require("../../../assets/img/brandlogo_light.png")}
+                        src={require("../../../assets/img/logo.png")}
                       />
                     </div>
                     <Form>

@@ -53,7 +53,53 @@ class Order extends Component {
       maxDate: null,
       currentDate: null,
       dropDownDate: false,
-      tableitems: [],
+      tableitems: [
+        {
+          orderItemID: "123456789",
+          orderNumber: "123",
+          orderItem: [{
+            title: "Ebi Furai",
+            descrip: "Deep fried king prawns coated in seasonal breadcrumbs served with sweet Japanese sauce",
+            priceperunit: 5.9,
+          }],
+          customerID: "123123123",
+          customerDetails: [{
+            customerFirstName: "Cian",
+            customerLastName: "Horan",
+            customerPhoneNumber: "083-9457891",
+          }],
+          customerType: "new",
+          totalOrderPrice: 5.9,
+          orderStatus: "pending",
+          paymentIntentID: "123123123",
+          paymentType: "visa",
+          paymentStatus: "pending",
+          pickupTime: new Date(),
+        },
+        {
+          orderItemID: "123456789",
+          orderNumber: "478",
+          orderItem: [{
+            title: "Yasai Gyoza",
+            descrip: "Finely chopped seasonal vegetables dumpling steamed and then pan fried, served with traditional gyoza sauce",
+            priceperunit: 6.8,
+          }],
+          customerID: "123123123",
+          customerDetails: [{
+            customerFirstName: "John",
+            customerLastName: "King",
+            customerPhoneNumber: "083-9920456",
+          }],
+          customerType: "recurring",
+          totalOrderPrice: 6.8,
+          orderStatus: "accepted",
+          paymentIntentID: "123123123",
+          paymentType: "visa",
+          paymentStatus: "succeeded",
+          pickupTime: new Date(),
+          createdAt: new Date(),
+        }
+      ],
       pagesCount: 0,
       pageSize: 2,
       currentPage: 1,
@@ -66,15 +112,9 @@ class Order extends Component {
     };
   }
 
-  componentDidMount() {
-    
-    if (sessionStorage.getItem("currentLunchOrderDateString") !== null) {
-      this.getLocalStorage()
-    }
-    else {
-      this.getTodayDate()
-    }
 
+  componentDidMount() {
+    this.getTodayDate()
   }
 
   getLocalStorage = () => {
@@ -111,7 +151,7 @@ class Order extends Component {
 
   getOrder = (currentDateString) => {
   
-    var headers = {
+    /*var headers = {
       'Content-Type': 'application/json',
     }
 
@@ -137,7 +177,15 @@ class Order extends Component {
           empty: true ,
           loadingModal: false,
         })
-      });
+      });*/
+
+      this.setState({
+        empty: false,
+        totalOrderCount: 1,
+        pagesCount: 1,
+        currentPage: 1,
+        loadingModal: false,
+      })
   }
 
   toggleDropDown = () => {
@@ -161,10 +209,10 @@ class Order extends Component {
       currentDate: date,
       currentDateString: moment(date).format("ddd, DD MMM YYYY"),
       dropDownDate: !this.state.dropDownDate, 
-      loadingModal: true,
+    //  loadingModal: true,
     }, () => {
-      sessionStorage.setItem('currentLunchOrderDateString', moment(date).format("ddd, DD MMM YYYY"))
-      this.getOrder(moment(date).format("ddd, DD MMM YYYY"))
+    //  sessionStorage.setItem('currentLunchOrderDateString', moment(date).format("ddd, DD MMM YYYY"))
+    //  this.getOrder(moment(date).format("ddd, DD MMM YYYY"))
     })
   }
 
@@ -723,7 +771,7 @@ class Order extends Component {
             style={{ opacity: 1, fontSize: 14, fontWeight: "600" }}
             block
             color="danger"
-            onClick={() => this.rejectOrder(_id, "single")}
+           // onClick={() => this.rejectOrder(_id, "single")}
           >
             Reject
           </Button>
@@ -734,7 +782,7 @@ class Order extends Component {
             style={{ opacity: 1, fontSize: 14, fontWeight: "600" }}
             block
             color="success"
-            onClick={() => this.acceptOrder(_id, "single")}
+          //  onClick={() => this.acceptOrder(_id, "single")}
           >
             Accept
           </Button>
@@ -833,10 +881,14 @@ class Order extends Component {
 
                   <Col style={{ marginTop: 20, marginBottom: 20 }} xs="12">
                     <div>
-                      <Button color="success"  onClick={() => this.acceptOrder("", "bulk")}>
+                      <Button color="success" 
+                       //onClick={() => this.acceptOrder("", "bulk")}
+                       >
                         Accept All
                       </Button>
-                      <Button color="danger" onClick={() => this.rejectOrder("", "bulk")} style={{ marginLeft: 10 }}>
+                      <Button color="danger" 
+                     // onClick={() => this.rejectOrder("", "bulk")} 
+                      style={{ marginLeft: 10 }}>
                         Reject All
                       </Button>
                     </div>

@@ -2,64 +2,54 @@ export default {
   items: [
     {
       name: 'Dashboard',
-      url: '/caterer/dashboard',
+      url: '/restaurant/dashboard',
       icon: 'icon-speedometer',
     },
     {
       name: 'Basics',
-      url: '/caterer/basics',
+      url: '/restaurant/basics',
       icon: 'icon-home',
       children: [
         {
           name: 'Profile',
-          url: '/caterer/basics/businessprofile',
+          url: '/restaurant/basics/businessprofile',
           icon: '',
         },
         {
           name: 'Location',
-          url: '/caterer/basics/location',
-          icon: '',
-        },
-        {
-          name: 'Cuisine',
-          url: '/caterer/basics/cuisine',
+          url: '/restaurant/basics/location',
           icon: '',
         },
         {
           name: 'Online Payment',
-          url: '/caterer/basics/onlinepayment',
+          url: '/restaurant/basics/onlinepayment',
           icon: '',
         },
       ]
     },
     {
       name: 'Menu',
-      url: '/caterer/menusetup',
+      url: '/restaurant/menusetup',
       icon: 'icon-book-open',
     },
     {
       name: 'Order',
-      url: '/caterer/order',
+      url: '/restaurant/order',
       icon: 'icon-bell',
     },
     {
       name: 'Analysis',
-      url: '/caterer/analysis',
+      url: '/restaurant/analysis',
       icon: 'icon-chart',
       children: [
         {
           name: 'Sales',
-          url: '/caterer/analysis/sales',
+          url: '/restaurant/analysis/sales',
           icon: '',
         },
         {
           name: 'Customer',
-          url: '/caterer/analysis/customer',
-          icon: '',
-        },
-        {
-          name: 'Review',
-          url: '/caterer/analysis/review',
+          url: '/restaurant/analysis/customer',
           icon: '',
         },
       ]

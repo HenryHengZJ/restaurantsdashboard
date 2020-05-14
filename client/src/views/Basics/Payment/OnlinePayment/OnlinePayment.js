@@ -258,7 +258,7 @@ class OnlinePayment extends Component {
   }
 
   handleNext() {
-    this.addNewCard()
+   // this.addNewCard()
   }
 
   handleVerify() {

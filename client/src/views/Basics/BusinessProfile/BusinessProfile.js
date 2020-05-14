@@ -244,7 +244,7 @@ class BusinessProfile extends Component {
   }
 
   handleProceed = () => {
-    this.props.history.push('/caterer/basics/location')
+    this.props.history.push('/restaurant/basics/location')
   }
 
   render() {
@@ -260,7 +260,7 @@ class BusinessProfile extends Component {
               </CardHeader>
               <CardBody>
                 <FormGroup>
-                  <Label style={{color: 'black', fontWeight: '600' }}>Restaurant / Caterer Logo</Label>
+                  <Label style={{color: 'black', fontWeight: '600' }}>Restaurant Logo</Label>
                   
                   <div onClick={() => this.inputLogoOpenFileRef.current.click()} style={{ cursor:'pointer', width: 80, height: 80, position: 'relative', overflow: 'hidden', borderRadius: '50%'}}>
                     <img 

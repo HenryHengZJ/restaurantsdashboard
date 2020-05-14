@@ -252,7 +252,7 @@ class AddBank extends Component {
   }
 
   handleProceed = () => {
-    this.props.history.push('/caterer/reports/order')
+    this.props.history.push('/restaurant/reports/order')
   }
 
   generateBankToken = () => {

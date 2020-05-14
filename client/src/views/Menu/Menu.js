@@ -38,6 +38,7 @@ import Dotdotdot from "react-dotdotdot";
 import ContentLoader, { Facebook } from "react-content-loader";
 import Checkbox from "@material-ui/core/Checkbox";
 import CurrencyInput from "react-currency-input";
+import color from "../../assets/color"
 
 const glutenfreeIcon = require("../../assets/img/glutenfree1.png");
 const hotIcon = require("../../assets/img/fire.png");
@@ -80,6 +81,95 @@ class Menu extends Component {
         "Vegetarian",
         "Healthy"
       ],
+      fetchedmenu: [
+        {
+          title: "Ebi Furai",
+          category: 'Side Dishes',
+          descrip: "Deep fried king prawns coated in seasonal breadcrumbs served with sweet Japanese sauce",
+          markitem: [],
+          priceperunit: 5.9,
+        },
+        {
+          title: "Yasai Gyoza",
+          category: 'Side Dishes',
+          descrip: "Finely chopped seasonal vegetables dumpling steamed and then pan fried, served with traditional gyoza sauce",
+          markitem: [],
+          priceperunit: 6.8,
+        },
+        {
+          title: "Yakitori",
+          category: 'Side Dishes',
+          descrip: "Chicken and spring onion grilled on skewer served with yakitori sauce",
+          markitem: [],
+          priceperunit: 6.9,
+        },
+        {
+          title: "Sake / Salmon Nigiri",
+          category: 'Sushi Nigiri',
+          descrip: "Rice ball served with a slice of filling (2 pcs)",
+          markitem: [],
+          priceperunit: 4,
+        },
+        {
+          title: "Suzuki / Sea Bass Nigiri",
+          category: 'Sushi Nigiri',
+          descrip: "Rice ball served with a slice of filling. (2 pcs)",
+          markitem: [],
+          priceperunit: 5,
+        },
+        {
+          title: "Ebi / Prawn Nigiri",
+          category: 'Sushi Nigiri',
+          descrip: "Rice ball served with a slice of filling. (2 pcs)",
+          markitem: [],
+          priceperunit: 4,
+        },
+        {
+          title: "Yasai Tempura Set",
+          category: 'Tempura Set',
+          descrip: "Sweet potato, aubergine, shitake mushroom, asparagus, carrot, lotus roots, green paper and onion coated in a light crispy batter. Served with steamed rice, miso soup",
+          markitem: [],
+          priceperunit: 12.9,
+        },
+        {
+          title: "Seafood Tempura",
+          category: 'Tempura Set',
+          descrip: "Fresh mix seafood coated in a light crispy batter served with steamed rice, miso soup",
+          markitem: [],
+          priceperunit: 13.9,
+        },
+        {
+          title: "Tempura Moriawase",
+          category: 'Tempura Set',
+          descrip: "Assorted mix vegetable and fresh seafood coated in a light crispy batter served with steam rice, miso soup",
+          markitem: [],
+          priceperunit: 13.9,
+        },
+        {
+          title: "Teppan Chicken Teriyaki",
+          category: 'Teppan Teriyaki',
+          descrip: "Grilled 8oz of chicken breast served with stir fried vegetables and sweet teriyaki sauce",
+          markitem: [],
+          priceperunit: 13.9,
+        },
+        {
+          title: "Teppan Salmon Teriyaki",
+          category: 'Teppan Teriyaki',
+          descrip: "Grilled fresh supreme of salmon served with stir fried vegetables and sweet teriyaki sauce",
+          markitem: [],
+          priceperunit: 15.9,
+        },
+        {
+          title: "Teppan Beef Teriyaki",
+          category: 'Teppan Teriyaki',
+          descrip: "Grilled 9oz prime Irish strip loin steak served with stir fried vegetables and sweet teriyaki sauce",
+          markitem: [],
+          priceperunit: 15.9,
+        },
+      ],
+      menu: [],
+      menutitle: [],
+      selectedMenuTitle: "",
       discountedpricelist: [6, 10],
       file: "",
       data: [],
@@ -98,74 +188,64 @@ class Menu extends Component {
   }
 
   componentDidMount() {
-
-    var dayList = [];
-    var selectedDay = "";
-
-    var todayDate = new Date();
-    var mondayOfTheWeek = this.getMonday(todayDate);
-
-    var dayOfTheWeek = null;
-
-    if (todayDate.getDay() === 0 || todayDate.getDay() === 6) {
-      //detect if weekends, if yes, get next monday
-      mondayOfTheWeek = new Date(
-        mondayOfTheWeek.setDate(mondayOfTheWeek.getDate() + 7)
-      );
-
-      dayOfTheWeek = mondayOfTheWeek;
-
-      for (let i = 0; i < 5; i++) {
-        dayList.push(dayOfTheWeek.toString());
-
-        if (i === 0) {
-          selectedDay = dayOfTheWeek.toString();
-        }
-
-        dayOfTheWeek = new Date(
-          dayOfTheWeek.setDate(dayOfTheWeek.getDate() + 1)
-        );
-      }
-    } else {
-      dayOfTheWeek = mondayOfTheWeek;
-
-      for (let i = 0; i < 5; i++) {
-        dayList.push(dayOfTheWeek.toString());
-
-        if (dayOfTheWeek.getTime() - todayDate.getTime() === 0) {
-          selectedDay = dayOfTheWeek.toString();
-        }
-
-        dayOfTheWeek = new Date(
-          dayOfTheWeek.setDate(dayOfTheWeek.getDate() + 1)
-        );
-      }
-    }
-
-    this.setState({
-      dayList: dayList,
-      selectedDay,
-    },() => {
-      this.getMenu()
-    })
+    
+    this.restructureMenu();
 
   }
+
   
-  getMonday = d => {
-    d = new Date(d);
-    var day = d.getDay(),
-      diff = d.getDate() - day + (day === 0 ? -6 : 1); // adjust when day is sunday
-    return new Date(d.setDate(diff));
-  };
+  restructureMenu = () => {
+    var finalresult = [];
 
-  dayClicked = index => {
-    var activeDay = moment(this.state.dayList[index]).format("dddd");
+    var result = this.state.fetchedmenu.reduce(function(r, a) {
+      r[a.category] = r[a.category] || [];
+      r[a.category].push(a);
+      return r;
+    }, Object.create(null));
 
-    var filtered_data = this.state.data
-      .slice()
-      .filter(datachild => datachild.activeDay === activeDay);
+    for (var key in result) {
+     
+      var parentObject = {
+        menutitle: key,
+        menuitem: result[key],
+      };
+
+      finalresult.push(parentObject);
+    }
+  
     this.setState({
-      selectedDay: this.state.dayList[index],
+      menu: finalresult,
+      loading: false,
+    },() => {
+      this.listmenu()
+    })
+  }
+
+  listmenu = () => {
+    var menu = this.state.menu
+    var menutitleArray = [];
+    for (let i = 0; i < menu.length; i++) { 
+      var menutitle = menu[i].menutitle
+      menutitleArray.push(menutitle)
+    }
+      
+    var filtered_data = this.state.menu[0].menuitem
+
+    this.setState({
+      menutitle: menutitleArray,
+      selectedMenuTitle: menutitleArray[0],
+      filtered_data,
+    })
+  }
+
+  categoryClicked = index => {
+
+    var menuindex = this.state.menu.findIndex(x => x.menutitle == this.state.menutitle[index]);
+
+    var filtered_data = this.state.menu[menuindex].menuitem
+
+    this.setState({
+      selectedMenuTitle: this.state.menutitle[index],
       filtered_data: filtered_data
     });
   };
@@ -205,15 +285,13 @@ class Menu extends Component {
     return string.charAt(0).toUpperCase() + string.slice(1);
   }
 
-  menuItemClicked = (_id) => {
-    var itemindex = this.state.data.findIndex(x => x._id == _id);
-    var data = this.state.data.slice()
+  menuItemClicked = (index) => {
 
-    var selectedMenuItem = data[itemindex]
-    
-    if (itemindex >= 0) {
+    var menuindex = this.state.menu.findIndex(x => x.menutitle == this.state.selectedMenuTitle);
+    if (menuindex >= 0 && index >= 0) {
+
       this.setState({
-        selectedMenuItem,
+        selectedMenuItem: this.state.menu[menuindex].menuitem[index],
         updateItem: true,
         file:"",        
         isTitleEmpty: false,
@@ -372,40 +450,11 @@ class Menu extends Component {
     else {
       if (updateItem) {
 
-        //Check Image
-        if (file === "" && selectedSrc === "") {
-          this.setState({
-            isImgInValid: true
-          });
-          return;
-        } 
-
-        if (file !== "") {
-          if (file.type === "image/png" || file.type === "image/PNG" || file.type === "image/jpeg" || file.type === "image/jpg" || file.type === "image/JPG") {
-          } 
-          else {
-            this.setState({
-              isImgInValid: true
-            });
-            return;
-          }
-        }
-
-
-        //Check Price
-        if (parseFloat(selectedItemPrice) < 6) {
-          this.setState({
-            isPricePerUnitInvalid: true
-          })
-          return;
-        }
-
         this.setState({
           isSaving: true
         })
 
         //Update Item
-
         let formData = new FormData();    //formdata object
         formData.append('title', selectedItemTitle);
         formData.append('descrip', selectedItemDescrip);
@@ -442,7 +491,8 @@ class Menu extends Component {
           })
           .catch((error) => {
             this.setState({
-              menuItemModal: !this.state.menuItemModal
+              menuItemModal: !this.state.menuItemModal,
+              isSaving: false,
             }, () => {
               toast(<ErrorInfo/>, {
                 position: toast.POSITION.BOTTOM_RIGHT
@@ -451,31 +501,6 @@ class Menu extends Component {
           });
       }
       else {
-
-        //Check Image
-        if (file === "") {
-          this.setState({
-            isImgInValid: true
-          });
-          return;
-        }
-
-        if (file.type === "image/png" || file.type === "image/PNG" || file.type === "image/jpeg" || file.type === "image/jpg" || file.type === "image/JPG") {
-        } 
-        else {
-          this.setState({
-            isImgInValid: true
-          });
-          return;
-        }
-
-        //Check Price
-        if (parseFloat(selectedItemPrice) < 6) {
-          this.setState({
-            isPricePerUnitInvalid: true
-          })
-          return;
-        }
 
         this.setState({
           isSaving: true
@@ -662,64 +687,29 @@ class Menu extends Component {
 
     this.setState({
       selectedMenuItem,
-    },() => {
-      if (parseFloat(value) === parseFloat(selectedMenuItem.discountedprice)) {
-        this.setState({
-          isPricePerUnitInvalid: true
-        })
-      }
-      else if (parseFloat(value) < parseFloat(selectedMenuItem.discountedprice)) {
-        this.setState({
-          isPricePerUnitInvalid: true
-        })
-      }
-      else {
-        this.setState({
-          isPricePerUnitInvalid: false
-        })
-      }
     })
   }
 
-  handlePrimePriceChange(e) {
-
-    var selectedMenuItem = JSON.parse(JSON.stringify(this.state.selectedMenuItem));
-    selectedMenuItem.discountedprice = parseInt(e.target.value)
-    var isPrimePriceInvalid = false
-
-    if (parseFloat(e.target.value) === parseFloat(selectedMenuItem.priceperunit)) {
-      isPrimePriceInvalid = true
-    }
-    else if (parseFloat(e.target.value) > parseFloat(selectedMenuItem.priceperunit)) {
-      isPrimePriceInvalid = true
-    }
-
-    this.setState({
-      selectedMenuItem,
-      isPrimePriceInvalid
-    })
-    
-  }
 
   //Render functions///////////////////////////////////////////////////////////////////////
   
-  renderDate() {
+  renderCategory() {
     var itemsarray = [];
-    var items = this.state.dayList;
+    var items = this.state.menutitle;
     for (let i = 0; i < items.length; i++) {
       itemsarray.push(
         <Card
           key={i}
           className="card-1"
-          onClick={() => this.dayClicked(i)}
+          onClick={() => this.categoryClicked(i)}
           style={{
             cursor: "pointer",
             marginLeft: 20,
             marginRight: 20,
             marginBottom: 20,
-            borderColor: this.state.selectedDay === items[i] ? "#20a8d8" : null,
+            borderColor: this.state.selectedMenuTitle === items[i] ? color.primaryLight : null,
             borderStyle: "solid",
-            borderWidth: this.state.selectedDay === items[i] ? 2 : null
+            borderWidth: this.state.selectedMenuTitle === items[i] ? 2 : null
           }}
         >
           <CardBody
@@ -736,16 +726,12 @@ class Menu extends Component {
                 <div>
                   <p
                     className="h5"
-                    style={{ cursor: "pointer", color: "#20a8d8" }}
+                    style={{ cursor: "pointer", color: color.primaryLight }}
                   >
-                    {moment(items[i]).format("dddd")}
+                    {items[i]}
                   </p>
                 </div>
-                <div style={{ marginTop: 10 }}>
-                  <p style={{ cursor: "pointer" }}>
-                    {moment(items[i]).format("DD MMM YYYY")}
-                  </p>
-                </div>
+
               </Col>
             </Row>
           </CardBody>
@@ -754,7 +740,7 @@ class Menu extends Component {
     }
 
     return (
-      <Row style={{ marginTop: 40 }}>
+      <Row style={{ marginTop: 10 }}>
         <Col xs="12">{itemsarray}</Col>
       </Row>
     );
@@ -778,7 +764,7 @@ class Menu extends Component {
                   padding: 0,
                   height: "100%"
                 }}
-                onClick={() => this.menuItemClicked(items[i]._id)}
+                onClick={() => this.menuItemClicked(i)}
               >
                 <Col>
                   <div className="row">
@@ -812,7 +798,7 @@ class Menu extends Component {
                             marginTop: 20,
                             marginLeft: 15,
                             marginRight: 15,
-                            color: "#20a8d8",
+                            color: color.primaryLight,
                             cursor: "pointer",
                             overflow: "hidden"
                           }}
@@ -822,28 +808,6 @@ class Menu extends Component {
                       </Dotdotdot>
                     </div>
                   </div>
-
-                  {items[i].selected ?
-                    <div >
-                      <Badge
-                        color="success"
-                      >
-                        DEFAULT
-                      </Badge>
-                      <Badge
-                        style={{marginLeft: 10}}
-                        color="secondary"
-                      >
-                        {items[i].soldamount} SOLD 
-                      </Badge>
-                    </div>
-                    :
-                    <Badge
-                      color="secondary"
-                    >
-                      {items[i].soldamount} SOLD 
-                    </Badge> 
-                  }
 
                   <div style={{ marginTop: 10 }}>
                     <Dotdotdot clamp={2}>
@@ -864,34 +828,7 @@ class Menu extends Component {
                     >
                       €{Number(items[i].priceperunit).toFixed(2)}
                     </Label>
-                    <div
-                      style={{
-                        cursor: "pointer",
-                        marginLeft: 10,
-                        color: "#FF5722"
-                      }}
-                      className="h5 float-right"
-                    >
-                      <Button
-                        style={{
-                          cursor: "pointer",
-                          marginRight: 5,
-                          opacity: 1.0,
-                          padding: 5,
-                          fontWeight: "600",
-                          fontSize: 11,
-                          borderWidth: 0,
-                          backgroundColor: "#FF5722",
-                          color: "white"
-                        }}
-                        disabled
-                      >
-                        PRIME
-                      </Button>
-                      <Label style={{ cursor: "pointer", fontSize: 22 }}>
-                        €{items[i].discountedprice}
-                      </Label>
-                    </div>
+                  
                   </div>
                 </Col>
               </CardBody>
@@ -923,47 +860,11 @@ class Menu extends Component {
     var selectedItemTitle = this.state.selectedMenuItem.title;
     var selectedItemDescrip = this.state.selectedMenuItem.descrip;
     var selectedItemPrice = this.state.selectedMenuItem.priceperunit;
-    var selectedDiscountedPrice = this.state.selectedMenuItem.discountedprice;
     var selectedMarkItemAs = this.state.selectedMenuItem.markitem;
-    var imagePreviewUrl = this.state.selectedMenuItem.src;
-
+  
     return (
     
         <Form action="" method="post" className="form-horizontal">
-          <FormGroup>
-            <Label style={{fontWeight: '600', color: 'black'}}>Image</Label>
-            <div>
-              <input
-                id="fileInput"
-                type="file"
-                ref={this.inputOpenFileRef}
-                onChange={(e)=>this.handleImageChange(e)}
-              />
-            </div>
-            {imagePreviewUrl === "" ?
-            <div onClick={() => this.inputOpenFileRef.current.click()} style={{ cursor:'pointer', marginTop:20, width: "100%", height: 200, display:'flex', alignItems: 'center', backgroundColor: 'rgba(211,211,211,0.7)'}}>
-                <img
-                style={{ margin: 'auto', objectFit: "cover", width: 70, height: 70 }}
-                src={"https://cdn4.iconfinder.com/data/icons/social-communication/142/add_photo-512.png"}
-              />
-              </div>
-              :
-            <img
-              style={{cursor:'pointer', marginTop:20, objectFit: "cover", width: "100%", height: 200 }}
-              onClick={() => this.inputOpenFileRef.current.click()}
-              src={imagePreviewUrl !== "" ? imagePreviewUrl : "https://cdn4.iconfinder.com/data/icons/social-communication/142/add_photo-512.png"}
-            />
-              }
-            {imagePreviewUrl !== "" ?<Button
-              style={{ borderRadius: 0, opacity: 0.9 }}
-              color="danger"
-              block
-              onClick={() => this.removePhoto()}
-            >
-              Remove
-            </Button> : null }
-            {this.state.isImgInValid === true? <Label style={{color: 'red', fontSize: 13, opacity: 0.7}}>* Please input only jpg / png format</Label> : null}
-          </FormGroup>
           <FormGroup row>
             <Col md="3">
               <h6>Title</h6>
@@ -1003,7 +904,7 @@ class Menu extends Component {
           </FormGroup>
           <FormGroup row>
             <Col md="3">
-              <h6>Price / Unit</h6>
+              <h6>Price</h6>
             </Col>
             <Col xs="12" md="9">
               <InputGroup style={{padding: 0}} className="input-prepend">
@@ -1027,42 +928,7 @@ class Menu extends Component {
               {this.state.isPricePerUnitInvalid ? <Label style={{color: 'red', fontSize: 11, opacity:0.6}}>Price has to be more than €6</Label> : null }
             </Col> 
           </FormGroup>
-          <FormGroup row>
-            <Col md="3">
-              <div style={{ marginLeft: 0,}} className="row">
-                <h6>Prime Price </h6>
-                <img onClick={this.toggleInfoModal} style={{ cursor: 'pointer', marginLeft: 5, height: 20, width: 20, objectFit: "cover" }} src="https://img.icons8.com/ios/50/000000/info.png" alt=""/>
-              </div>
-            </Col>
-            <Col xs="12" md="9">
-              <InputGroup style={{padding: 0}} className="input-prepend">
-                <InputGroupAddon addonType="prepend">
-                  <InputGroupText>€</InputGroupText>
-                </InputGroupAddon>
-                <Input
-                  onChange={e => this.handlePrimePriceChange(e)}
-                  value={selectedDiscountedPrice}
-                  style={{ color: "black", width: '50%' }}
-                  type="select"
-                  placeholder="6"
-                  invalid={this.state.isPrimePriceInvalid ? true : false}
-                >
-                  {this.state.discountedpricelist.map(price => (
-                    <option
-                      style={{ color: "black" }}
-                      key={price}
-                      value={price}
-                    >
-                      {price}
-                    </option>
-                  ))}
-                </Input>
-                <FormFeedback className="help-block">
-                  Prime Price must be smaller than price / unit.
-                </FormFeedback>
-              </InputGroup>
-            </Col>
-          </FormGroup>
+         
           <h6
             style={{
               fontWeight: "600",
@@ -1156,12 +1022,6 @@ class Menu extends Component {
           {this.renderForm()}
         </ModalBody>
         <ModalFooter>
-          {this.state.updateItem ?
-          <Button className="float-left" onClick={() => this.makeDefault(this.state.selectedMenuItem._id)} color="primary" disabled={!this.state.updateItem ? true : this.state.isSaving ? true : false }>
-            Make Default
-          </Button>
-          :
-          null}
           <Button onClick={() => this.checkInput()} color="success" disabled={this.state.isSaving ? true : false}>
             {this.state.updateItem ? this.state.isSaving ? "Saving" : "Save" : this.state.isSaving ? "Adding..." : "Add"}
           </Button>
@@ -1318,7 +1178,8 @@ class Menu extends Component {
                     xs="12"
                     md="3"
                   >
-                    {this.renderDate(this.state.data)}
+                    <p style={{fontSize: 18, fontWeight: 600, color: "black", marginLeft: 20, marginRight: 20, marginBottom: 10, marginTop: 20}}>Categories</p>
+                    {this.renderCategory(this.state.data)}
                   </Col>
                   <Col
                     style={{ paddingTop: 30, paddingLeft: 40, paddingRight: 20 }}
@@ -1328,7 +1189,7 @@ class Menu extends Component {
                     <Row>
                       <Col style={{ textAlign: "start" }} xs="12">
                         <h4>
-                          {moment(this.state.selectedDay).format("dddd, DD MMM YYYY")}
+                          {this.state.selectedMenuTitle}
                         </h4>
                       </Col>
                       <Col style={{ marginTop: 20 }} xs="12">
