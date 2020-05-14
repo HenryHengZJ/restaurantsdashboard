@@ -1,6 +1,6 @@
 {
-  "short_name": "FoodieBee",
-  "name": "FoodieBee - Catering Service",
+  "short_name": "Restaurant Dashboard",
+  "name": "Restaurant Dashboard",
   "icons": [
     {
       "src": "./assets/img/brandicon.png",
