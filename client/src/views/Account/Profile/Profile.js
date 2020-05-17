@@ -47,10 +47,10 @@ class Profile extends Component {
   }
 
   componentDidMount() {
-    this.getCatererDetail()
+    this.getRestaurantDetail()
   }
 
-  getCatererDetail = () => {
+  getRestaurantDetail = () => {
     var headers = {
       'Content-Type': 'application/json',
     }
@@ -108,7 +108,7 @@ class Profile extends Component {
           toast(<SuccessInfo/>, {
             position: toast.POSITION.BOTTOM_RIGHT
           });
-          this.getCatererDetail();
+          this.getRestaurantDetail();
         }
       })
       .catch((error) => {
@@ -156,7 +156,7 @@ class Profile extends Component {
                 invalidPassword: false,
                 isChangePasswordClicked: false
               }, () => {
-                this.getCatererDetail();
+                this.getRestaurantDetail();
               })
             }
           })

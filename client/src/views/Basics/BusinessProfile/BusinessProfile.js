@@ -62,7 +62,7 @@ class BusinessProfile extends Component {
 
   componentDidMount() {
   
-    var headers = {
+    /*var headers = {
       'Content-Type': 'application/json',
     }
 
@@ -82,7 +82,7 @@ class BusinessProfile extends Component {
         } 
       })
       .catch((error) => {
-      });
+      });*/
   }
 
   handleRestaurantNameChange(e) {

@@ -65,7 +65,7 @@ class Location extends Component {
 
     Geocode.setApiKey(GOOGLE_API_KEY);
   
-    var headers = {
+   /* var headers = {
       'Content-Type': 'application/json',
     }
 
@@ -105,7 +105,16 @@ class Location extends Component {
           this.setState({
             center,
           })
-      });
+      });*/
+
+      var center;
+      center =  {
+        lat: 53.350140,
+        lng: -6.266155
+      };
+      this.setState({
+        center,
+      })
   }
 
   handleProceed = () => {

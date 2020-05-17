@@ -55,13 +55,37 @@ class Order extends Component {
       dropDownDate: false,
       tableitems: [
         {
-          orderItemID: "123456789",
           orderNumber: "123",
-          orderItem: [{
-            title: "Ebi Furai",
-            descrip: "Deep fried king prawns coated in seasonal breadcrumbs served with sweet Japanese sauce",
-            priceperunit: 5.9,
-          }],
+          orderType: "delivery",
+          orderItem: [
+            {
+              title: "Ebi Furai",
+              descrip: "Deep fried king prawns coated in seasonal breadcrumbs served with sweet Japanese sauce",
+              priceperunit: 5.9,
+              totalunitprice: 11.8,
+              quantity: 2,
+              selection: [
+                {
+                  selectioncategory: "Meat",
+                  selectionmaxnum: 1,
+                  selectionitem: [
+                    {
+                      selectionitemtitle: "Beef",
+                      selectionitemprice: 2,
+                    }
+                  ]
+                }
+              ],
+            },
+            {
+              title: "Yasai Gyoza",
+              descrip: "Finely chopped seasonal vegetables dumpling steamed and then pan fried, served with traditional gyoza sauce",
+              priceperunit: 6.8,
+              totalunitprice: 6.8,
+              instruction: "No onion please",
+              quantity: 1,
+            }
+          ],
           customerID: "123123123",
           customerDetails: [{
             customerFirstName: "Cian",
@@ -69,20 +93,25 @@ class Order extends Component {
             customerPhoneNumber: "083-9457891",
           }],
           customerType: "new",
-          totalOrderPrice: 5.9,
+          totalOrderPrice: 18.6,
           orderStatus: "pending",
           paymentIntentID: "123123123",
           paymentType: "visa",
           paymentStatus: "pending",
-          pickupTime: new Date(),
+          pickupTime: new Date().setHours(new Date().getHours() + 0.5),
+          deliveryTime: new Date().setHours(new Date().getHours() + 1),
+          deliveryAddress: "123, Wingston St, Dublin",
+          createdAt: new Date(),
         },
         {
-          orderItemID: "123456789",
           orderNumber: "478",
+          orderType: "pickup",
           orderItem: [{
             title: "Yasai Gyoza",
             descrip: "Finely chopped seasonal vegetables dumpling steamed and then pan fried, served with traditional gyoza sauce",
             priceperunit: 6.8,
+            totalunitprice: 6.8,
+            quantity: 1
           }],
           customerID: "123123123",
           customerDetails: [{
@@ -96,7 +125,9 @@ class Order extends Component {
           paymentIntentID: "123123123",
           paymentType: "visa",
           paymentStatus: "succeeded",
-          pickupTime: new Date(),
+          pickupTime: new Date().setHours(new Date().getHours() + 0.5),
+          deliveryTime: new Date().setHours(new Date().getHours() + 1),
+          deliveryAddress: "",
           createdAt: new Date(),
         }
       ],
@@ -104,11 +135,11 @@ class Order extends Component {
       pageSize: 2,
       currentPage: 1,
       togglePickUpTime: false,
-      dropDownStatusForLunch: false,
+      dropDownStatus: false,
       filtered_data: [],
       totalOrderCount: 0,
-      selectedLunchOrderItem: null,
-      orderLunchModal: false
+      selectedOrderItem: null,
+      orderModal: false
     };
   }
 
@@ -194,9 +225,9 @@ class Order extends Component {
     })
   }
 
-  toggleStatusForLunch = () => {
+  toggleStatus = () => {
     this.setState({
-      dropDownStatusForLunch: !this.state.dropDownStatusForLunch
+      dropDownStatus: !this.state.dropDownStatus
     })
   }
 
@@ -216,22 +247,25 @@ class Order extends Component {
     })
   }
 
-  tableItemClicked = (_id) => {
-    var itemindex = this.state.tableitems.findIndex(x => x._id == _id);
+  tableItemClicked = (index) => {
+    
+    var dataToShow = this.state.filtered_data.length > 0 ? this.state.filtered_data : this.state.tableitems;
 
-    if (itemindex >= 0) {
+    var tableitems = dataToShow.slice((this.state.currentPage - 1) * this.state.pageSize,this.state.currentPage * this.state.pageSize);
+
+    if (index >= 0) {
       this.setState({
-        selectedLunchOrderItem: this.state.tableitems[itemindex]
+        selectedOrderItem: tableitems[index]
       }, () => {
-        this.toggleLunchOrderModal()
+        this.toggleOrderModal()
       })
   
     }
   }
 
-  toggleLunchOrderModal = () => {
+  toggleOrderModal = () => {
     this.setState({
-      orderLunchModal: !this.state.orderLunchModal
+      orderModal: !this.state.orderModal
     })
   }
 
@@ -249,17 +283,17 @@ class Order extends Component {
 
     if (type === "single") {
       body ={
-        arrayOfLunchOrderID: JSON.stringify([orderID])
+        arrayOrderID: JSON.stringify([orderID])
       }
     }
     else {
-      var arrayOfLunchOrderID = []
+      var arrayOrderID = []
       var filtered_data = this.state.tableitems.slice().filter(datachild => datachild.orderStatus === "pending");
       for (let i = 0; i < filtered_data.length; i++) {
-        arrayOfLunchOrderID.push(filtered_data[i]._id)
+        arrayOrderID.push(filtered_data[i]._id)
       }
       body ={
-        arrayOfLunchOrderID: JSON.stringify(arrayOfLunchOrderID)
+        arrayOrderID: JSON.stringify(arrayOrderID)
       }
     }
 
@@ -273,7 +307,7 @@ class Order extends Component {
           });
           this.setState({
             loadingModal: false,
-            orderLunchModal: false
+            orderModal: false
           }, () => {
             if (sessionStorage.getItem("currentLunchOrderDateString") !== null) {
               this.getLocalStorage()
@@ -290,7 +324,7 @@ class Order extends Component {
         });
         this.setState({
           loadingModal: false,
-          orderLunchModal: false
+          orderModal: false
         })
       });
   }
@@ -310,17 +344,17 @@ class Order extends Component {
 
     if (type === "single") {
       body ={
-        arrayOfLunchOrderID: JSON.stringify([orderID])
+        arrayOrderID: JSON.stringify([orderID])
       }
     }
     else {
-      var arrayOfLunchOrderID = []
+      var arrayOrderID = []
       var filtered_data = this.state.tableitems.slice().filter(datachild => datachild.orderStatus === "pending");
       for (let i = 0; i < filtered_data.length; i++) {
-        arrayOfLunchOrderID.push(filtered_data[i]._id)
+        arrayOrderID.push(filtered_data[i]._id)
       }
       body ={
-        arrayOfLunchOrderID: JSON.stringify(arrayOfLunchOrderID)
+        arrayOrderID: JSON.stringify(arrayOrderID)
       }
     }
 
@@ -334,7 +368,7 @@ class Order extends Component {
           });
           this.setState({
             loadingModal: false,
-            orderLunchModal: false
+            orderModal: false
           }, () => {
             if (sessionStorage.getItem("currentLunchOrderDateString") !== null) {
               this.getLocalStorage()
@@ -351,7 +385,7 @@ class Order extends Component {
         });
         this.setState({
           loadingModal: false,
-          orderLunchModal: false
+          orderModal: false
         })
       });
   }
@@ -379,20 +413,20 @@ class Order extends Component {
     });
   }
   
-  sortPickUpTime = () => {
+  sortOrderTime = () => {
     var sorteddata = [];
     if (this.state.togglePickUpTime) {
       sorteddata = this.state.tableitems.slice().sort(function(x, y) {
         return (
-          new Date(y["pickupTime"]).getTime() -
-          new Date(x["pickupTime"]).getTime()
+          new Date(y["createdAt"]).getTime() -
+          new Date(x["createdAt"]).getTime()
         );
       });
     } else {
       sorteddata = this.state.tableitems.slice().sort(function(x, y) {
         return (
-          new Date(x["pickupTime"]).getTime() -
-          new Date(y["pickupTime"]).getTime()
+          new Date(x["createdAt"]).getTime() -
+          new Date(y["createdAt"]).getTime()
         );
       });
     }
@@ -451,55 +485,159 @@ class Order extends Component {
     }
   };
 
-  rendeSelectedLunchOrderItems() {
-    const { selectedLunchOrderItem } = this.state;
+  renderSelectedOrderSelectionItem(selectionitem) {
+    var itemstext = "";
+
+    for (let i = 0; i < selectionitem.length; i++) {
+      if (i == 0) {
+        itemstext = selectionitem[i].selectionitemtitle;
+      } else {
+        itemstext = itemstext + ", " + selectionitem[i].selectionitemtitle;
+      }
+    }
+    return (
+      <div>
+        <Label style={{ cursor: "pointer", opacity: 0.7 }}>{itemstext}</Label>
+      </div>
+    );
+  }
+
+  renderSelectedOrderSelection(selection) {
+    var itemsarray = [];
+
+    for (let i = 0; i < selection.length; i++) {
+      itemsarray.push(
+        <p key={i} style={{ textSize: 13, opacity: 0.7, margin: 0 }}>
+          <span>&#8226;</span> {selection[i].selectioncategory}:
+          {this.renderSelectedOrderSelectionItem(selection[i].selectionitem)}
+        </p>
+      );
+    }
+
+    return <div>{itemsarray}</div>;
+  }
+
+  renderInstruction(instruction) {
+    var itemsarray = [];
+
+    for (let i = 0; i < 1; i++) {
+      itemsarray.push(
+        <p key={i} style={{ textSize: 13, opacity: 0.7, margin: 0 }}>
+          <span>&#8226;</span> Instruction:
+          <div>
+            <Label style={{ cursor: "pointer", opacity: 0.7 }}>
+              {instruction}
+            </Label>
+          </div>
+        </p>
+      );
+    }
+
+    return <div>{itemsarray}</div>;
+  }
+
+  renderSelectedOrderTableItems() {
+    const { selectedOrderItem } = this.state;
+
+    var itemarray = [];
+
+    var orderItem = selectedOrderItem.orderItem;
+
+    for (let i = 0; i < orderItem.length; i++) {
+      itemarray.push(
+        <tr>
+          <td style={{ fontWeight: "500" }}>{orderItem[i].quantity}</td>
+          <td style={{ textAlign: "start" }}>
+            <p
+              style={{
+                marginBottom: 5,
+                fontWeight: "500",
+                color: "#20a8d8",
+                overflow: "hidden"
+              }}
+            >
+              {orderItem[i].title}
+            </p>
+
+            {typeof orderItem[i].selection === "undefined"
+              ? null
+              : this.renderSelectedOrderSelection(orderItem[i].selection)}
+            {typeof orderItem[i].instruction === "undefined"
+              ? null
+              : this.renderInstruction(orderItem[i].instruction)}
+          </td>
+
+          <td style={{ width: "20%", textAlign: "start" }}>
+            €{Number(orderItem[i].totalunitprice).toFixed(2)}
+          </td>
+        </tr>
+      );
+    }
+
+    return <tbody>{itemarray}</tbody>;
+  }
+
+  rendeselectedOrderItems() {
+    const { selectedOrderItem } = this.state;
     return (
       <div style={{ textAlign: "start" }}>
         <Table bordered responsive className="mb-0 d-none d-sm-table">
           <thead className="thead-light">
             <tr>
-              <th>Item</th>
+              <th>Qty</th>
+              <th>Items</th>
               <th>Price</th>
             </tr>
           </thead>
-          <tbody>
-            <tr>
-              <td>1x {selectedLunchOrderItem.orderItem[0].title}</td>
-              <td>{selectedLunchOrderItem.totalOrderPrice}</td>
-            </tr>
-          </tbody>
+          {this.renderSelectedOrderTableItems()}
         </Table>
 
         <Table style={{ marginTop: 20 }} borderless>
           <tbody>
             <tr>
+              <td style={{ fontSize: 16, textAlign: "start" }}>Total Order</td>
+              <td style={{ fontSize: 16, fontWeight: "600", textAlign: "end" }}>
+                €{Number(selectedOrderItem.totalOrderPrice).toFixed(2)}
+              </td>
+            </tr>
+            <tr>
               <td style={{ fontSize: 16, textAlign: "start" }}>Customer</td>
               <td style={{ fontSize: 16, fontWeight: "600", textAlign: "end" }}>
-                {selectedLunchOrderItem.customerDetails[0].customerFirstName}{" "}
-                {selectedLunchOrderItem.customerDetails[0].customerLastName.charAt(
+                {selectedOrderItem.customerDetails[0].customerFirstName}{" "}
+                {selectedOrderItem.customerDetails[0].customerLastName.charAt(
                   0
                 )}
                 .
                 <Badge
                   style={{ marginLeft: 5 }}
                   color={
-                    selectedLunchOrderItem.customerType === "new"
+                    selectedOrderItem.customerType === "new"
                       ? "warning"
-                      : selectedLunchOrderItem.customerType === "recurring"
+                      : selectedOrderItem.customerType === "recurring"
                       ? "primary"
                       : "secondary"
                   }
                 >
-                  {this.capitalizeFirstLetter(
-                    selectedLunchOrderItem.customerType
-                  )}
+                  {this.capitalizeFirstLetter( selectedOrderItem.customerType)}
                 </Badge>
               </td>
             </tr>
             <tr>
-              <td style={{ fontSize: 16, textAlign: "start" }}>Pick Up Time</td>
+              <td style={{ fontSize: 16, textAlign: "start" }}>Order Type</td>
               <td style={{ fontSize: 16, fontWeight: "600", textAlign: "end" }}>
-                {moment(selectedLunchOrderItem.pickupTime).format("hh:mm A")}
+                {this.capitalizeFirstLetter(selectedOrderItem.orderType)}
+              </td>
+            </tr>
+            <tr>
+              <td style={{ fontSize: 16, textAlign: "start" }}>Collection / Delivery Time</td>
+              <td style={{ fontSize: 16, fontWeight: "600", textAlign: "end" }}>
+                {selectedOrderItem.orderType === "delivery" ? moment(selectedOrderItem.deliveryTime).format("hh:mm A") : moment(selectedOrderItem.pickupTime).format("hh:mm A")}
+              </td>
+            </tr>
+            <tr>
+              <td style={{ fontSize: 16, textAlign: "start" }}>Delivery Address</td>
+              <td style={{ fontSize: 16, fontWeight: "600", textAlign: "end" }}>
+                {selectedOrderItem.orderType === "delivery" ? selectedOrderItem.deliveryAddress : " - "}
               </td>
             </tr>
           </tbody>
@@ -508,24 +646,24 @@ class Order extends Component {
     );
   }
 
-  renderLunchOrderModal() {
-    const { selectedLunchOrderItem } = this.state;
+  renderOrderModal() {
+    const { selectedOrderItem } = this.state;
     return (
       <Modal
-        isOpen={this.state.orderLunchModal}
-        toggle={() => this.toggleLunchOrderModal()}
+        isOpen={this.state.orderModal}
+        toggle={() => this.toggleOrderModal()}
       >
-        <ModalHeader toggle={() => this.toggleLunchOrderModal()}>
-          Order #{selectedLunchOrderItem.orderNumber}
+        <ModalHeader toggle={() => this.toggleOrderModal()}>
+          Order #{selectedOrderItem.orderNumber}
         </ModalHeader>
         <ModalBody>
-          {this.rendeSelectedLunchOrderItems()}
-          {selectedLunchOrderItem.orderStatus === "pending"
+          {this.rendeselectedOrderItems()}
+          {selectedOrderItem.orderStatus === "pending"
             ? this.renderPendingStatus()
             : null}
         </ModalBody>
         <ModalFooter style={{ padding: 0 }}>
-          {selectedLunchOrderItem.orderStatus === "accepted" ? (
+          {selectedOrderItem.orderStatus === "accepted" ? (
             <Button
               style={{
                 opacity: 1,
@@ -539,7 +677,7 @@ class Order extends Component {
             >
               Accepted
             </Button>
-          ) : selectedLunchOrderItem.orderStatus === "cancelled" ? (
+          ) : selectedOrderItem.orderStatus === "cancelled" ? (
             <Button
               style={{
                 opacity: 1,
@@ -553,7 +691,7 @@ class Order extends Component {
             >
               Cancelled
             </Button>
-          ) : selectedLunchOrderItem.orderStatus === "rejected" ? (
+          ) : selectedOrderItem.orderStatus === "rejected" ? (
             <Button
               style={{
                 opacity: 1,
@@ -567,7 +705,7 @@ class Order extends Component {
             >
               Rejected
             </Button>
-          ) : selectedLunchOrderItem.orderStatus === "pickedup" ? (
+          ) : selectedOrderItem.orderStatus === "pickedup" ? (
             <Button
               style={{
                 opacity: 1,
@@ -616,7 +754,7 @@ class Order extends Component {
     );
   }
 
-  renderLunchTable() {
+  renderOrderTable() {
     return (
       <div>
         <Table hover={true} responsive={this.state.totalOrderCount === 0 ? false : true }>
@@ -631,20 +769,23 @@ class Order extends Component {
                     ? "headerSortUp"
                     : "headerSortDown"
                 }
-                onClick={() => this.sortPickUpTime()}
+                onClick={() => this.sortOrderTime()}
               >
-                Pick Up
+                Order Time
               </th>
+              <th>Order Type</th>
+              <th>Collection / Delivery Time</th>
+              <th>Delivery Address</th>
               <th>Item</th>
               <th>Price (€)</th>
               <th
-                onClick={() => this.toggleStatusForLunch()}
+                onClick={() => this.toggleStatus()}
                 style={{ cursor: "pointer" }}
               >
                 <Row style={{ marginLeft: 0 }}>
                   Status
                   <Dropdown
-                    isOpen={this.state.dropDownStatusForLunch}
+                    isOpen={this.state.dropDownStatus}
                     size="sm"
                   >
                     <DropdownToggle
@@ -690,18 +831,17 @@ class Order extends Component {
             </tr>
           </thead>
 
-          {this.state.empty ? null : this.renderLunchTableItems()}
+          {this.state.empty ? null : this.renderTableItems()}
         </Table>
         {this.state.empty ? this.renderEmptyItems() : null}
       </div>
     );
   }
 
-  renderLunchTableItems() {
+  renderTableItems() {
     var itemarray = [];
 
-    var dataToShow =
-      this.state.filtered_data.length > 0 ? this.state.filtered_data : this.state.tableitems;
+    var dataToShow = this.state.filtered_data.length > 0 ? this.state.filtered_data : this.state.tableitems;
 
     var tableitems = dataToShow.slice((this.state.currentPage - 1) * this.state.pageSize,this.state.currentPage * this.state.pageSize);
 
@@ -710,8 +850,8 @@ class Order extends Component {
         <tr
           style={{ cursor: "pointer" }}
         >
-          <td style={{ width: "10%" }} onClick={() => this.tableItemClicked(tableitems[i]._id)}>#{tableitems[i].orderNumber}</td>
-          <td style={{ width: "15%" }} onClick={() => this.tableItemClicked(tableitems[i]._id)}>
+          <td  onClick={() => this.tableItemClicked(i)}>#{tableitems[i].orderNumber}</td>
+          <td  onClick={() => this.tableItemClicked(i)}>
             {tableitems[i].customerDetails[0].customerFirstName}{" "}
             {tableitems[i].customerDetails[0].customerLastName.charAt(0)}.
             <Badge
@@ -727,18 +867,25 @@ class Order extends Component {
               {this.capitalizeFirstLetter(tableitems[i].customerType)}
             </Badge>
           </td>
-          <td style={{ width: "10%" }} onClick={() => this.tableItemClicked(tableitems[i]._id)}>
-            {moment(tableitems[i].pickupTime).format("hh:mm A")}
+          <td  onClick={() => this.tableItemClicked(i)}>
+            {moment(tableitems[i].createdAt).format("hh:mm A")}
           </td>
-          <td style={{ width: "35%" }} onClick={() => this.tableItemClicked(tableitems[i]._id)}>
-            1x {tableitems[i].orderItem[0].title}
+          <td  onClick={() => this.tableItemClicked(i)}>{this.capitalizeFirstLetter(tableitems[i].orderType)}</td>
+          <td  onClick={() => this.tableItemClicked(i)}>
+            {tableitems[i].orderType === "delivery" ? moment(tableitems[i].deliveryTime).format("hh:mm A") : moment(tableitems[i].pickupTime).format("hh:mm A")}
           </td>
-          <td style={{ width: "10%" }} onClick={() => this.tableItemClicked(tableitems[i]._id)}>
+          <td onClick={() => this.tableItemClicked(i)}>
+            {tableitems[i].orderType === "delivery" ? tableitems[i].deliveryAddress : " - "}
+          </td>
+          
+          {this.renderOrderItemsTable(i)}
+         
+          <td  onClick={() => this.tableItemClicked(i)}>
             {Number(tableitems[i].totalOrderPrice).toFixed(2)}
           </td>
-          <td style={{ width: "20%" }} onClick={() => tableitems[i].orderStatus === "pending" ? this.tableItemClicked("") : this.tableItemClicked(tableitems[i]._id)}>
+          <td onClick={() => tableitems[i].orderStatus === "pending" ? this.tableItemClicked("") : this.tableItemClicked(i)}>
             {tableitems[i].orderStatus === "pending" ? (
-              this.renderPendingStatus(tableitems[i]._id)
+              this.renderPendingStatusTable(tableitems[i]._id)
             ) : (
               <Badge
                 color={
@@ -760,6 +907,56 @@ class Order extends Component {
     }
 
     return <tbody>{itemarray}</tbody>;
+  }
+
+  renderOrderItemsTable(index) {
+    var orderitemarray = [];
+    
+    var dataToShow = this.state.filtered_data.length > 0 ? this.state.filtered_data : this.state.tableitems;
+
+    var tableitems = dataToShow.slice((this.state.currentPage - 1) * this.state.pageSize,this.state.currentPage * this.state.pageSize);
+
+    var orderitems = tableitems[index].orderItem;
+
+    for (let i = 0; i < orderitems.length; i++) {
+      orderitemarray.push(
+        <Row>
+          <Label>
+            {orderitems[i].quantity} x {orderitems[i].title}
+          </Label>
+        </Row>
+      );
+    }
+
+    return <td onClick={() => this.tableItemClicked(tableitems[index]._id)}>{orderitemarray}</td>;
+  }
+
+  renderPendingStatusTable(_id) {
+    return (
+      <div className="column">
+
+          <Button
+            outline
+            style={{ opacity: 1, fontSize: 14, fontWeight: "600" }}
+            block
+            color="success"
+          //  onClick={() => this.acceptOrder(_id, "single")}
+          >
+            Accept
+          </Button>
+
+           <Button
+            outline
+            style={{ opacity: 1, fontSize: 14, fontWeight: "600" }}
+            block
+            color="danger"
+           // onClick={() => this.rejectOrder(_id, "single")}
+          >
+            Reject
+          </Button>
+       
+      </div>
+    );
   }
 
   renderPendingStatus(_id) {
@@ -894,7 +1091,7 @@ class Order extends Component {
                     </div>
                   </Col>
 
-                  <Col xs="12">{this.renderLunchTable()}</Col>
+                  <Col xs="12">{this.renderOrderTable()}</Col>
                   <Col style={{ marginTop: 20, marginBottom: 20 }} xs="12">
                     <Row>
                       <Col xs="12" md="6">
@@ -929,7 +1126,7 @@ class Order extends Component {
               </CardBody>
             </Card>
           </Col>
-          {this.state.selectedLunchOrderItem !== null ? this.renderLunchOrderModal() : null}
+          {this.state.selectedOrderItem !== null ? this.renderOrderModal() : null}
           {this.renderLoadingModal()}
           <ToastContainer hideProgressBar/>
         </Row>

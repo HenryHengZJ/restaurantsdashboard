@@ -13,23 +13,13 @@ var customerSchema = mongoose.Schema({
     customerEmail: String,
 	customerPassword: String,
     customerPhoneNumber: String,
-    customerCity: String,
-    customerCounty: String,
-    customerCountry: String,
-    customerCountryCode: String,
-    customerCompanyID: ObjectId,
     customerOrderCount: {
         type: Number,
         default: 0
     },
-    customerIsPrime: {
-        type: Boolean,
-        default: false
-    },
     resetPasswordToken: String,
     resetPasswordExpires: Date,
     customerPaymentAccountID: String,
-    subscriptionID: String,
 }, {
     timestamps: true
 });

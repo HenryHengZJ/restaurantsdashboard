@@ -61,11 +61,11 @@ class Menu extends Component {
     super(props);
 
     this.inputOpenFileRef = React.createRef()
-    this.toggleInfoModal = this.toggleInfoModal.bind(this);
+    this.toggleNewCategoryModal = this.toggleNewCategoryModal.bind(this);
     this.toggleDeleteItemModal = this.toggleDeleteItemModal.bind(this);
 
     this.state = {
-      infoModalOpen: false,
+      categoryModal: false,
       loadingModal: false,
       deleteModalOpen: false,
       deleteMenuID: "",
@@ -73,6 +73,7 @@ class Menu extends Component {
       updateItem: false,
       menuItemModal: false,
       selectedMenuItem: null,
+      newMenuCategoryName: "",
       markitem: [
         "Hot",
         "Spicy",
@@ -87,6 +88,7 @@ class Menu extends Component {
           category: 'Side Dishes',
           descrip: "Deep fried king prawns coated in seasonal breadcrumbs served with sweet Japanese sauce",
           markitem: [],
+          selection: [],
           priceperunit: 5.9,
         },
         {
@@ -94,6 +96,7 @@ class Menu extends Component {
           category: 'Side Dishes',
           descrip: "Finely chopped seasonal vegetables dumpling steamed and then pan fried, served with traditional gyoza sauce",
           markitem: [],
+          selection: [],
           priceperunit: 6.8,
         },
         {
@@ -101,6 +104,7 @@ class Menu extends Component {
           category: 'Side Dishes',
           descrip: "Chicken and spring onion grilled on skewer served with yakitori sauce",
           markitem: [],
+          selection: [],
           priceperunit: 6.9,
         },
         {
@@ -108,6 +112,7 @@ class Menu extends Component {
           category: 'Sushi Nigiri',
           descrip: "Rice ball served with a slice of filling (2 pcs)",
           markitem: [],
+          selection: [],
           priceperunit: 4,
         },
         {
@@ -115,6 +120,7 @@ class Menu extends Component {
           category: 'Sushi Nigiri',
           descrip: "Rice ball served with a slice of filling. (2 pcs)",
           markitem: [],
+          selection: [],
           priceperunit: 5,
         },
         {
@@ -122,6 +128,7 @@ class Menu extends Component {
           category: 'Sushi Nigiri',
           descrip: "Rice ball served with a slice of filling. (2 pcs)",
           markitem: [],
+          selection: [],
           priceperunit: 4,
         },
         {
@@ -129,6 +136,7 @@ class Menu extends Component {
           category: 'Tempura Set',
           descrip: "Sweet potato, aubergine, shitake mushroom, asparagus, carrot, lotus roots, green paper and onion coated in a light crispy batter. Served with steamed rice, miso soup",
           markitem: [],
+          selection: [],
           priceperunit: 12.9,
         },
         {
@@ -136,6 +144,7 @@ class Menu extends Component {
           category: 'Tempura Set',
           descrip: "Fresh mix seafood coated in a light crispy batter served with steamed rice, miso soup",
           markitem: [],
+          selection: [],
           priceperunit: 13.9,
         },
         {
@@ -143,6 +152,7 @@ class Menu extends Component {
           category: 'Tempura Set',
           descrip: "Assorted mix vegetable and fresh seafood coated in a light crispy batter served with steam rice, miso soup",
           markitem: [],
+          selection: [],
           priceperunit: 13.9,
         },
         {
@@ -150,6 +160,7 @@ class Menu extends Component {
           category: 'Teppan Teriyaki',
           descrip: "Grilled 8oz of chicken breast served with stir fried vegetables and sweet teriyaki sauce",
           markitem: [],
+          selection: [],
           priceperunit: 13.9,
         },
         {
@@ -157,6 +168,7 @@ class Menu extends Component {
           category: 'Teppan Teriyaki',
           descrip: "Grilled fresh supreme of salmon served with stir fried vegetables and sweet teriyaki sauce",
           markitem: [],
+          selection: [],
           priceperunit: 15.9,
         },
         {
@@ -164,8 +176,21 @@ class Menu extends Component {
           category: 'Teppan Teriyaki',
           descrip: "Grilled 9oz prime Irish strip loin steak served with stir fried vegetables and sweet teriyaki sauce",
           markitem: [],
+          selection: [],
           priceperunit: 15.9,
         },
+      ],
+      selectionmaxnum: [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
       ],
       menu: [],
       menutitle: [],
@@ -182,8 +207,7 @@ class Menu extends Component {
       isImgInValid: null,
       isTitleEmpty: false,
       isDescripEmpty: false,
-      isPricePerUnitInvalid: false,
-      isPrimePriceInvalid: false,
+      isItemSelectionEmpty: false,
     };
   }
 
@@ -297,12 +321,17 @@ class Menu extends Component {
         isTitleEmpty: false,
         isDescripEmpty: false,
         isImgInValid: null,
-        isPricePerUnitInvalid: false,
-        isPrimePriceInvalid: false,
+        isItemSelectionEmpty: false,
       }, () => {
         this.toggleMenuItemModal()
       })
     }
+  }
+
+  addNewCategoryClicked = () => {
+    this.setState({
+      categoryModal: !this.state.categoryModal,
+    })
   }
 
   addNewItemClicked = () => {
@@ -323,12 +352,92 @@ class Menu extends Component {
       isTitleEmpty: false,
       isDescripEmpty: false,
       isImgInValid: null,
-      isPricePerUnitInvalid: false,
-      isPrimePriceInvalid: false,
+      isItemSelectionEmpty: false,
     }, () => {
       this.toggleMenuItemModal()
     })
   }
+
+  
+  addNewSelectionCategory = () => {
+
+    var newselectedItemSelection;
+    var newitem = {
+      selectionitemtitle: "",
+      selectionitemprice: 0
+    };
+    var newSelectionItem = {
+      selectioncategory: "",
+      selectionmaxnum: 1,
+      selectionisOpen: true,
+      selectionitem: [newitem]
+    };
+    //If selection existed
+    if (typeof this.state.selectedMenuItem.selection !== 'undefined' && this.state.selectedMenuItem.selection.length > 0) {
+      newselectedItemSelection = this.state.selectedMenuItem.selection.slice();
+      newselectedItemSelection.push(newSelectionItem);
+    } else {
+      newselectedItemSelection = [newSelectionItem];
+    }
+
+    var newselectedMenuItem = JSON.parse(JSON.stringify(this.state.selectedMenuItem))
+    newselectedMenuItem.selection = newselectedItemSelection
+
+    this.setState({
+      selectedMenuItem: newselectedMenuItem
+    });
+  };
+
+  deleteSelectionCategory = index => {
+
+    var newselectedItemSelection;
+    newselectedItemSelection = this.state.selectedMenuItem.selection.slice();
+    newselectedItemSelection.splice(index, 1);
+
+    var newselectedMenuItem = JSON.parse(JSON.stringify(this.state.selectedMenuItem))
+    newselectedMenuItem.selection = newselectedItemSelection
+
+    this.setState({
+      selectedMenuItem: newselectedMenuItem
+    });
+  };
+
+  addNewSelectionItem = outerindex => {
+
+    var selectedItemSelection = this.state.selectedMenuItem.selection.slice();
+    var selectedSelectionJson = JSON.parse(JSON.stringify(selectedItemSelection[outerindex]));
+
+    var newitem = {
+      selectionitemtitle: "",
+      selectionitemprice: 0
+    };
+
+    selectedSelectionJson.selectionitem.push(newitem);
+    selectedItemSelection.splice(outerindex, 1, selectedSelectionJson);
+
+    var newselectedMenuItem = JSON.parse(JSON.stringify(this.state.selectedMenuItem))
+    newselectedMenuItem.selection = selectedItemSelection
+
+    this.setState({
+      selectedMenuItem: newselectedMenuItem
+    });
+  };
+
+  deleteSelectionItem = (outerindex, innerindex) => {
+
+    var selectedItemSelection = this.state.selectedMenuItem.selection.slice();
+    var selectedSelectionJson = JSON.parse( JSON.stringify(selectedItemSelection[outerindex]));
+
+    selectedSelectionJson.selectionitem.splice(innerindex, 1);
+    selectedItemSelection.splice(outerindex, 1, selectedSelectionJson);
+
+    var newselectedMenuItem = JSON.parse(JSON.stringify(this.state.selectedMenuItem))
+    newselectedMenuItem.selection = selectedItemSelection
+
+    this.setState({
+      selectedMenuItem: newselectedMenuItem
+    });
+  };
 
   toggleMenuItemModal = () => {
     this.setState({
@@ -336,9 +445,9 @@ class Menu extends Component {
     })
   }
 
-  toggleInfoModal() {
+  toggleNewCategoryModal() {
     this.setState({
-      infoModalOpen: !this.state.infoModalOpen,
+      categoryModal: !this.state.categoryModal,
     });
   }
 
@@ -347,7 +456,7 @@ class Menu extends Component {
       deleteModalOpen: !this.state.deleteModalOpen,
     });
   }
-  
+
   findIcon = iconname => {
     var iconPath;
     if (iconname == "Hot") {
@@ -422,15 +531,13 @@ class Menu extends Component {
       selectedMenuItem,
       updateItem,
       file,
-      isPricePerUnitInvalid,
-      isPrimePriceInvalid,
     } = this.state;
 
     var selectedItemTitle = selectedMenuItem.title
     var selectedItemDescrip = selectedMenuItem.descrip
     var selectedItemId = selectedMenuItem._id
     var selectedItemPrice = selectedMenuItem.priceperunit
-    var selectedDiscountedPrice = selectedMenuItem.discountedprice
+    var selectedItemSelection = selectedMenuItem.selection
     var selectedMarkItemAs = selectedMenuItem.markitem
     var selectedSrc = selectedMenuItem.src
 
@@ -444,8 +551,10 @@ class Menu extends Component {
         isDescripEmpty: true
       });
     } 
-    else if (isPricePerUnitInvalid || isPrimePriceInvalid ) {
-      return;
+    else if (this.checkSelection() === true) {
+      this.setState({
+        isItemSelectionEmpty: true
+      });
     } 
     else {
       if (updateItem) {
@@ -459,12 +568,12 @@ class Menu extends Component {
         formData.append('title', selectedItemTitle);
         formData.append('descrip', selectedItemDescrip);
         formData.append('priceperunit', selectedItemPrice);
-        formData.append('discountedprice', selectedDiscountedPrice);
-        formData.append('activeDay', moment(this.state.selectedDay).format("dddd"));
         if (file !== "") {
           formData.append('files', file);
         }
-        
+        if (selectedItemSelection.length > 0) {
+          formData.append('selection', JSON.stringify(selectedItemSelection));
+        }
         if (selectedMarkItemAs.length > 0) {
           formData.append('markitem', JSON.stringify(selectedMarkItemAs));
         }
@@ -511,10 +620,12 @@ class Menu extends Component {
         formData.append('title', selectedItemTitle);
         formData.append('descrip', selectedItemDescrip);
         formData.append('priceperunit', selectedItemPrice);
-        formData.append('discountedprice', selectedDiscountedPrice);
-        formData.append('files', file);   
-        formData.append('activeDay', moment(this.state.selectedDay).format("dddd"));
-
+        if (file !== "") {
+          formData.append('files', file);
+        }
+        if (selectedItemSelection.length > 0) {
+          formData.append('selection', JSON.stringify(selectedItemSelection));
+        }
         if (selectedMarkItemAs.length > 0) {
           formData.append('markitem', JSON.stringify(selectedMarkItemAs));
         }
@@ -603,10 +714,32 @@ class Menu extends Component {
     });
   }
   
+  checkSelection = () => {
+
+    var selectedSelectionArray = this.state.selectedMenuItem.selection.slice()
+
+    for (let i = 0; i < selectedSelectionArray.length; i++) {
+      if (selectedSelectionArray[i].selectioncategory === "") {
+        return true;
+      }
+      var selectedSelectionItemArray = selectedSelectionArray[
+        i
+      ].selectionitem.slice();
+      for (let x = 0; x < selectedSelectionItemArray.length; x++) {
+        if (selectedSelectionItemArray[x].selectionitemtitle === "") {
+          return true;
+        }
+      }
+    }
+    return false;
+  };
 
   //Handle Input Change//////////////////////////////////////////////////////////////////////
 
-  
+  handleCategoryNameChange = (e) => {
+    this.setState({ newMenuCategoryName: e.target.value });
+  }
+
   handleImageChange(e) {
     e.preventDefault();
     var selectedMenuItem = JSON.parse(JSON.stringify(this.state.selectedMenuItem));
@@ -651,7 +784,7 @@ class Menu extends Component {
     //If selectedmarkitem not exist
     else {
       selectedMarkItemAs.push(markitem);
-    }
+    } 
 
     selectedMenuItem.markitem = selectedMarkItemAs
 
@@ -688,6 +821,82 @@ class Menu extends Component {
     this.setState({
       selectedMenuItem,
     })
+  }
+
+  
+  handleSelectionCategoryChange(e, index) {
+
+    var selectedSelectionArray = this.state.selectedMenuItem.selection.slice();
+    var selectedSelectionJson = JSON.parse(JSON.stringify(selectedSelectionArray[index]) );
+
+    selectedSelectionJson.selectioncategory = e.target.value;
+    selectedSelectionArray.splice(index, 1, selectedSelectionJson);
+    
+    var newselectedMenuItem = JSON.parse(JSON.stringify(this.state.selectedMenuItem))
+    newselectedMenuItem.selection = selectedSelectionArray
+
+    this.setState({
+      selectedMenuItem: newselectedMenuItem
+    });
+  }
+
+  handleSelectionMaxNumChange(e, index) {
+
+    var selectedSelectionArray = this.state.selectedMenuItem.selection.slice();
+    var selectedSelectionJson = JSON.parse( JSON.stringify(selectedSelectionArray[index]));
+    
+    selectedSelectionJson.selectionmaxnum = e.target.value;
+    selectedSelectionArray.splice(index, 1, selectedSelectionJson);
+
+    var newselectedMenuItem = JSON.parse(JSON.stringify(this.state.selectedMenuItem))
+    newselectedMenuItem.selection = selectedSelectionArray
+
+    this.setState({
+      selectedMenuItem: newselectedMenuItem
+    });
+  }
+
+  handleSelectionItemTitleChange(e, outerindex, innerindex) {
+
+    var selectedSelectionArray = this.state.selectedMenuItem.selection.slice();
+    var selectedSelectionJson = JSON.parse(JSON.stringify(selectedSelectionArray[outerindex]));
+
+    var selectedSelectionItemArray = selectedSelectionArray[outerindex].selectionitem.slice();
+    var selectedSelectionItemJson = JSON.parse(JSON.stringify(selectedSelectionItemArray[innerindex]));
+    
+    selectedSelectionItemJson.selectionitemtitle = e.target.value;
+    selectedSelectionItemArray.splice(innerindex, 1, selectedSelectionItemJson);
+    selectedSelectionJson.selectionitem = selectedSelectionItemArray;
+    selectedSelectionArray.splice(outerindex, 1, selectedSelectionJson);
+
+    var newselectedMenuItem = JSON.parse(JSON.stringify(this.state.selectedMenuItem))
+    newselectedMenuItem.selection = selectedSelectionArray
+
+    this.setState({
+      selectedMenuItem: newselectedMenuItem
+    });
+  }
+
+  handleSelectionItemPriceChange(e, value, outerindex, innerindex) {
+
+    var selectedSelectionArray = this.state.selectedMenuItem.selection.slice();
+    var selectedSelectionJson = JSON.parse(JSON.stringify(selectedSelectionArray[outerindex]));
+
+    var selectedSelectionItemArray = selectedSelectionArray[outerindex].selectionitem.slice();
+    var selectedSelectionItemJson = JSON.parse(JSON.stringify(selectedSelectionItemArray[innerindex]));
+
+    
+    selectedSelectionItemJson.selectionitemprice = value;
+    selectedSelectionItemArray.splice(innerindex, 1, selectedSelectionItemJson);
+    selectedSelectionJson.selectionitem = selectedSelectionItemArray;
+    selectedSelectionArray.splice(outerindex, 1, selectedSelectionJson);
+
+    var newselectedMenuItem = JSON.parse(JSON.stringify(this.state.selectedMenuItem))
+    newselectedMenuItem.selection = selectedSelectionArray
+
+    this.setState({
+      selectedMenuItem: newselectedMenuItem
+    });
   }
 
 
@@ -742,6 +951,7 @@ class Menu extends Component {
     return (
       <Row style={{ marginTop: 10 }}>
         <Col xs="12">{itemsarray}</Col>
+        <Col xs="12">{this.renderEmptyCategoryItem()}</Col>
       </Row>
     );
   }
@@ -861,7 +1071,8 @@ class Menu extends Component {
     var selectedItemDescrip = this.state.selectedMenuItem.descrip;
     var selectedItemPrice = this.state.selectedMenuItem.priceperunit;
     var selectedMarkItemAs = this.state.selectedMenuItem.markitem;
-  
+    var selectedItemSelection = this.state.selectedMenuItem.selection;
+
     return (
     
         <Form action="" method="post" className="form-horizontal">
@@ -925,9 +1136,19 @@ class Menu extends Component {
                   required
                 />
               </InputGroup>
-              {this.state.isPricePerUnitInvalid ? <Label style={{color: 'red', fontSize: 11, opacity:0.6}}>Price has to be more than €6</Label> : null }
             </Col> 
           </FormGroup>
+
+          {this.renderSelection(selectedItemSelection)}
+
+          <Button
+            className="btn-pill"
+            block
+            style={{backgroundColor: color.primary, color: 'white', fontWeight: '600' }}
+            onClick={() => this.addNewSelectionCategory()}
+          >
+            Add Selections (Toppings / Sides)
+          </Button>
          
           <h6
             style={{
@@ -942,6 +1163,190 @@ class Menu extends Component {
           {this.renderFormMarkItem(selectedMarkItemAs)}
         </Form>
      
+    );
+  }
+
+  
+  renderSelection(selection) {
+    var selectionarray = [];
+    for (let i = 0; i < selection.length; i++) {
+      selectionarray.push(
+        <Card>
+          <CardHeader>
+            <Label style={{ fontWeight: "600" }}>
+              Selection {i + 1}
+            </Label>
+            <div className="card-header-actions">
+              <a
+                onClick={() => this.deleteSelectionCategory(i)}
+                style={{ cursor: "pointer" }}
+                onMouseOver=""
+                className="card-header-action btn btn-close"
+              >
+                <img
+                  style={{
+                    height: 10,
+                    width: 10,
+                    objectFit: "cover"
+                  }}
+                  src={closeIcon}
+                  alt=""
+                />
+              </a>
+            </div>
+          </CardHeader>
+          <Collapse isOpen={selection[i].selectionisOpen ? true : false}>
+            <CardBody>
+              <FormGroup row>
+                <Col xs="4">
+                  <h6 style={{ marginTop: 5 }}>Selection Category</h6>
+                </Col>
+                <Col xs="8">
+                  <Input
+                    onChange={e => this.handleSelectionCategoryChange(e, i)}
+                    value={selection[i].selectioncategory}
+                    style={{ color: "black" }}
+                    type="text"
+                    placeholder="i.e: Meat"
+                  />
+                </Col>
+              </FormGroup>
+              <FormGroup row>
+                <Col xs="4">
+                  <h6 style={{ marginTop: 5 }}>How many sides can customer select?</h6>
+                </Col>
+                <Col xs="8">
+                  <Input
+                    onChange={e => this.handleSelectionMaxNumChange(e, i)}
+                    value={selection[i].selectionmaxnum}
+                    style={{ color: "black" }}
+                    type="select"
+                    placeholder="1"
+                  >
+                    {this.state.selectionmaxnum.map(limit => (
+                      <option
+                        style={{ color: "black" }}
+                        key={limit}
+                        value={limit}
+                      >
+                        {limit}
+                      </option>
+                    ))}
+                  </Input>
+                </Col>
+              </FormGroup>
+              {this.renderSelectionItems(selection[i].selectionitem, i)}
+            </CardBody>
+          </Collapse>
+        </Card>
+      );
+    }
+    return (
+      <FormGroup>
+        {selectionarray}
+        {this.state.isItemSelectionEmpty ? (
+          <FormText className="help-block">
+            <span style={{ color: "red" }}>
+              Please fill in all the empty inputs in selections
+            </span>
+          </FormText>
+        ) : null}
+      </FormGroup>
+    );
+  }
+
+  renderSelectionItems(selectionitem, outerindex) {
+    var selectionitemarray = [];
+    if (typeof selectionitem !== 'undefined') {
+      for (let i = 0; i < selectionitem.length; i++) {
+        selectionitemarray.push(
+          <Row>
+            <Col xs="12" md="5">
+              <FormGroup>
+                <div>
+                  <Input
+                    onChange={e =>
+                      this.handleSelectionItemTitleChange(e, outerindex, i)
+                    }
+                    value={
+                      selectionitem[i] == null
+                        ? ""
+                        : selectionitem[i].selectionitemtitle
+                    }
+                    style={{ color: "black" }}
+                    type="text"
+                    placeholder="Selection 1"
+                  />
+                </div>
+              </FormGroup>
+            </Col>
+            <Col xs="10" md="6">
+              <FormGroup>
+                <div>
+                  <InputGroup className="input-prepend">
+                    <InputGroupAddon addonType="prepend">
+                      <InputGroupText>€</InputGroupText>
+                    </InputGroupAddon>
+                    <CurrencyInput
+                      style={{
+                        borderWidth: 1,
+                        borderColor: "rgba(211,211,211,0.3)",
+                        paddingLeft: 10,
+                        color: "black",
+                        width:'80%'
+                      }}
+                      value={
+                        selectionitem[i] == null
+                          ? ""
+                          : Number(selectionitem[i].selectionitemprice).toFixed(2)
+                      }
+                      onChange={(e, value) =>
+                        this.handleSelectionItemPriceChange(
+                          e,
+                          value,
+                          outerindex,
+                          i
+                        )
+                      }
+                      placeholder="0.00"
+                      required
+                    />
+                  </InputGroup>
+                </div>
+              </FormGroup>
+            </Col>
+
+            <Col style={{ padding: 0 }} xs="2" md="1">
+              <img
+                style={{
+                  cursor: "pointer",
+                  height: 10,
+                  width: 10,
+                  objectFit: "cover",
+                  marginTop: 10
+                }}
+                onClick={() => this.deleteSelectionItem(outerindex, i)}
+                src={closeIcon}
+                alt=""
+              />
+            </Col>
+          </Row>
+        );
+      }
+    }
+    return (
+      <Row>
+        <Col xs="12">{selectionitemarray}</Col>
+        <Col xs="12">
+          <Button
+            style={{backgroundColor: color.secondary, color: 'white', fontWeight: '600'}}
+            onClick={() => this.addNewSelectionItem(outerindex)}
+            className="btn-pill"
+          >
+            Add Items
+          </Button>
+        </Col>
+      </Row>
     );
   }
 
@@ -1014,9 +1419,45 @@ class Menu extends Component {
     );
   }
 
+  
+  renderAddNewCategoryModal() {
+    return (
+      <Modal
+        isOpen={this.state.categoryModal}
+        toggle={this.toggleNewCategoryModal}
+      >
+        <ModalHeader toggle={this.toggleNewCategoryModal}>
+          Add New Category
+        </ModalHeader>
+        <ModalBody>
+          <FormGroup>
+            <Input
+              style={{ marginTop: 10, color: "black" }}
+              value={this.state.newMenuCategoryName}
+              onChange={e => this.handleCategoryNameChange(e)}
+              type="text"
+            />
+          </FormGroup>
+        </ModalBody>
+        <ModalFooter>
+          <Button
+            disabled={true}
+            color="primary"
+           // onClick={() => this.addNewMenuCategory()}
+          >
+           Add
+          </Button>
+          <Button color="secondary" onClick={this.toggleNewCategoryModal} disabled={this.state.isSaving ? true : false}>
+            Cancel
+          </Button>
+        </ModalFooter>
+      </Modal>
+    );
+  }
+
   renderAddNewItemModal() {
     return (
-      <Modal isOpen={this.state.menuItemModal} toggle={this.toggleMenuItemModal}>
+      <Modal isOpen={this.state.menuItemModal}>
         <ModalHeader toggle={this.toggleMenuItemModal}>{this.state.updateItem ? "Edit Item" : "Add New Item"}</ModalHeader>
         <ModalBody>
           {this.renderForm()}
@@ -1030,6 +1471,45 @@ class Menu extends Component {
           </Button>
         </ModalFooter>
       </Modal>
+    );
+  }
+
+  renderEmptyCategoryItem() {
+    return (
+    
+        <Card 
+          className="card-1"
+          onClick={() => this.addNewCategoryClicked()}
+          style={{
+            cursor: "pointer",
+            marginLeft: 20,
+            marginRight: 20,
+            marginBottom: 20,
+            borderStyle: "dashed",
+            borderWidth: 2
+          }}
+        >
+          <CardBody
+            style={{ cursor: "pointer",
+            paddingTop: 0,
+            paddingBottom: 0,
+            paddingRight: 15,
+            height: "100%",  }}
+          >
+            <Row>
+              <Col xs="12">
+                <div className="row" style={{ display: 'table', paddingTop: 10, paddingBottom: 10 }}>
+                  <i
+                    style={{ color: "#c8ced3", marginLeft: 10 }}
+                    className="fa icon-plus fa-3x text-center"
+                  />
+                  <p  className="h5" style={{ verticalAlign: 'middle', display: 'table-cell', paddingLeft: 10, color: "gray", opacity: 0.7}}>Add New Category</p>
+                </div>
+              </Col>
+            </Row>
+          </CardBody>
+        </Card>
+     
     );
   }
   
@@ -1090,48 +1570,6 @@ class Menu extends Component {
     );
   }
   
-  
-  renderInfoModal() {
-
-    return (
-      <Modal    
-        toggle={this.toggleInfoModal}
-        isOpen={this.state.infoModalOpen} >
-
-        <ModalHeader toggle={this.toggleInfoModal}>
-          Main Lunch
-        </ModalHeader>
-        <ModalBody style={{paddingTop: 0, marginTop: 0, paddingLeft: 0, paddingRight: 20}}>
- 
-          <Table borderless style={{ marginLeft: 10, marginRight: 10, marginTop: 20}}>
-            <tbody>
-              <tr>
-                <td><img style={ { objectFit:'cover', marginTop:5, width: 35, height: 35 }} src={primeIcon} alt=""/></td>
-                <td style={{fontSize: 15}}><p style={{opacity: 0.8}}>Prime subscribed customers will enjoy the lunch at <b style={{color: 'orange'}}>Prime Price</b> once per day except for weekends and holidays.</p></td>
-              </tr>
-              <tr>
-                <td><img style={ { objectFit:'cover', marginTop:5, width: 35, height: 35 }} src={small_commissionIcon} alt=""/></td>
-                <td style={{fontSize: 15}}><p style={{opacity: 0.8}}>FoodieBee will only charge <b style={{color: 'green'}}>5%</b> commission on each order by Prime subscribed customers.</p></td>
-              </tr>
-              <tr>
-                <td><img style={ { objectFit:'cover', marginTop:5, width: 35, height: 35 }} src={mainlunchIcon} alt=""/></td>
-                <td style={{fontSize: 15}}><p style={{opacity: 0.8}}>Normal customers will pay at the original price.</p></td>
-              </tr>
-              <tr>
-                <td><img style={ { objectFit:'cover', marginTop:5, width: 35, height: 35 }} src={commissionIcon} alt=""/></td>
-                <td style={{fontSize: 15}}><p style={{opacity: 0.8}}>FoodieBee charge a <b style={{color: 'green'}}>10%</b> commission on each order.</p></td>
-              </tr>
-            </tbody>
-          </Table>
-
-          <div style={{textAlign: 'center', color: 'white',}}>
-            <Button onClick={this.toggleInfoModal} style={{fontSize: 15, height: 50, marginTop: 10, marginBottom: 10,}} className="bg-primary" color="primary">Got It</Button>
-          </div>
-
-        </ModalBody>
-      </Modal>
-    )
-  }
 
   renderDeleteItemModal() {
     var title ;
@@ -1210,7 +1648,7 @@ class Menu extends Component {
 
         {this.state.selectedMenuItem ? this.renderAddNewItemModal() : null}
 
-        {this.renderInfoModal()}
+        {this.renderAddNewCategoryModal()}
 
         {this.renderDeleteItemModal()}
 

@@ -119,18 +119,20 @@ class Sales extends Component {
       },
       tableitems: [
         {
-          orderItemID: "123456789",
           orderNumber: "478",
+          orderType: "pickup",
           orderItem: [{
             title: "Yasai Gyoza",
             descrip: "Finely chopped seasonal vegetables dumpling steamed and then pan fried, served with traditional gyoza sauce",
             priceperunit: 6.8,
+            totalunitprice: 6.8,
+            quantity: 1
           }],
           customerID: "123123123",
           customerDetails: [{
             customerFirstName: "John",
             customerLastName: "King",
-            customerPhoneNumber: "083-9457891",
+            customerPhoneNumber: "083-9920456",
           }],
           customerType: "recurring",
           totalOrderPrice: 6.8,
@@ -138,7 +140,9 @@ class Sales extends Component {
           paymentIntentID: "123123123",
           paymentType: "visa",
           paymentStatus: "succeeded",
-          pickupTime: new Date(),
+          pickupTime: new Date().setHours(new Date().getHours() + 0.5),
+          deliveryTime: new Date().setHours(new Date().getHours() + 1),
+          deliveryAddress: "",
           createdAt: new Date(),
         }
       ],
@@ -459,6 +463,99 @@ class Sales extends Component {
     );
   }
 
+  
+  renderSelectedOrderSelectionItem(selectionitem) {
+    var itemstext = "";
+
+    for (let i = 0; i < selectionitem.length; i++) {
+      if (i == 0) {
+        itemstext = selectionitem[i].selectionitemtitle;
+      } else {
+        itemstext = itemstext + ", " + selectionitem[i].selectionitemtitle;
+      }
+    }
+    return (
+      <div>
+        <Label style={{ cursor: "pointer", opacity: 0.7 }}>{itemstext}</Label>
+      </div>
+    );
+  }
+
+  renderSelectedOrderSelection(selection) {
+    var itemsarray = [];
+
+    for (let i = 0; i < selection.length; i++) {
+      itemsarray.push(
+        <p key={i} style={{ textSize: 13, opacity: 0.7, margin: 0 }}>
+          <span>&#8226;</span> {selection[i].selectioncategory}:
+          {this.renderSelectedOrderSelectionItem(selection[i].selectionitem)}
+        </p>
+      );
+    }
+
+    return <div>{itemsarray}</div>;
+  }
+
+  renderInstruction(instruction) {
+    var itemsarray = [];
+
+    for (let i = 0; i < 1; i++) {
+      itemsarray.push(
+        <p key={i} style={{ textSize: 13, opacity: 0.7, margin: 0 }}>
+          <span>&#8226;</span> Instruction:
+          <div>
+            <Label style={{ cursor: "pointer", opacity: 0.7 }}>
+              {instruction}
+            </Label>
+          </div>
+        </p>
+      );
+    }
+
+    return <div>{itemsarray}</div>;
+  }
+
+  renderSelectedOrderTableItems() {
+    const { selectedOrderItem } = this.state;
+
+    var itemarray = [];
+
+    var orderItem = selectedOrderItem.orderItem;
+
+    for (let i = 0; i < orderItem.length; i++) {
+      itemarray.push(
+        <tr>
+          <td style={{ fontWeight: "500" }}>{orderItem[i].quantity}</td>
+          <td style={{ textAlign: "start" }}>
+            <p
+              style={{
+                marginBottom: 5,
+                fontWeight: "500",
+                color: "#20a8d8",
+                overflow: "hidden"
+              }}
+            >
+              {orderItem[i].title}
+            </p>
+
+            {typeof orderItem[i].selection === "undefined"
+              ? null
+              : this.renderSelectedOrderSelection(orderItem[i].selection)}
+            {typeof orderItem[i].instruction === "undefined"
+              ? null
+              : this.renderInstruction(orderItem[i].instruction)}
+          </td>
+
+          <td style={{ width: "20%", textAlign: "start" }}>
+            €{Number(orderItem[i].totalunitprice).toFixed(2)}
+          </td>
+        </tr>
+      );
+    }
+
+    return <tbody>{itemarray}</tbody>;
+  }
+
   rendeSelectedOrderItems() {
     const { selectedOrderItem } = this.state;
     return (
@@ -466,20 +563,22 @@ class Sales extends Component {
         <Table bordered responsive className="mb-0 d-none d-sm-table">
           <thead className="thead-light">
             <tr>
-              <th>Item</th>
-              <th>Price (€)</th>
+              <th>Qty</th>
+              <th>Items</th>
+              <th>Price</th>
             </tr>
           </thead>
-          <tbody>
-            <tr>
-              <td>1x {selectedOrderItem.orderItem[0].title}</td>
-              <td>{Number(selectedOrderItem.totalOrderPrice).toFixed(2)}</td>
-            </tr>
-          </tbody>
+          {this.renderSelectedOrderTableItems()}
         </Table>
 
         <Table style={{ marginTop: 20 }} borderless>
           <tbody>
+            <tr>
+              <td style={{ fontSize: 16, textAlign: "start" }}>Total Order</td>
+              <td style={{ fontSize: 16, fontWeight: "600", textAlign: "end" }}>
+                €{Number(selectedOrderItem.totalOrderPrice).toFixed(2)}
+              </td>
+            </tr>
             <tr>
               <td style={{ fontSize: 16, textAlign: "start" }}>Customer</td>
               <td style={{ fontSize: 16, fontWeight: "600", textAlign: "end" }}>
@@ -498,42 +597,26 @@ class Sales extends Component {
                       : "secondary"
                   }
                 >
-                  {this.capitalizeFirstLetter(
-                    selectedOrderItem.customerType
-                  )}
+                  {this.capitalizeFirstLetter( selectedOrderItem.customerType)}
                 </Badge>
               </td>
             </tr>
             <tr>
-              <td style={{ fontSize: 16, textAlign: "start" }}>Date</td>
+              <td style={{ fontSize: 16, textAlign: "start" }}>Order Type</td>
               <td style={{ fontSize: 16, fontWeight: "600", textAlign: "end" }}>
-                {moment(selectedOrderItem.createdAt).format("DD MMM, YYYY")}
+                {this.capitalizeFirstLetter(selectedOrderItem.orderType)}
               </td>
             </tr>
             <tr>
-              <td style={{ fontSize: 16, textAlign: "start" }}>Pick Up Time</td>
+              <td style={{ fontSize: 16, textAlign: "start" }}>Collection / Delivery Time</td>
               <td style={{ fontSize: 16, fontWeight: "600", textAlign: "end" }}>
-                {moment(selectedOrderItem.pickupTime).format("hh:mm A")}
+                {selectedOrderItem.orderType === "delivery" ? moment(selectedOrderItem.deliveryTime).format("hh:mm A") : moment(selectedOrderItem.pickupTime).format("hh:mm A")}
               </td>
             </tr>
-          </tbody>
-        </Table>
-
-        <div
-          style={{
-            height: 1,
-            backgroundColor: "gray",
-            opacity: 0.5,
-            width: "100%"
-          }}
-        />
-
-        <Table borderless>
-          <tbody>
             <tr>
-              <td style={{ fontSize: 16, textAlign: "start" }}>Total Order Price</td>
+              <td style={{ fontSize: 16, textAlign: "start" }}>Delivery Address</td>
               <td style={{ fontSize: 16, fontWeight: "600", textAlign: "end" }}>
-                €{Number(selectedOrderItem.totalOrderPrice).toFixed(2)}
+                {selectedOrderItem.orderType === "delivery" ? selectedOrderItem.deliveryAddress : " - "}
               </td>
             </tr>
           </tbody>
@@ -598,8 +681,23 @@ class Sales extends Component {
         <tr style={{cursor: 'pointer'}} onClick={() => this.tableItemClicked(tableitems[i]._id)}>
           <td>#{tableitems[i].orderNumber}</td>
           <td>{moment(tableitems[i].createdAt).format("DD MMM, YYYY")}</td>
-          <td> {tableitems[i].customerDetails[0].customerFirstName}{" "}{tableitems[i].customerDetails[0].customerLastName.charAt(0)}.</td>
-          <td >1x {tableitems[i].orderItem[0].title}</td>
+          <td> 
+            {tableitems[i].customerDetails[0].customerFirstName}{" "}{tableitems[i].customerDetails[0].customerLastName.charAt(0)}.
+            <Badge
+              style={{ marginLeft: 5 }}
+              color={
+                tableitems[i].customerType === "new"
+                  ? "warning"
+                  : tableitems[i].customerType === "recurring"
+                  ? "primary"
+                  : "secondary"
+              }
+            >
+              {this.capitalizeFirstLetter(tableitems[i].customerType)}
+            </Badge>
+          </td>
+          <td >{this.capitalizeFirstLetter(tableitems[i].orderType)}</td>
+          <td >{tableitems[i].orderItem[0].quantity + "x " + tableitems[i].orderItem[0].title}</td>
           <td>{Number(tableitems[i].totalOrderPrice).toFixed(2)}</td>
           <td>
             <Badge
@@ -665,6 +763,7 @@ class Sales extends Component {
               <th>Order No.</th>
               <th style={{ cursor: "pointer" }} className={!this.state.sortDate ? "headerSortUp" : "headerSortDown"} onClick={() => this.sortDateClicked()} >Date</th>
               <th>Customer</th>
+              <th>Order Type</th>
               <th>Item</th>
               <th>Order Price (€)</th>
               <th>Payment Status</th>

@@ -127,7 +127,6 @@ class Customer extends Component {
       },
       tableitems: [
         {
-          orderItemID: "123456789",
           orderNumber: "123",
           orderItem: [{
             title: "Ebi Furai",
@@ -139,6 +138,8 @@ class Customer extends Component {
             customerFirstName: "Cian",
             customerLastName: "Horan",
             customerPhoneNumber: "083-9920456",
+            customerEmail: "cianhoran@hotmail.com",
+            createdAt: new Date()
           }],
           customerType: "new",
           totalOrderPrice: 5.9,
@@ -149,7 +150,6 @@ class Customer extends Component {
           pickupTime: new Date(),
         },
         {
-          orderItemID: "123456789",
           orderNumber: "478",
           orderItem: [{
             title: "Yasai Gyoza",
@@ -161,6 +161,8 @@ class Customer extends Component {
             customerFirstName: "John",
             customerLastName: "King",
             customerPhoneNumber: "083-9457891",
+            customerEmail: "johnking@gmail.com",
+            createdAt: new Date()
           }],
           customerType: "recurring",
           totalOrderPrice: 6.8,
@@ -178,35 +180,6 @@ class Customer extends Component {
       currentPage: 1,
       totalCustomerCount: 0,
     };
-  }
-
-  getSessionStorage = () => {
-    
-    var maxDate = moment().toDate();
-
-    var currentDate = moment(sessionStorage.getItem("currentCustomerDateString"), 'ddd, DD MMM YYYY').toDate()
-    var previousDate = moment(sessionStorage.getItem("previousCustomerDateString"), 'ddd, DD MMM YYYY').toDate()
-
-    var currentDateString = moment(currentDate).format("ddd, DD MMM YYYY")
-    var previousDateString = moment(previousDate).format("ddd, DD MMM YYYY")
-    var finalSelectionDate = previousDateString + ' - ' + currentDateString
-    var finalDateArray = this.getIntervalDates(currentDate, previousDate).reverse();
-    var newline = this.state.line;
-    newline.labels = finalDateArray;
-    var newbar = this.state.bar;
-    newbar.labels = finalDateArray;
-
-    this.setState({
-      maxDate: maxDate,
-      currentDate: currentDate,
-      previousDate: previousDate,
-      dateRange: finalSelectionDate,
-      line: newline,
-      bar: newbar,
-      dateArray: finalDateArray,
-    }, () => {
-      this.getCustomer(currentDateString, previousDateString)
-    })
   }
 
   componentDidMount() {
@@ -509,59 +482,6 @@ class Customer extends Component {
     );
   }
 
-  renderPendingAction() {
-    return (
-      <Row>
-        <Button
-          style={{ marginLeft: 10 }}
-          className="float-right"
-          color="success"
-          onClick={this.tableClicked}
-        >
-          Accept
-        </Button>
-        <Button
-          style={{ marginLeft: 10 }}
-          className="float-right"
-          color="danger"
-          onClick={this.linechartClicked}
-        >
-          Reject
-        </Button>
-      </Row>
-    );
-  }
-
-  renderRejectAction() {
-    return (
-      <Row>
-        <Button
-          style={{ marginLeft: 10 }}
-          className="float-right"
-          color="secondary"
-          onClick={this.tableClicked}
-        >
-          Reject
-        </Button>
-      </Row>
-    );
-  }
-
-  renderAcceptAction() {
-    return (
-      <Row>
-        <Button
-          style={{ marginLeft: 10 }}
-          className="float-right"
-          color="secondary"
-          onClick={this.tableClicked}
-        >
-          Accept
-        </Button>
-      </Row>
-    );
-  }
-
 
   renderTableItems() {
     var itemarray = [];
@@ -589,27 +509,9 @@ class Customer extends Component {
             </Badge>
           </td>
           <td>{tableitems[i].customerDetails[0].customerPhoneNumber}</td>
-          <td>#{tableitems[i].orderNumber}</td>
-          <td>{moment(tableitems[i].createdAt).format("DD MMM, YYYY")}</td>
-          <td>1x {tableitems[i].orderItem[0].title}</td>
-          <td>{Number(tableitems[i].totalOrderPrice).toFixed(2)}</td>
-          <td>
-            <Badge
-              color={
-                    tableitems[i].orderStatus === "accepted"
-                  ? "success"
-                  : tableitems[i].orderStatus === "rejected"
-                  ? "danger"
-                  : tableitems[i].orderStatus === "pickedup"
-                  ? "primary"
-                  : tableitems[i].orderStatus === "pending"
-                  ? "warning"
-                  : "secondary"
-              }
-            >
-              {this.capitalizeFirstLetter(tableitems[i].orderStatus)}
-            </Badge>
-          </td>
+          <td>{tableitems[i].customerDetails[0].customerEmail}</td>
+          <td>{moment(tableitems[i].customerDetails[0].createdAt).format("DD MMM, YYYY")}</td>
+         
         </tr>
       );
     }
@@ -694,11 +596,8 @@ class Customer extends Component {
               </Row>
             </th>
             <th>Phone No.</th>
-            <th>Last Order No.</th>
-            <th style={{ cursor: "pointer" }} className={!this.state.sortDate ? "headerSortUp" : "headerSortDown"} onClick={() => this.sortDateClicked()}>Last Order Date</th>
-            <th>Last Order Item</th>
-            <th>Last Order Price (€)</th>
-            <th>Last Order Status</th>
+            <th>Email</th>
+            <th style={{ cursor: "pointer" }} className={!this.state.sortDate ? "headerSortUp" : "headerSortDown"} onClick={() => this.sortDateClicked()}>Registered Date</th>
           </tr>
         </thead>
 

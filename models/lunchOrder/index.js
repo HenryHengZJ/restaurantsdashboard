@@ -4,28 +4,44 @@ const Schema = mongoose.Schema
 const ObjectId = Schema.Types.ObjectId
 var newObjectId = require('mongodb').ObjectID;
 
+// define the schema for our orderSchema model
+var selectionItemSchema = mongoose.Schema({
+	selectionitemtitle: String,
+	selectionitemprice: Number,
+});
+
+var selectionSchema = mongoose.Schema({
+	selectioncategory: String,
+	selectionmaxnum: Number,
+	selectionitem: [selectionItemSchema],
+});
+
 var cartSchema = mongoose.Schema({
+	menuID: ObjectId,
 	title: String,
 	descrip: String,
+	quantity: Number,
 	priceperunit: Number,
-	src: Number,
+	instruction: String,
+	totalunitprice: Number,
+	src: String,
+	selection: [selectionSchema],
 });
 
 var orderSchema = mongoose.Schema({
-	orderItemID: ObjectId,
 	orderNumber: String,
 	orderItem: [cartSchema],
-	catererID: ObjectId,
 	customerID: ObjectId,
 	customerType: String,
 	totalOrderPrice: Number,
-	commission: Number,
-	netOrderPrice: Number,
+	orderType: String,
 	orderStatus: String,
 	paymentIntentID: String,
 	paymentType: String,
 	paymentStatus: String,
 	pickupTime: Date,
+	deliveryTime: Date,
+	deliveryAddress: String,
 }, {
     timestamps: true
 });

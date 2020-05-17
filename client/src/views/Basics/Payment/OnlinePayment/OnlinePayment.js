@@ -162,7 +162,7 @@ class OnlinePayment extends Component {
   }
 
   getCatererAccount = () => {
-    var headers = {
+    /*var headers = {
       'Content-Type': 'application/json',
     }
 
@@ -184,7 +184,11 @@ class OnlinePayment extends Component {
         this.setState({
           loading: false
         })
-      });
+      });*/
+      this.setState({
+        loading: false
+      })
+
   }
 
   getCatererPaymentAccount = (catererPaymentAccountID) => {
