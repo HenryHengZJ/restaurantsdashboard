@@ -1,9 +1,7 @@
+## Restaurant Online Order Dashboard
 
-
-# View live demo version here <a href="https://restaurantsdashboard.herokuapp.com/" style="font-size: 40px">View Demo</a>
-=======
-This is a fullstack web application for restaurants online ordering dashboard.
-=======
+This is a fullstack web application for restaurants online ordering.
+View live demo version here <a href="https://restaurantsweb.herokuapp.com/">View Demo</a>
 
 ![alt-text](https://github.com/HenryHengZJ/restaurantsdashboard/blob/master/1.JPG)
 ![alt-text](https://github.com/HenryHengZJ/restaurantsdashboard/blob/master/2.JPG)
